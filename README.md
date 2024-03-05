@@ -62,11 +62,15 @@ There are certain cases where this will not work. Typically, this is because the
 
 ### Pulling <br>
 
-When you pull, you retrieve the most recent record of your branch from github. It is strongly recommended to do this every time before you work on the code to avoid version conflicts when pushing. To pull from the branch that you are currently on simply run `git pull`. This can also fail if you have changes that will be overwritten by the pull command. A simple solution is to stash your local changes before pulling. More on this in the [stashing](stash) section. 
+When you pull, you retrieve the most recent record of your branch from github. It is strongly recommended to do this every time before you work on the code to avoid version conflicts when pushing. To pull from the branch that you are currently on simply run `git pull`. Since you will eventually want to merge the branch you are working on with the main This can also fail if you have changes that will be overwritten by the pull command. A simple solution is to stash your local changes before pulling. More on this in the [stashing](stash) section. 
 
-### Stashing <br>
+### Stashing<br>
 
 For the reasons stated above, sometimes we need to save our local changes before pulling. Another reason could be if you want to switch branches without committing yet. To save your work, you can use `git stash` which will push your new stash onto the stack. You can call this multiple times, so to view a list of all stashes in the branch, you can call `git stash list`. Now, you can pull and switch branches as you wish. When you want to add your most resent stash back, use `git stash apply`. If you want to restore an older stash, use `git stash apply stash@{<insert stash number>}`. Keep in mind that every branch has its own stack of stashes, so you cannot apply a stash from one branch A onto branch B after switching from A to B.<br>
+
+### Pull Requests<br>
+
+Not to be confused with pulling, a pull request is a service offered by Github that allows developers to merge different branches. This is how we will be merging the working branches to the functional code. When you are ready to merge the branch you are working on with the main branch, you can open a pull request on Github. This allows you to compare any conflicts before making changes. More on this on Github's guide to [pull requests](https://docs.github.com/en/pull-requests).
 
 ### Useful commands<br>
 
