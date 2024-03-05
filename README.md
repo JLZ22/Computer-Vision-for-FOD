@@ -46,9 +46,9 @@ Commits are snapshots of a branch's edit history, and they are created by the de
 - `git commit -m "<insert brief description of accomplishents>`<br>
 - `git push`<br>
 
-#### To commit certain files<br>
+#### To commit a specific file<br>
 
-- `git add <insert file name 1> <insert file name 2> <...>`<br>
+- `git add <insert file name 1>`<br>
 
 If this does not work, there should be alternative instructions provided in the terminal. 
 
@@ -58,10 +58,20 @@ To move your changes from your machine to Github, run<br>
 
 `git push`.<br>
 
-There are certain cases where this will not work. Typically, this is because the branch that you are pushing to has changes that you did not [pull](#pulling) before working. A brief but not comprehensive solution can be found by [stashing](#stashing), [pulling](#pulling), and restoring your changes from the [stash](#stashing).<br>
+There are certain cases where this will not work. Typically, this is because the branch that you are pushing to has changes that you did not [pull](#pulling) before working. A brief but not comprehensive solution can be found by [stashing](#stashing), [pulling](#pulling), and restoring your changes from the [stash](#stashing). Another solution is to force the push. **UNDER ALMOST NO CIRCUMSTANCES DO YOU WANT TO DO THIS.**<br>
 
 ### Pulling <br>
 
 When you pull, you retrieve the most recent record of your branch from github. It is strongly recommended to do this every time before you work on the code to avoid version conflicts when pushing. To pull from the branch that you are currently on simply run `git pull`. This can also fail if you have changes that will be overwritten by the pull command. A simple solution is to stash your local changes before pulling. More on this in the [stashing](stash) section. 
 
 ### Stashing <br>
+
+For the reasons stated above, sometimes we need to save our local changes before pulling. Another reason could be if you want to switch branches without committing yet. To save your work, you can use `git stash` which will push your new stash onto the stack. You can call this multiple times, so to view a list of all stashes in the branch, you can call `git stash list`. Now, you can pull and switch branches as you wish. When you want to add your most resent stash back, use `git stash apply`. If you want to restore an older stash, use `git stash apply stash@{<insert stash number>}`. Keep in mind that every branch has its own stack of stashes, so you cannot apply a stash from one branch A onto branch B after switching from A to B.<br>
+
+### Useful commands<br>
+
+`git status`: shows you relevant information about your working directory<br>
+`git log`: shows commit history (this is where you get commit id for git revert)<br>
+`git revert <commit id>`: revert commit changes of the commit with the given id<br>
+
+[More useful commands](https://www.loginradius.com/blog/engineering/git-commands/)
