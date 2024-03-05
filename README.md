@@ -16,9 +16,13 @@ This is a repository. A repository is essentially a collection of files and fold
 
 ### Branches<br>
 
-Git is powerful because it allows you to maintain many different sandboxes of your project. Each one of these is called a branch so modifications to one branch will have no effect on others. There are two types of branches, local and remote. A local branch is what is stored on a collaborator's machine while a remote branch is what is stored on Github. You will be editing code on your local branch.<br>
+Git is powerful because it allows you to maintain many different sandboxes of your project. Each one of these is called a branch so modifications to one branch will have no effect on others.<br>
 
-Every repository has a *main* branch which, at least for this project, will be the branch that stores the functioning version of our project. As such, we will never directly edit this branch (more on this in a later section). Instead, create a new branch with a name that most appropriately describes what you are working on (i.e. writing-readme). Branch names should be more or less a general task. After it is complete, the branch can be merged with the main branch (more on this in a later section). This ensures that if anything goes wrong, it does not affect the funcitoning code. Additionally, it prevents multiple contributors from making changes that would impact eachother's code. Below are some important commands to know for branching. 
+Every repository has a *main* branch which, at least for this project, will be the branch that stores the functioning version of our project. As such, we will never directly edit this branch (more on this in a later section). Instead, create a new branch with a name that most appropriately describes what you are working on (i.e. writing-readme).<br>
+
+Branch names should be more or less a general task. After it is complete, the branch can be merged with the main branch (more on this in a later section). This ensures that if anything goes wrong, it does not affect the funcitoning code. Additionally, it prevents multiple contributors from making changes that would impact eachother's code.<br>
+
+Below are some important commands to know for branching. 
 
 #### View all the branches of a repository<br>
 
@@ -34,7 +38,7 @@ Every repository has a *main* branch which, at least for this project, will be t
 
 ### Commits<br>
 
-Commits are snapshots of a branch's edit history, and they are created by the developer in order to record and save progress. You typically make a commit after finishing a relatively small subtask.<br>
+Commits are snapshots of a branch's edit history, and they are created by the developer in order to record and save progress. You typically make a commit after finishing a relatively small subtask. These commits are stored locally for now.<br>
 
 #### To make a commit, follow the steps below.<br>
 
@@ -48,3 +52,16 @@ Commits are snapshots of a branch's edit history, and they are created by the de
 
 If this does not work, there should be alternative instructions provided in the terminal. 
 
+### Pushing
+
+To move your changes from your machine to Github, run<br>
+
+`git push`.<br>
+
+There are certain cases where this will not work. Typically, this is because the branch that you are pushing to has changes that you did not [pull](#pulling) before working. A brief but not comprehensive solution can be found by [stashing](#stashing), [pulling](#pulling), and restoring your changes from the [stash](#stashing).<br>
+
+### Pulling <br>
+
+When you pull, you retrieve the most recent record of your branch from github. It is strongly recommended to do this every time before you work on the code to avoid version conflicts when pushing. To pull from the branch that you are currently on simply run `git pull`. This can also fail if you have changes that will be overwritten by the pull command. A simple solution is to stash your local changes before pulling. More on this in the [stashing](stash) section. 
+
+### Stashing <br>
