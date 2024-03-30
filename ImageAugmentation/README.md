@@ -4,7 +4,7 @@
 
 ## Package List<br>
 
-The packages you need to run scripts in `Computer-Vision-For-FOD/ImageAugmentation/src` will be found here. Other directories' `src` folders may require different packages that will be covered in their respective READMEs.<br>
+The package(s) you need to run scripts in `Computer-Vision-For-FOD/ImageAugmentation/src` will be found here. Other directories' `src` folders may require different packages that will be covered in their respective READMEs.<br>
 ```
 imgaug
 ```
