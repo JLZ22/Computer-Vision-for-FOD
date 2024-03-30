@@ -9,4 +9,4 @@ The packages you need to run scripts in `Computer-Vision-For-FOD/ImageAugmentati
 imgaug
 ```
 
-### imgaug Installation
+The packages(s) above can be installed on a virtual environment of your choice. [Here](https://github.com/aleju/imgaug?tab=readme-ov-file) is the repository for imgaug. It has installation instructions for python venv and conda. 

@@ -8,7 +8,7 @@ This is a research project under Professor Nathaniel Hartman at Purdue Universit
 
 Before beginning to work on this project, it is important to be familiar with git. A brief git tutorial can be found [here](https://github.com/JLZ22/Git-Tutorial-for-New-Users).<br>
 
-It is also recommended that you work in a python virtual environment. One option is to use [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) and its [virtual environment manager](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) while another is python3's built in [venv](https://docs.python.org/3/library/venv.html).
+It is also strongly recommended that you work in a python virtual environment. One option is to use [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) and its [virtual environment manager](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) while another is python3's built in [venv](https://docs.python.org/3/library/venv.html).
 
 
 ## Package List<br>
