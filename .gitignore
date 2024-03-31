@@ -1,2 +1,2 @@
 # ignore virtual environments because it varies for everyone
-venv/
+venv*/

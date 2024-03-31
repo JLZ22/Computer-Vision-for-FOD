@@ -8,7 +8,14 @@ This is a research project under Professor Nathaniel Hartman at Purdue Universit
 
 Before beginning to work on this project, it is important to be familiar with git. A brief git tutorial can be found [here](https://github.com/JLZ22/Git-Tutorial-for-New-Users).<br>
 
-It is also strongly recommended that you work in a python virtual environment. One option is to use python3's built in [venv](https://docs.python.org/3/library/venv.html) while another is to use [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) and its [virtual environment manager](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html). I (John Zeng, B.S. AI + Computer Science at Purdue, 2026) recommend) using python3's built in venv because it is more lightweight than conda. 
+It is also **STRONGLY RECOMMENDED** that you work in a python virtual environment. One option is to use python3's built in [venv](https://docs.python.org/3/library/venv.html) while another is to use [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) and its [virtual environment manager](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html). I (John Zeng, B.S. AI + Computer Science at Purdue, 2026) recommend using python3's built in venv because it is more lightweight than conda. 
+
+It is also recommended that each component has its own respective venv. For example, the two directories below are two separate virtual environments for different components of the project. There may be conflicting packages in the image augmentation section and the general FOD section. Therefore, it is wise to use different virtual environments when running scripts from the `src` folders of each of these components. **When using virtual environments, be sure to include those in the `.gitignore`. You can read more about them in the git tutorial above.**<br>
+
+```
+Computer-Vision-For-FOD/ImageAugmentation/venvImgAug
+Computer-Vision-For-FOD/venvFOD
+```
 
 
 ## Package List<br>
