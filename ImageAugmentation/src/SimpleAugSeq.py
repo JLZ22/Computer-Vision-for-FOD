@@ -13,20 +13,42 @@ from pascal_voc_writer import Writer
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 
 class SimpleAugSeq:
-    def __init__(self, path, save_path, seed) -> None:
+    def __init__(self, path, save_path, seed, copies) -> None:
         self.path = path
         self.save_path = path
         self.seed = seed
+        self.num_copies = num_copies
         self.contents = os.listdir(path) 
         ia.seed(self.seed)
 
     # Return an array of copies of the image stored at 
     # path/img. The array has num_copies number of copies.
-    def make_copies(img: str, num_copies: int) -> np.array:
+    def make_copies(self, img: str, num_copies: int) -> np.array:
         return np.array(
             [il.imread(path + img) for _ in range(int)],
             dtype=np.uint8
         )
+    
+    def create_bbs(self, root, shape) -> BoundingBoxesOnImage:
+        bboxes = []
+        for member in root.findall('object'):
+            xmin = int(member[4][0].text)
+            ymin = int(member[4][1].text)
+            xmax = int(member[4][2].text)
+            ymax = int(member[4][3].text)
+            bboxes.append(BoundingBox(x1=xmin, y1=ymin, x2=xmax, y2=ymax))
+        return BoundingBoxesOnImage(bboxes, shape)
+    
+    def augment(self):
+        for y in range(2): # Modifies 2 images starting at 18
+            name = str(y+18) # name of the image/xml pair we are considering
+
+            # get the tree for the current xml file as well as its root
+            tree = ET.parse(path + name + '.xml') 
+            root = tree.getroot()
+
+            images = self.make_copies(name+'.jpg', self.num_copies) # make 64 copies of the current image and store it in a np.array
+            bbs = self.create_bbs(root, image[0].shape) # create the BoundingBoxesOnImage object for the current image
 
 # path on John laptop
 path = "smb://ecn-techwin.ecn.purdue.edu/Research/PLM/Restricted/Research/Project Folders/Active/ADT - Assembly Digital Thread/FOD/Images/pencils/Synthetic images/"
@@ -57,6 +79,7 @@ for y in range(2):   #Modifies 2 images from image 18
     class_name = str(root.find('object')[0].text)
 
 
+    bbs = create_bbs(root, image[0].shape)
     bbox_coordinates = []
     for member in root.findall('object'):
         
