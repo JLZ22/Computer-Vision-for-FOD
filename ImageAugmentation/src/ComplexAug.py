@@ -1,17 +1,18 @@
 #Original code "https://imgaug.readthedocs.io/en/latest/source/examples_basics.html"
 #matplotlib version 3.5 and numpy version 1.2 
-
-
-
 import numpy as np
 import imgaug as ia
 import imgaug.augmenters as iaa
 import imageio as il
-
 import os 
 
-path = "Z:\Restricted\Research\Project Folders\Active\ADT - Assembly Digital Thread\FOD\Images\pencils\Synthetic images\\"
-save_path = "Z:\Restricted\Research\Project Folders\Active\ADT - Assembly Digital Thread\FOD\Images\pencils\Imgaug images\\"
+# Paths on John's machine
+path = "smb://ecn-techwin.ecn.purdue.edu/Research/PLM/Restricted/Research/Project Folders/Active/ADT - Assembly Digital Thread/FOD/Images/pencils/Synthetic images"
+save_path = "smb://ecn-techwin.ecn.purdue.edu/Research/PLM/Restricted/Research/Project Folders/Active/ADT - Assembly Digital Thread/FOD/Images/pencils/Imgaug images"
+
+# Paths on Luca's PC
+# path = "Z:\Restricted\Research\Project Folders\Active\ADT - Assembly Digital Thread\FOD\Images\pencils\Synthetic images\\"
+# save_path = "Z:\Restricted\Research\Project Folders\Active\ADT - Assembly Digital Thread\FOD\Images\pencils\Imgaug images\\"
 
 contents = os.listdir(path) 
 ia.seed(1)
