@@ -12,6 +12,22 @@ import xml.etree.ElementTree as ET
 from pascal_voc_writer import Writer
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 
+class SimpleAugSeq:
+    def __init__(self, path, save_path, seed) -> None:
+        self.path = path
+        self.save_path = path
+        self.seed = seed
+        self.contents = os.listdir(path) 
+        ia.seed(self.seed)
+
+    # Return an array of copies of the image stored at 
+    # path/img. The array has num_copies number of copies.
+    def make_copies(img: str, num_copies: int) -> np.array:
+        return np.array(
+            [il.imread(path + img) for _ in range(int)],
+            dtype=np.uint8
+        )
+
 # path on John laptop
 path = "smb://ecn-techwin.ecn.purdue.edu/Research/PLM/Restricted/Research/Project Folders/Active/ADT - Assembly Digital Thread/FOD/Images/pencils/Synthetic images/"
 save_path = "smb://ecn-techwin.ecn.purdue.edu/Research/PLM/Restricted/Research/Project Folders/Active/ADT - Assembly Digital Thread/FOD/Images/pencils/Imgaug images/"
@@ -20,23 +36,10 @@ save_path = "smb://ecn-techwin.ecn.purdue.edu/Research/PLM/Restricted/Research/P
 # path = "Z:\Restricted\Research\Project Folders\Active\ADT - Assembly Digital Thread\FOD\Images\pencils\Synthetic images\\"
 # save_path = "Z:\Restricted\Research\Project Folders\Active\ADT - Assembly Digital Thread\FOD\Images\pencils\Imgaug images\\"
 
-contents = os.listdir(path) 
-ia.seed(1)
-freq = 0.5
-sometimes = lambda aug: iaa.Sometimes(freq, aug) # initialize sometimes as a function that runs the augmentation "aug" (freq * 100)% of the time
-
-# Return an array of copies of the image stored at 
-# path/img. The array has num_copies number of copies.
-def make_copies(img: str, num_copies: int) -> np.array:
-    return np.array(
-        [il.imread(path + img) for _ in range(int)],
-        dtype=np.uint8
-    )
-
 # Example batch of images.
 # The array has shape (32, 64, 64, 3) and dtype uint8.
 
-for y in range(2):   #Modifies 4 images from image 17
+for y in range(2):   #Modifies 2 images from image 18
 
 
     img = str(y+18) + ".jpg"    #changes the file name for each loop
@@ -71,6 +74,8 @@ for y in range(2):   #Modifies 4 images from image 17
     for h in range(10):   #make x copies of the original bounding boxes for transformation
         Allbbs.append(bbs)
 
+    freq = 0.5
+    sometimes = lambda aug: iaa.Sometimes(freq, aug) # initialize sometimes as a function that runs the augmentation "aug" (freq * 100)% of the time
     seq = iaa.Sequential([  #randomly transforms the image
         iaa.Fliplr(0.5), # horizontal flips
         iaa.Crop(percent=(0, 0.1)), # random crops
