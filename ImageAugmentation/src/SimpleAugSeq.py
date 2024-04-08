@@ -13,8 +13,8 @@ from pascal_voc_writer import Writer
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 
 # path on John laptop
-path = "smb://ecn-techwin.ecn.purdue.edu/Research/PLM/Restricted/Research/Project Folders/Active/ADT - Assembly Digital Thread/FOD/Images/pencils/Synthetic images"
-save_path = "smb://ecn-techwin.ecn.purdue.edu/Research/PLM/Restricted/Research/Project Folders/Active/ADT - Assembly Digital Thread/FOD/Images/pencils/Imgaug images"
+path = "smb://ecn-techwin.ecn.purdue.edu/Research/PLM/Restricted/Research/Project Folders/Active/ADT - Assembly Digital Thread/FOD/Images/pencils/Synthetic images/"
+save_path = "smb://ecn-techwin.ecn.purdue.edu/Research/PLM/Restricted/Research/Project Folders/Active/ADT - Assembly Digital Thread/FOD/Images/pencils/Imgaug images/"
 
 # path on Luca workstation
 # path = "Z:\Restricted\Research\Project Folders\Active\ADT - Assembly Digital Thread\FOD\Images\pencils\Synthetic images\\"
@@ -25,6 +25,13 @@ ia.seed(1)
 freq = 0.5
 sometimes = lambda aug: iaa.Sometimes(freq, aug) # initialize sometimes as a function that runs the augmentation "aug" (freq * 100)% of the time
 
+# Return an array of copies of the image stored at 
+# path/img. The array has num_copies number of copies.
+def make_copies(img: str, num_copies: int) -> np.array:
+    return np.array(
+        [il.imread(path + img) for _ in range(int)],
+        dtype=np.uint8
+    )
 
 # Example batch of images.
 # The array has shape (32, 64, 64, 3) and dtype uint8.
@@ -33,10 +40,7 @@ for y in range(2):   #Modifies 4 images from image 17
 
 
     img = str(y+18) + ".jpg"    #changes the file name for each loop
-    image = np.array(
-        [il.imread(path + img) for _ in range(10)],  #opens the designated image file across 64 instances in an array
-        dtype=np.uint8
-    )
+    image = make_copies(img, 64) # make 64 copies of img and store it in a np.array
 
 
     tree = ET.parse(path + str(y+18) + '.xml') 
