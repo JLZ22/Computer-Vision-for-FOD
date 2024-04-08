@@ -29,6 +29,10 @@ class SimpleAugSeq:
             dtype=np.uint8
         )
     
+    # Return a BoundingBoxesOnImage object with the 
+    # given root and shape by automatically creating a 
+    # new BoundingBox object for every object 
+    # in the root
     def create_bbs(self, root, shape) -> BoundingBoxesOnImage:
         bboxes = []
         for member in root.findall('object'):
