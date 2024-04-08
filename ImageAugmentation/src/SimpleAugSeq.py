@@ -26,14 +26,14 @@ sometimes = lambda aug: iaa.Sometimes(0.5, aug)
 for y in range(2):   #Modifies 4 images from image 17
 
 
-    img = str(y+17) + ".jpg"    #changes the file name for each loop
+    img = str(y+18) + ".jpg"    #changes the file name for each loop
     image = np.array(
-        [il.imread(path + img) for _ in range(64)],  #opens the designated image file across 64 instances in an array
+        [il.imread(path + img) for _ in range(10)],  #opens the designated image file across 64 instances in an array
         dtype=np.uint8
     )
 
 
-    tree = ET.parse(path + str(y+17) + '.xml') 
+    tree = ET.parse(path + str(y+18) + '.xml') 
     root = tree.getroot() # get root object
 
     height = int(root.find("size")[0].text)
@@ -57,7 +57,9 @@ for y in range(2):   #Modifies 4 images from image 17
     
     bbs = BoundingBoxesOnImage([BoundingBox(x1=arr[0], x2=arr[1], y1 = arr[2], y2 = arr[3]) for arr in bbox_coordinates], shape=image[0].shape)
     
-    
+    Allbbs = []   
+    for h in range(10):   #make x copies of the original bounding boxes for transformation
+        Allbbs.append(bbs)
 
     seq = iaa.Sequential([  #randomly transforms the image
         iaa.Fliplr(0.5), # horizontal flips
@@ -91,16 +93,16 @@ for y in range(2):   #Modifies 4 images from image 17
     ], random_order=True) # apply augmenters in random order
 
 
-    images_aug , bbs_aug = seq(images=image, bounding_boxes=bbs)  #applys the transformation to each image in the array and to the bounding boxes
+    images_aug , bbs_aug = seq(images=image, bounding_boxes=Allbbs)  #applys the transformation to each image in the array and to the bounding boxes
 
-    for i in range(64):
-        il.imwrite(save_path + str(i+51+(y*64)) + '.jpg', images_aug[i])  #saves each transformed image
+    #bbs_aug = bbs_aug.remove_out_of_image().clip_out_of_image() #This is an attempt to fix broken bounding boxes Current issue is list has no attribute 'remove_out_of_image()'
+
+    for i in range(10):
+        il.imwrite(save_path + str(i+51+(y*10)) + '.jpg', images_aug[i])  #saves each transformed image
         writer = Writer(path + img, height, width)
 
-        """for x in bbs_aug[i]:
-            writer.addObject(class_name,x[0],x[2],x[3],x[4])
+        for bbox in bbs_aug[i]:
+           writer.addObject(class_name,bbox.x2,bbox.y2,bbox.x1,bbox.y1)
 
-        writer.save(save_path + str(i+50+(y*64))+ '.xml')
-"""
-#ia.imshow(np.hstack(images_aug))
+        writer.save(save_path + str(i+51+(y*10))+ '.xml')
 
