@@ -1,5 +1,5 @@
 #Original code "https://imgaug.readthedocs.io/en/latest/source/examples_basics.html"
-#matplotlib version 3.5 and numpy version 1.2 
+#matplotlib version 3.5 and numpy version 1.2 and markupsafe version 2.0.1
 
 
 
@@ -7,8 +7,10 @@ import numpy as np
 import imgaug as ia
 import imgaug.augmenters as iaa
 import imageio as il
-
 import os 
+import xml.etree.ElementTree as ET
+from pascal_voc_writer import Writer
+from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 
 path = "Z:\Restricted\Research\Project Folders\Active\ADT - Assembly Digital Thread\FOD\Images\pencils\Synthetic images\\"
 save_path = "Z:\Restricted\Research\Project Folders\Active\ADT - Assembly Digital Thread\FOD\Images\pencils\Imgaug images\\"
@@ -17,15 +19,45 @@ contents = os.listdir(path)
 ia.seed(1)
 sometimes = lambda aug: iaa.Sometimes(0.5, aug)
 
+
 # Example batch of images.
 # The array has shape (32, 64, 64, 3) and dtype uint8.
 
-for y in range(4):   #Loops the transformation 6 times
+for y in range(2):   #Modifies 4 images from image 17
+
+
     img = str(y+17) + ".jpg"    #changes the file name for each loop
-    images = np.array(
+    image = np.array(
         [il.imread(path + img) for _ in range(64)],  #opens the designated image file across 64 instances in an array
         dtype=np.uint8
     )
+
+
+    tree = ET.parse(path + str(y+17) + '.xml') 
+    root = tree.getroot() # get root object
+
+    height = int(root.find("size")[0].text)
+    width = int(root.find("size")[1].text)
+    channels = int(root.find("size")[2].text)
+    ref_path = str(root.find('path').text)
+    ref_file = str(root.find('filename').text)
+    class_name = str(root.find('object')[0].text)
+
+
+    bbox_coordinates = []
+    for member in root.findall('object'):
+        
+        # bbox coordinates
+        xmin = int(member[4][0].text)
+        ymin = int(member[4][1].text)
+        xmax = int(member[4][2].text)
+        ymax = int(member[4][3].text)
+        # store data in list
+        bbox_coordinates.append([xmin, ymin, xmax, ymax])
+    
+    bbs = BoundingBoxesOnImage([BoundingBox(x1=arr[0], x2=arr[1], y1 = arr[2], y2 = arr[3]) for arr in bbox_coordinates], shape=image[0].shape)
+    
+    
 
     seq = iaa.Sequential([  #randomly transforms the image
         iaa.Fliplr(0.5), # horizontal flips
@@ -59,10 +91,16 @@ for y in range(4):   #Loops the transformation 6 times
     ], random_order=True) # apply augmenters in random order
 
 
-    images_aug = seq(images=images)  #applys the transformation to each image in the array
+    images_aug , bbs_aug = seq(images=image, bounding_boxes=bbs)  #applys the transformation to each image in the array and to the bounding boxes
 
     for i in range(64):
-        il.imwrite(save_path + str(i+50+(y*64)) + '.jpg', images_aug[i])  #saves each transformed image
+        il.imwrite(save_path + str(i+51+(y*64)) + '.jpg', images_aug[i])  #saves each transformed image
+        writer = Writer(path + img, height, width)
 
+        """for x in bbs_aug[i]:
+            writer.addObject(class_name,x[0],x[2],x[3],x[4])
+
+        writer.save(save_path + str(i+50+(y*64))+ '.xml')
+"""
 #ia.imshow(np.hstack(images_aug))
 
