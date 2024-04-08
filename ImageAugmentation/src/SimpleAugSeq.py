@@ -22,7 +22,8 @@ save_path = "smb://ecn-techwin.ecn.purdue.edu/Research/PLM/Restricted/Research/P
 
 contents = os.listdir(path) 
 ia.seed(1)
-sometimes = lambda aug: iaa.Sometimes(0.5, aug)
+freq = 0.5
+sometimes = lambda aug: iaa.Sometimes(freq, aug) # initialize sometimes as a function that runs the augmentation "aug" (freq * 100)% of the time
 
 
 # Example batch of images.
