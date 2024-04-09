@@ -133,5 +133,9 @@ if __name__ == '__main__':
     # path = "Z:\Restricted\Research\Project Folders\Active\ADT - Assembly Digital Thread\FOD\Images\pencils\Synthetic images\\"
     # save_path = "Z:\Restricted\Research\Project Folders\Active\ADT - Assembly Digital Thread\FOD\Images\pencils\Imgaug images\\"
 
-    simple_aug = SimpleAugSeq(path, save_path, 1, 64, ['18', '19', '20'])
+    simple_aug = SimpleAugSeq(path=path, 
+                              save_path=save_path, 
+                              seed=1, 
+                              num_copies=64, 
+                              names=['18', '19', '20']) 
     simple_aug.augment()
