@@ -2,7 +2,7 @@
 import numpy as np
 import imgaug as ia
 import imgaug.augmenters as iaa
-import imageio as il
+import imageio.v2 as il
 import xml.etree.ElementTree as ET
 import json 
 from pascal_voc_writer import Writer
@@ -70,10 +70,10 @@ class SimpleAugSeq:
     def create_bbs(self, root, shape: int) -> BoundingBoxesOnImage:
         bboxes = []
         for member in root.findall('object'):
-            xmin = int(member[4][0].text)
-            ymin = int(member[4][1].text)
-            xmax = int(member[4][2].text)
-            ymax = int(member[4][3].text)
+            xmin = int(float(member[4][0].text))
+            ymin = int(float(member[4][1].text))
+            xmax = int(float(member[4][2].text))
+            ymax = int(float(member[4][3].text))
             bboxes.append(BoundingBox(x1=xmin, y1=ymin, x2=xmax, y2=ymax))
         return BoundingBoxesOnImage(bboxes, shape)
     
@@ -105,11 +105,12 @@ class SimpleAugSeq:
     def augment(self):
         # augments every image in the list given to the constructor 
         for name in self.names:
+            print(f"Augmenting \"{name}.jpg/xml\"...")
             # get the tree for the current xml file as well as its root
             tree = ET.parse(path + name + '.xml') 
             root = tree.getroot()
 
-            images = self.make_copies(name+'.jpg') # make num_copies number of copies of the current image 
+            images = self.make_copies_images(name+'.jpg') # make num_copies number of copies of the current image 
             bbs = self.create_bbs(root, images[0].shape) # create the BoundingBoxesOnImage object for the current image
             allbbs = self.make_copies_bboxes(bbs) # make num_copies number of copies of the current image's corresponding xml file
 
@@ -122,6 +123,7 @@ class SimpleAugSeq:
             width = int(root.find("size")[1].text)
             class_name = str(root.find('object')[0].text)
             self.save_aug_pairs(images_aug, bbs_aug, name, height, width, class_name)
+            print(f"Saved augmented versions of {name}.")
 
 
 if __name__ == '__main__':
