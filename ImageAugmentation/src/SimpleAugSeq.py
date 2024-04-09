@@ -13,7 +13,7 @@ from pascal_voc_writer import Writer
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 
 class SimpleAugSeq:
-    def __init__(self, path, save_path, seed, copies) -> None:
+    def __init__(self, path, save_path, seed, num_copies) -> None:
         self.path = path
         self.save_path = path
         self.seed = seed
@@ -23,17 +23,55 @@ class SimpleAugSeq:
 
     # Return an array of copies of the image stored at 
     # path/img. The array has num_copies number of copies.
-    def make_copies(self, img: str, num_copies: int) -> np.array:
+    def make_copies_images(img: str, num_copies: int) -> np.array:
         return np.array(
             [il.imread(path + img) for _ in range(int)],
             dtype=np.uint8
         )
+
+    # Make num_copies number of the bbs object and return it 
+    # in an array
+    def make_copies_bboxes(bbs: BoundingBoxesOnImage, num_copies: int) -> np.array:
+        return [bbs for _ in range(num_copies)]
     
+    def create_sequential() -> iaa.Sequential:
+        return iaa.Sequential([  #randomly transforms the image
+            iaa.Fliplr(0.5), # horizontal flips
+            iaa.Crop(percent=(0, 0.1)), # random crops
+            # Small gaussian blur with random sigma between 0 and 0.5.
+            # But we only blur about 50% of all images.
+            iaa.Sometimes(
+                0.5,
+                iaa.GaussianBlur(sigma=(0, 0.5))
+            ),
+            # Strengthen or weaken the contrast in each image.
+            iaa.LinearContrast((0.75, 1.5)),
+            # Add gaussian noise.
+            # For 50% of all images, we sample the noise once per pixel.
+            # For the other 50% of all images, we sample the noise per pixel AND
+            # channel. This can change the color (not only brightness) of the
+            # pixels.
+            iaa.AdditiveGaussianNoise(loc=0, scale=(0.0, 0.05*255), per_channel=0.5),
+            # Make some images brighter and some darker.
+            # In 20% of all cases, we sample the multiplier once per channel,
+            # which can end up changing the color of the images.
+            iaa.Multiply((0.8, 1.2), per_channel=0.2),
+            # Apply affine transformations to each image.
+            # Scale/zoom them, translate/move them, rotate them and shear them.
+            iaa.Affine(
+                scale={"x": (0.8, 1.2), "y": (0.8, 1.2)},
+                translate_percent={"x": (-0.2, 0.2), "y": (-0.2, 0.2)},
+                rotate=(-25, 25),
+                shear=(-8, 8)
+            )
+            ], 
+            random_order=True) # apply augmenters in random order
+
     # Return a BoundingBoxesOnImage object with the 
     # given root and shape by automatically creating a 
     # new BoundingBox object for every object 
     # in the root
-    def create_bbs(self, root, shape) -> BoundingBoxesOnImage:
+    def create_bbs(root, shape: int) -> BoundingBoxesOnImage:
         bboxes = []
         for member in root.findall('object'):
             xmin = int(member[4][0].text)
@@ -43,6 +81,8 @@ class SimpleAugSeq:
             bboxes.append(BoundingBox(x1=xmin, y1=ymin, x2=xmax, y2=ymax))
         return BoundingBoxesOnImage(bboxes, shape)
     
+    # The primary function in charge of 
+    # augmenting everything
     def augment(self):
         for y in range(2): # Modifies 2 images starting at 18
             name = str(y+18) # name of the image/xml pair we are considering
@@ -101,8 +141,7 @@ for y in range(2):   #Modifies 2 images from image 18
     for h in range(10):   #make x copies of the original bounding boxes for transformation
         Allbbs.append(bbs)
 
-    freq = 0.5
-    sometimes = lambda aug: iaa.Sometimes(freq, aug) # initialize sometimes as a function that runs the augmentation "aug" (freq * 100)% of the time
+    sometimes = lambda freq, aug: iaa.Sometimes(freq, aug) # initialize sometimes as a function that runs the augmentation "aug" (freq * 100)% of the time
     seq = iaa.Sequential([  #randomly transforms the image
         iaa.Fliplr(0.5), # horizontal flips
         iaa.Crop(percent=(0, 0.1)), # random crops
