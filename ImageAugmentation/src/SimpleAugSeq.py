@@ -3,7 +3,6 @@ import numpy as np
 import imgaug as ia
 import imgaug.augmenters as iaa
 import imageio as il
-import os 
 import xml.etree.ElementTree as ET
 from pascal_voc_writer import Writer
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
