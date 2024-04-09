@@ -18,16 +18,16 @@ class SimpleAugSeq:
 
     # Return an array of copies of the image stored at 
     # path/img. The array has num_copies number of copies.
-    def make_copies_images(self, img: str, num_copies: int) -> np.array:
+    def make_copies_images(self, img: str) -> np.array:
         return np.array(
-            [il.imread(path + img) for _ in range(int)],
+            [il.imread(path + img) for _ in range(self.num_copies)],
             dtype=np.uint8
         )
 
     # Make num_copies number of the bbs object and return it 
     # in an array
-    def make_copies_bboxes(self, bbs: BoundingBoxesOnImage, num_copies: int) -> np.array:
-        return [bbs for _ in range(num_copies)]
+    def make_copies_bboxes(self, bbs: BoundingBoxesOnImage) -> np.array:
+        return [bbs for _ in range(self.num_copies)]
     
     def create_sequential(self) -> iaa.Sequential:
         return iaa.Sequential([  #randomly transforms the image
@@ -108,9 +108,9 @@ class SimpleAugSeq:
             tree = ET.parse(path + name + '.xml') 
             root = tree.getroot()
 
-            images = self.make_copies(name+'.jpg', self.num_copies) # make num_copies number of copies of the current image 
+            images = self.make_copies(name+'.jpg') # make num_copies number of copies of the current image 
             bbs = self.create_bbs(root, images[0].shape) # create the BoundingBoxesOnImage object for the current image
-            allbbs = self.make_copies_bboxes(bbs, self.num_copies) # make num_copies number of copies of the current image's corresponding xml file
+            allbbs = self.make_copies_bboxes(bbs) # make num_copies number of copies of the current image's corresponding xml file
 
             seq = self.create_sequential() # create the sequential object in charge of the augmentation
 
