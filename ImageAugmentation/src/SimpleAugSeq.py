@@ -4,6 +4,7 @@ import imgaug as ia
 import imgaug.augmenters as iaa
 import imageio as il
 import xml.etree.ElementTree as ET
+import json 
 from pascal_voc_writer import Writer
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 
@@ -124,9 +125,12 @@ class SimpleAugSeq:
 
 
 if __name__ == '__main__':
-    # path on John laptop
-    path = "smb://ecn-techwin.ecn.purdue.edu/Research/PLM/Restricted/Research/Project Folders/Active/ADT - Assembly Digital Thread/FOD/Images/pencils/Synthetic images/"
-    save_path = "smb://ecn-techwin.ecn.purdue.edu/Research/PLM/Restricted/Research/Project Folders/Active/ADT - Assembly Digital Thread/FOD/Images/pencils/Imgaug images/"
+    path = ''
+    save_path = ''
+    with open("../config.json") as f:
+        d = json.load(f)
+        path = d["path"]
+        save_path = d["save_path"]
 
     # path on Luca workstation
     # path = "Z:\Restricted\Research\Project Folders\Active\ADT - Assembly Digital Thread\FOD\Images\pencils\Synthetic images\\"
