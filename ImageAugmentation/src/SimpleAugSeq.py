@@ -38,32 +38,45 @@ class SimpleAugSeq:
     
     def create_sequential(self) -> iaa.Sequential:
         return iaa.Sequential([  #randomly transforms the image
-            iaa.Fliplr(0.5), # horizontal flips
+            iaa.Fliplr(0.5), # mirror image horizontally 50% of the time 
+
+            iaa.Flipud(0.5), # mirror image vertically 50% of the time
+
             iaa.Crop(percent=(0, 0.1)), # random crops
+
             # Small gaussian blur with random sigma between 0 and 0.5.
             # But we only blur about 50% of all images.
             iaa.Sometimes(
                 0.5,
                 iaa.GaussianBlur(sigma=(0, 0.5))
             ),
+
             # Strengthen or weaken the contrast in each image.
             iaa.LinearContrast((0.75, 1.5)),
+
             # Add gaussian noise.
             # For 50% of all images, we sample the noise once per pixel.
             # For the other 50% of all images, we sample the noise per pixel AND
             # channel. This can change the color (not only brightness) of the
             # pixels.
             iaa.AdditiveGaussianNoise(loc=0, scale=(0.0, 0.05*255), per_channel=0.5),
+
             # Make some images brighter and some darker.
             # In 20% of all cases, we sample the multiplier once per channel,
             # which can end up changing the color of the images.
             iaa.Multiply((0.8, 1.2), per_channel=0.2),
+
             # Apply affine transformations to each image.
             # Scale/zoom them, translate/move them, rotate them and shear them.
             iaa.Affine(
-                scale={"x": (0.8, 1.2), "y": (0.8, 1.2)},
-                translate_percent={"x": (-0.2, 0.2), "y": (-0.2, 0.2)},
-                rotate=(-25, 25),
+
+                # zoom in or out
+                scale={"x": (0.8, 1.2), "y": (0.8, 1.2)}, 
+                
+                # horizontal and vertical shifts
+                translate_percent={"x": (-0.2, 0.2), "y": (-0.2, 0.2)}, # TODO: explore changing the fill color to something that looks like the work station 
+
+                #horizontal and vertical distortion
                 shear=(-8, 8)
             )
             ], 
@@ -85,7 +98,7 @@ class SimpleAugSeq:
     
     # Save the images and corresponding xml files 
     # 
-    # Naming convention: name + '_synth_' + i + '.file_extension'
+    # Naming convention: name + '_aug_' + i + '.file_extension'
     # e.g. The third synthetic image of 18.jpg will be called
     #      `18_synth_2.jpg`. Its xml file will have the same name.
     def save_aug_pairs(self, 
@@ -137,7 +150,7 @@ class SimpleAugSeq:
             width = int(root.find("size")[1].text)
             class_name = str(root.find('object')[0].text)
             self.save_aug_pairs(images_aug, bbs_aug, name, height, width, class_name)
-            print_green(f"Saved {self.num_copies} augmented versions of {name} as {name}_aug_.jpg/xml")
+            print_green(f"Saved {self.num_copies} augmented versions of {name} as {name}_aug_<copy #>.jpg/xml")
             print("---------------------------------")
 
 if __name__ == '__main__':
@@ -152,5 +165,5 @@ if __name__ == '__main__':
                               save_path=save_path, 
                               seed=1, 
                               num_copies=64, 
-                              names=['18', '19']) 
+                              names=['21']) 
     simple_aug.augment()
