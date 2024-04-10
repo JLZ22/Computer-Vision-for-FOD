@@ -7,6 +7,8 @@ import xml.etree.ElementTree as ET
 import json 
 from pascal_voc_writer import Writer
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
+from halo import Halo
+
 
 def print_red(text):
     print("\033[91m{}\033[0m".format(text))
@@ -123,8 +125,8 @@ class SimpleAugSeq:
     # augmenting everything
     def augment(self):
         # augments every image in the list given to the constructor 
-        print(f"Read Location: \"{self.path}\"")
-        print(f"Save Location: \"{self.save_path}\"")
+        print_red(f"Read Location: \"{self.path}\"")
+        print_green(f"Save Location: \"{self.save_path}\"")
         print(f"Num Compies:   {self.num_copies}")
         proceed = input("Type \"y\" to proceed. ")
         print("---------------------------------")
@@ -132,24 +134,25 @@ class SimpleAugSeq:
             print_red("Failed to augment images.")
             exit()
         for name in self.names:
-            print(f"Augmenting \"{name}.jpg/xml\"...")
-            # get the tree for the current xml file as well as its root
-            tree = ET.parse(path + name + '.xml') 
-            root = tree.getroot()
+            with Halo(text=f"Augmenting \"{name}.jpg/xml\"", spinner='dots'):
 
-            images = self.make_copies_images(name+'.jpg') # make num_copies number of copies of the current image 
-            bbs = self.create_bbs(root, images[0].shape) # create the BoundingBoxesOnImage object for the current image
-            allbbs = self.make_copies_bboxes(bbs) # make num_copies number of copies of the current image's corresponding xml file
+                # get the tree for the current xml file as well as its root
+                tree = ET.parse(path + name + '.xml') 
+                root = tree.getroot()
 
-            seq = self.create_sequential() # create the sequential object in charge of the augmentation
+                images = self.make_copies_images(name+'.jpg') # make num_copies number of copies of the current image 
+                bbs = self.create_bbs(root, images[0].shape) # create the BoundingBoxesOnImage object for the current image
+                allbbs = self.make_copies_bboxes(bbs) # make num_copies number of copies of the current image's corresponding xml file
 
-            images_aug, bbs_aug = seq(images=images, bounding_boxes=allbbs)
+                seq = self.create_sequential() # create the sequential object in charge of the augmentation
+
+                images_aug, bbs_aug = seq(images=images, bounding_boxes=allbbs)
                 
-            #bbs_aug = bbs_aug.remove_out_of_image().clip_out_of_image() #This is an attempt to fix broken bounding boxes Current issue is list has no attribute 'remove_out_of_image()'
-            height = int(root.find("size")[0].text)
-            width = int(root.find("size")[1].text)
-            class_name = str(root.find('object')[0].text)
-            self.save_aug_pairs(images_aug, bbs_aug, name, height, width, class_name)
+                #bbs_aug = bbs_aug.remove_out_of_image().clip_out_of_image() #This is an attempt to fix broken bounding boxes Current issue is list has no attribute 'remove_out_of_image()'
+                height = int(root.find("size")[0].text)
+                width = int(root.find("size")[1].text)
+                class_name = str(root.find('object')[0].text)
+                self.save_aug_pairs(images_aug, bbs_aug, name, height, width, class_name)
             print_green(f"Saved {self.num_copies} augmented versions of {name} as {name}_aug_<copy #>.jpg/xml")
             print("---------------------------------")
 
@@ -158,14 +161,20 @@ if __name__ == '__main__':
     save_path = ''
     import os
     json_path = os.path.join('..','config.json')
+    file_names = []
+    for aut in range(50):
+        if aut != 1:
+            file_names.append(str(aut+1))
+
     with open(json_path) as f:
         d = json.load(f)
         path = d["path"]
         save_path = d["save_path"]
-
+    
+    #print(file_names)
     simple_aug = SimpleAugSeq(path=path, 
                               save_path=save_path, 
                               seed=1, 
                               num_copies=64, 
-                              names=['21']) 
+                              names=file_names) 
     simple_aug.augment()
