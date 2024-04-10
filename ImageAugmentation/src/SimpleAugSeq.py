@@ -134,10 +134,6 @@ if __name__ == '__main__':
         path = d["path"]
         save_path = d["save_path"]
 
-    # path on Luca workstation
-    # path = "Z:\Restricted\Research\Project Folders\Active\ADT - Assembly Digital Thread\FOD\Images\pencils\Synthetic images\\"
-    # save_path = "Z:\Restricted\Research\Project Folders\Active\ADT - Assembly Digital Thread\FOD\Images\pencils\Imgaug images\\"
-
     simple_aug = SimpleAugSeq(path=path, 
                               save_path=save_path, 
                               seed=1, 
