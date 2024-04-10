@@ -2,16 +2,22 @@
 import numpy as np
 import imgaug as ia
 import imgaug.augmenters as iaa
-import imageio.v2 as il
+import cv2
 import xml.etree.ElementTree as ET
 import json 
 from pascal_voc_writer import Writer
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 
+def print_red(text):
+    print("\033[91m{}\033[0m".format(text))
+
+def print_green(text):
+    print("\033[92m{}\033[0m".format(text))
+
 class SimpleAugSeq:
     def __init__(self, path: str, save_path: str, seed: int, num_copies: int , names: list) -> None:
         self.path = path
-        self.save_path = path
+        self.save_path = save_path
         self.seed = seed
         self.num_copies = num_copies
         self.names = names
@@ -21,7 +27,7 @@ class SimpleAugSeq:
     # path/img. The array has num_copies number of copies.
     def make_copies_images(self, img: str) -> np.array:
         return np.array(
-            [il.imread(path + img) for _ in range(self.num_copies)],
+            [cv2.imread(path + img) for _ in range(self.num_copies)],
             dtype=np.uint8
         )
 
@@ -91,9 +97,9 @@ class SimpleAugSeq:
                        class_name) -> None:
         for i in range(imgs.shape[0]):
             curr_path = self.save_path + original_name
-            img_path = curr_path + '.jpg'
-            xml_path = curr_path + '.xml'
-            il.imwrite(img_path, imgs[i])
+            img_path = curr_path + '_aug_' + str(i) + '.jpg'
+            xml_path = curr_path + '_aug_' + str(i) + '.xml'
+            cv2.imwrite(img_path, imgs[i])
             writer = Writer(img_path, height, width)
             for box in bbss[i]:
                 writer.addObject(class_name, box.x1, box.y1, box.x2, box.y2)
@@ -104,6 +110,14 @@ class SimpleAugSeq:
     # augmenting everything
     def augment(self):
         # augments every image in the list given to the constructor 
+        print(f"Read Location: \"{self.path}\"")
+        print(f"Save Location: \"{self.save_path}\"")
+        print(f"Num Compies:   {self.num_copies}")
+        proceed = input("Type \"y\" to proceed. ")
+        print("---------------------------------")
+        if (proceed.lower() != 'y'):
+            print_red("Failed to augment images.")
+            exit()
         for name in self.names:
             print(f"Augmenting \"{name}.jpg/xml\"...")
             # get the tree for the current xml file as well as its root
@@ -123,8 +137,8 @@ class SimpleAugSeq:
             width = int(root.find("size")[1].text)
             class_name = str(root.find('object')[0].text)
             self.save_aug_pairs(images_aug, bbs_aug, name, height, width, class_name)
-            print(f"Saved augmented versions of {name}.")
-
+            print_green(f"Saved {self.num_copies} augmented versions of {name} as {name}_aug_.jpg/xml")
+            print("---------------------------------")
 
 if __name__ == '__main__':
     path = ''
@@ -138,5 +152,5 @@ if __name__ == '__main__':
                               save_path=save_path, 
                               seed=1, 
                               num_copies=64, 
-                              names=['18', '19', '20']) 
+                              names=['18', '19']) 
     simple_aug.augment()
