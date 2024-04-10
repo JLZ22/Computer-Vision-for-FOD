@@ -156,7 +156,9 @@ class SimpleAugSeq:
 if __name__ == '__main__':
     path = ''
     save_path = ''
-    with open("../config.json") as f:
+    import os
+    json_path = os.path.join('..','config.json')
+    with open(json_path) as f:
         d = json.load(f)
         path = d["path"]
         save_path = d["save_path"]
