@@ -125,8 +125,8 @@ class SimpleAugSeq:
     # augmenting everything
     def augment(self):
         # augments every image in the list given to the constructor 
-        print_red(f"Read Location: \"{self.path}\"")
-        print_green(f"Save Location: \"{self.save_path}\"")
+        print(f"Read Location: \"{self.path}\"")
+        print(f"Save Location: \"{self.save_path}\"")
         print(f"Num Compies:   {self.num_copies}")
         proceed = input("Type \"y\" to proceed. ")
         print("---------------------------------")
