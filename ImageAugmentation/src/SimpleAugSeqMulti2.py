@@ -8,7 +8,9 @@ import json
 from pascal_voc_writer import Writer
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 from halo import Halo
-
+import multiprocessing
+import os
+import time
 
 def print_red(text):
     print("\033[91m{}\033[0m".format(text))
@@ -28,8 +30,9 @@ class SimpleAugSeq:
     # Return an array of copies of the image stored at 
     # path/img. The array has num_copies number of copies.
     def make_copies_images(self, img: str) -> np.array:
+        print(os.getpid())
         return np.array(
-            [cv2.imread(path + img) for _ in range(self.num_copies)],
+            [cv2.imread(self.path + img) for _ in range(self.num_copies)],
             dtype=np.uint8
         )
 
@@ -133,37 +136,67 @@ class SimpleAugSeq:
         if (proceed.lower() != 'y'):
             print_red("Failed to augment images.")
             exit()
+
         for name in self.names:
-            with Halo(text=f"Augmenting \"{name}.jpg/xml\"", spinner='dots'):
+            print('Starting Woker')
+            p = multiprocessing.Process(target = self.augstart, kwargs={'name':name})
+            time.sleep(1)
+            print("Worker Created")
+            p.start()
+            print("Work Started")
+            print("")
+            time.sleep(300)
 
-                # get the tree for the current xml file as well as its root
-                tree = ET.parse(path + name + '.xml') 
-                root = tree.getroot()
+            #with Halo(text=f"Augmenting \"{name}.jpg/xml\"", spinner='dots'):
 
-                images = self.make_copies_images(name+'.jpg') # make num_copies number of copies of the current image 
-                bbs = self.create_bbs(root, images[0].shape) # create the BoundingBoxesOnImage object for the current image
-                allbbs = self.make_copies_bboxes(bbs) # make num_copies number of copies of the current image's corresponding xml file
+            # get the tree for the current xml file as well as its root
+            #tree = ET.parse(path + name + '.xml') 
+            #root = tree.getroot()
 
-                seq = self.create_sequential() # create the sequential object in charge of the augmentation
+            #images = self.make_copies_images(name+'.jpg') # make num_copies number of copies of the current image 
+            #bbs = self.create_bbs(root, images[0].shape) # create the BoundingBoxesOnImage object for the current image
+            #allbbs = self.make_copies_bboxes(bbs) # make num_copies number of copies of the current image's corresponding xml file
 
-                images_aug, bbs_aug = seq(images=images, bounding_boxes=allbbs)
+            #seq = self.create_sequential() # create the sequential object in charge of the augmentation
+
+            #images_aug, bbs_aug = seq(images=images, bounding_boxes=allbbs)
                 
-                #bbs_aug = bbs_aug.remove_out_of_image().clip_out_of_image() #This is an attempt to fix broken bounding boxes Current issue is list has no attribute 'remove_out_of_image()'
-                height = int(root.find("size")[0].text)
-                width = int(root.find("size")[1].text)
-                class_name = str(root.find('object')[0].text)
-                self.save_aug_pairs(images_aug, bbs_aug, name, height, width, class_name)
-            print_green(f"Saved {self.num_copies} augmented versions of {name} as {name}_aug_<copy #>.jpg/xml")
-            print("---------------------------------")
+            #bbs_aug = bbs_aug.remove_out_of_image().clip_out_of_image() #This is an attempt to fix broken bounding boxes Current issue is list has no attribute 'remove_out_of_image()'
+            #height = int(root.find("size")[0].text)
+            #width = int(root.find("size")[1].text)
+            #class_name = str(root.find('object')[0].text)
+            #self.save_aug_pairs(images_aug, bbs_aug, name, height, width, class_name)
+        #print_green(f"Saved {self.num_copies} augmented versions of {name} as {name}_aug_<copy #>.jpg/xml")
+        #print("---------------------------------")
+
+    def augstart(self, name: str):
+        print("Started")
+        tree = ET.parse(self.path + name + '.xml') 
+        root = tree.getroot()
+
+        images = self.make_copies_images(name+'.jpg') # make num_copies number of copies of the current image 
+        bbs = self.create_bbs(root, images[0].shape) # create the BoundingBoxesOnImage object for the current image
+        allbbs = self.make_copies_bboxes(bbs) # make num_copies number of copies of the current image's corresponding xml file
+
+        seq = self.create_sequential() # create the sequential object in charge of the augmentation
+
+        images_aug, bbs_aug = seq(images=images, bounding_boxes=allbbs)
+                
+        #bbs_aug = bbs_aug.remove_out_of_image().clip_out_of_image() #This is an attempt to fix broken bounding boxes Current issue is list has no attribute 'remove_out_of_image()'
+        height = int(root.find("size")[0].text)
+        width = int(root.find("size")[1].text)
+        class_name = str(root.find('object')[0].text)
+        self.save_aug_pairs(images_aug, bbs_aug, name, height, width, class_name)
+
 
 if __name__ == '__main__':
     path = ''
     save_path = ''
     import os
-    json_path = os.path.join('..','config.json')
+    json_path = os.path.join('..','config2.json')
     file_names = []
-    for aut in range(3276):
-        if aut >= 3250:
+    for aut in range(3288):
+        if aut >= 3276:
             file_names.append(str(aut+1))
 
     with open(json_path) as f:
