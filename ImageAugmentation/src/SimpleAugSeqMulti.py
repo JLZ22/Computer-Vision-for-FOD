@@ -160,15 +160,15 @@ if __name__ == '__main__':
     json_path = os.path.join('..','config2.json')
     file_names = []
     jobs = []
-    for aut in range(3288):
-        if aut >= 3276:
-            file_names.append(str(aut+1))
+    for aut in range(3276, 3288):
+        file_names.append(str(aut+1))
 
     with open(json_path) as f:
         d = json.load(f)
         path = d["path"]
         save_path = d["save_path"]
     
+
     #print(file_names)
     #simple_aug = SimpleAugSeq(path=path, 
                               #save_path=save_path, 
