@@ -159,7 +159,6 @@ if __name__ == '__main__':
     import os
     json_path = os.path.join('..','config2.json')
     file_names = []
-    jobs = []
     for aut in range(3276, 3288):
         file_names.append(str(aut+1))
 
@@ -181,6 +180,5 @@ if __name__ == '__main__':
         print("Creating Woker")
         p = multiprocessing.Process(target=augment(path=path,save_path=save_path,seed=1,num_copies=64,name=i))
         print("Worker Succesfully made")
-        jobs.append(p.target.augment())
         p.start()
         print("Worker Started")
