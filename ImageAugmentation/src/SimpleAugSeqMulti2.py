@@ -11,6 +11,7 @@ from halo import Halo
 import multiprocessing
 import os
 import time
+from multiprocessing import pool
 
 def print_red(text):
     print("\033[91m{}\033[0m".format(text))
@@ -30,7 +31,6 @@ class SimpleAugSeq:
     # Return an array of copies of the image stored at 
     # path/img. The array has num_copies number of copies.
     def make_copies_images(self, img: str) -> np.array:
-        print(os.getpid())
         return np.array(
             [cv2.imread(self.path + img) for _ in range(self.num_copies)],
             dtype=np.uint8
@@ -132,45 +132,34 @@ class SimpleAugSeq:
         print(f"Save Location: \"{self.save_path}\"")
         print(f"Num Compies:   {self.num_copies}")
         proceed = input("Type \"y\" to proceed. ")
-        print("---------------------------------")
         if (proceed.lower() != 'y'):
             print_red("Failed to augment images.")
             exit()
 
+        #Creates a pool with a max processes count of 3
+        pol = multiprocessing.pool.Pool(processes=3)
+
         for name in self.names:
-            print('Starting Woker')
-            p = multiprocessing.Process(target = self.augstart, kwargs={'name':name})
-            time.sleep(1)
-            print("Worker Created")
-            p.start()
-            print("Work Started")
-            print("")
-            time.sleep(300)
 
-            #with Halo(text=f"Augmenting \"{name}.jpg/xml\"", spinner='dots'):
+            #Previous code that ran as many processes as possible. WILL MAX YOUR CPU RAM AND DISK
+            #print('Starting Woker')
+            #p = multiprocessing.Process(target = self.augstart, kwargs={'name':name})
+            #print("Worker Created")
+            #p.start()
+            #print("Work Started")
+            #print("")
+            #time.sleep(300)
 
-            # get the tree for the current xml file as well as its root
-            #tree = ET.parse(path + name + '.xml') 
-            #root = tree.getroot()
+            #Adds work to the pool 
+            pol.apply_async(self.augstart, kwds={'name':name})
+            
+        pol.close()
+        pol.join()
+        
+            
 
-            #images = self.make_copies_images(name+'.jpg') # make num_copies number of copies of the current image 
-            #bbs = self.create_bbs(root, images[0].shape) # create the BoundingBoxesOnImage object for the current image
-            #allbbs = self.make_copies_bboxes(bbs) # make num_copies number of copies of the current image's corresponding xml file
-
-            #seq = self.create_sequential() # create the sequential object in charge of the augmentation
-
-            #images_aug, bbs_aug = seq(images=images, bounding_boxes=allbbs)
-                
-            #bbs_aug = bbs_aug.remove_out_of_image().clip_out_of_image() #This is an attempt to fix broken bounding boxes Current issue is list has no attribute 'remove_out_of_image()'
-            #height = int(root.find("size")[0].text)
-            #width = int(root.find("size")[1].text)
-            #class_name = str(root.find('object')[0].text)
-            #self.save_aug_pairs(images_aug, bbs_aug, name, height, width, class_name)
-        #print_green(f"Saved {self.num_copies} augmented versions of {name} as {name}_aug_<copy #>.jpg/xml")
-        #print("---------------------------------")
-
+    #New function that does the work part of the old augment function. 
     def augstart(self, name: str):
-        print("Started")
         tree = ET.parse(self.path + name + '.xml') 
         root = tree.getroot()
 
@@ -189,10 +178,11 @@ class SimpleAugSeq:
         self.save_aug_pairs(images_aug, bbs_aug, name, height, width, class_name)
 
 
+
+
 if __name__ == '__main__':
     path = ''
     save_path = ''
-    import os
     json_path = os.path.join('..','config2.json')
     file_names = []
     for aut in range(3288):
@@ -204,7 +194,6 @@ if __name__ == '__main__':
         path = d["path"]
         save_path = d["save_path"]
     
-    #print(file_names)
     simple_aug = SimpleAugSeq(path=path, 
                               save_path=save_path, 
                               seed=1, 
