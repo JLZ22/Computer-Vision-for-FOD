@@ -1,20 +1,23 @@
-#Original code 'https://imgaug.readthedocs.io/en/latest/source/examples_basics.html'
+#Original code "https://imgaug.readthedocs.io/en/latest/source/examples_basics.html"
 import numpy as np
 import imgaug as ia
 import imgaug.augmenters as iaa
 import cv2
 import xml.etree.ElementTree as ET
 import json 
-import os
 from pascal_voc_writer import Writer
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 from halo import Halo
+import multiprocessing
+import os
+import time
+from multiprocessing import pool
 
 def print_red(text):
-    print('\033[91m{}\033[0m'.format(text))
+    print("\033[91m{}\033[0m".format(text))
 
 def print_green(text):
-    print('\033[92m{}\033[0m'.format(text))
+    print("\033[92m{}\033[0m".format(text))
 
 class SimpleAugSeq:
     def __init__(self, path: str, save_path: str, seed: int, num_copies: int , names: list) -> None:
@@ -28,9 +31,8 @@ class SimpleAugSeq:
     # Return an array of copies of the image stored at 
     # path/img. The array has num_copies number of copies.
     def make_copies_images(self, img: str) -> np.array:
-        path = os.path.abspath(img)
         return np.array(
-            [cv2.imread((path)) for _ in range(self.num_copies)],
+            [cv2.imread(self.path + img) for _ in range(self.num_copies)],
             dtype=np.uint8
         )
 
@@ -74,10 +76,10 @@ class SimpleAugSeq:
             iaa.Affine(
 
                 # zoom in or out
-                scale={'x': (0.8, 1.2), 'y': (0.8, 1.2)}, 
+                scale={"x": (0.8, 1.2), "y": (0.8, 1.2)}, 
                 
                 # horizontal and vertical shifts
-                translate_percent={'x': (-0.2, 0.2), 'y': (-0.2, 0.2)}, # TODO: explore changing the fill color to something that looks like the work station 
+                translate_percent={"x": (-0.2, 0.2), "y": (-0.2, 0.2)}, # TODO: explore changing the fill color to something that looks like the work station 
 
                 #horizontal and vertical distortion
                 shear=(-8, 8)
@@ -126,86 +128,75 @@ class SimpleAugSeq:
     # augmenting everything
     def augment(self):
         # augments every image in the list given to the constructor 
-        read_path_is_dir = os.path.isdir(self.path)
-        save_path_is_dir = os.path.isdir(self.save_path)
-        print(f'Read Location: \"{self.path}\"')
-        if read_path_is_dir:
-            print_green(f'Read location is a directory.')
-        else:
-            print_red(f'Read location is not a directory. Exiting.')
-            exit(1)
-
-        print(f'Save Location: \"{self.save_path}\"')
-        if save_path_is_dir:
-            print_green(f'Save location is a directory.')
-        else:
-            print_red(f'Save location is not a directory. Exiting')
-            exit(1)
-
-        print(f'Num Compies:   {self.num_copies}')
-        if self.num_copies < 0:
-            print_red('Invalid number of copies.')
-            exit(1)
-
-        proceed = input('Type \"y\" to proceed. ')
-        print('---------------------------------')
+        print(f"Read Location: \"{self.path}\"")
+        print(f"Save Location: \"{self.save_path}\"")
+        print(f"Num Compies:   {self.num_copies}")
+        proceed = input("Type \"y\" to proceed. ")
         if (proceed.lower() != 'y'):
-            print_red('Failed to confirm augmentation.')
+            print_red("Failed to augment images.")
             exit()
+
+        #Creates a pool with a max processes count of 3
+        pol = multiprocessing.pool.Pool(processes=3)
+
         for name in self.names:
-            with Halo(text=f'Augmenting \"{name}.jpg/xml\"\'', spinner='dots'):
-                img_path = name + '.jpg'
-                xml_path = name + '.xml'
-                if (not os.path.exists(self.path + img_path)):
-                    print_red(f'\n\"{img_path}\" does not exist in the read directory. Continuing to next data point.')
-                    print('---------------------------------')
-                    continue
-                if (not os.path.exists(self.path + xml_path)):
-                    print_red(f'\n{xml_path} does not exist in the read directory. Continuing to next data point.')
-                    print('---------------------------------')
-                    continue
 
-                img_path = self.path + img_path
-                xml_path = self.path + xml_path
+            #Previous code that ran as many processes as possible. WILL MAX YOUR CPU RAM AND DISK
+            #print('Starting Woker')
+            #p = multiprocessing.Process(target = self.augstart, kwargs={'name':name})
+            #print("Worker Created")
+            #p.start()
+            #print("Work Started")
+            #print("")
+            #time.sleep(300)
 
-                # get the tree for the current xml file as well as its root
-                tree = ET.parse(xml_path) 
-                root = tree.getroot()
+            #Adds work to the pool 
+            pol.apply_async(self.augstart, kwds={'name':name})
+            
+        pol.close()
+        pol.join()
+        
+            
 
-                images = self.make_copies_images(img_path) # make num_copies number of copies of the current image 
-                bbs = self.create_bbs(root, images[0].shape) # create the BoundingBoxesOnImage object for the current image
-                allbbs = self.make_copies_bboxes(bbs) # make num_copies number of copies of the current image's corresponding xml file
+    #New function that does the work part of the old augment function. 
+    def augstart(self, name: str):
+        tree = ET.parse(self.path + name + '.xml') 
+        root = tree.getroot()
 
-                seq = self.create_sequential() # create the sequential object in charge of the augmentation
+        images = self.make_copies_images(name+'.jpg') # make num_copies number of copies of the current image 
+        bbs = self.create_bbs(root, images[0].shape) # create the BoundingBoxesOnImage object for the current image
+        allbbs = self.make_copies_bboxes(bbs) # make num_copies number of copies of the current image's corresponding xml file
 
-                images_aug, bbs_aug = seq(images=images, bounding_boxes=allbbs)
+        seq = self.create_sequential() # create the sequential object in charge of the augmentation
+
+        images_aug, bbs_aug = seq(images=images, bounding_boxes=allbbs)
                 
-                #bbs_aug = bbs_aug.remove_out_of_image().clip_out_of_image() #This is an attempt to fix broken bounding boxes Current issue is list has no attribute 'remove_out_of_image()'
-                height = int(root.find('size')[0].text)
-                width = int(root.find('size')[1].text)
-                class_name = str(root.find('object')[0].text)
-                # self.save_aug_pairs(images_aug, bbs_aug, name, height, width, class_name)
-            print_green(f'Saved {self.num_copies} augmented versions of {name} as {name}_aug_<copy#>.jpg/xml')
-            print('---------------------------------')
+        #bbs_aug = bbs_aug.remove_out_of_image().clip_out_of_image() #This is an attempt to fix broken bounding boxes Current issue is list has no attribute 'remove_out_of_image()'
+        height = int(root.find("size")[0].text)
+        width = int(root.find("size")[1].text)
+        class_name = str(root.find('object')[0].text)
+        self.save_aug_pairs(images_aug, bbs_aug, name, height, width, class_name)
+
+
+
 
 if __name__ == '__main__':
-    read_path = ''
+    path = ''
     save_path = ''
-    import os
-    json_path = os.path.join('..','config.json')
+    json_path = os.path.join('..','config2.json')
     file_names = []
-    for aut in range(3276):
-        if aut >= 3250:
+    for aut in range(3288):
+        if aut >= 3276:
             file_names.append(str(aut+1))
 
     with open(json_path) as f:
         d = json.load(f)
-        read_path = d['path']
-        save_path = d['save_path']
+        path = d["path"]
+        save_path = d["save_path"]
     
-    simple_aug = SimpleAugSeq(path=read_path, 
+    simple_aug = SimpleAugSeq(path=path, 
                               save_path=save_path, 
                               seed=1, 
-                              num_copies=30, 
-                              names=['18', '19', '333dsffssfsddsifsifjis', '20']) 
+                              num_copies=64, 
+                              names=file_names) 
     simple_aug.augment()
