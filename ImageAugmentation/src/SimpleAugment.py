@@ -20,12 +20,13 @@ def print_green(text):
     print("\033[92m{}\033[0m".format(text))
 
 class SimpleAugSeq:
-    def __init__(self, path: str, save_path: str, seed: int, num_copies: int , names: list) -> None:
+    def __init__(self, path: str, save_path: str, seed: int, num_copies: int , names: list, process = 1) -> None:
         self.path = path
         self.save_path = save_path
         self.seed = seed
         self.num_copies = num_copies
         self.names = names
+        self.process = process
         ia.seed(self.seed)
 
     # Return an array of copies of the image stored at 
@@ -137,7 +138,7 @@ class SimpleAugSeq:
             exit()
 
         #Creates a pool with a max processes count of 3
-        pol = multiprocessing.pool.Pool(processes=3)
+        pol = multiprocessing.pool.Pool(processes=self.process)
 
         for name in self.names:
 
@@ -183,8 +184,9 @@ class SimpleAugSeq:
 if __name__ == '__main__':
     path = ''
     save_path = ''
-    json_path = os.path.join('..','config2.json')
+    json_path = os.path.join('..','config.json')
     file_names = []
+    Num_Process = 1
     for aut in range(3288):
         if aut >= 3276:
             file_names.append(str(aut+1))
@@ -198,5 +200,6 @@ if __name__ == '__main__':
                               save_path=save_path, 
                               seed=1, 
                               num_copies=64, 
-                              names=file_names) 
+                              names=file_names,
+                              process=Num_Process)
     simple_aug.augment()
