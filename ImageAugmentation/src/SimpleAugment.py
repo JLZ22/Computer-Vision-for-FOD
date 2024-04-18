@@ -179,23 +179,31 @@ class SimpleAugSeq:
         self.save_aug_pairs(images_aug, bbs_aug, name, height, width, class_name)
 
 
+#gets all file names in the directory that end in .jpg
+def getFileNames(path: str):
+    names = []
+    names_Without = []
+    names = [f for f in os.listdir(path) if f.endswith('.jpg')]
+    for f in names:
+        names_Without.append(f[:-4])
 
+    return names_Without
 
 if __name__ == '__main__':
     path = ''
     save_path = ''
     json_path = os.path.join('..','config.json')
     file_names = []
-    Num_Process = 1
-    for aut in range(3288):
-        if aut >= 3276:
-            file_names.append(str(aut+1))
+    Num_Process = 2
+
 
     with open(json_path) as f:
         d = json.load(f)
         path = d["path"]
         save_path = d["save_path"]
     
+    file_names = getFileNames(path=path)
+
     simple_aug = SimpleAugSeq(path=path, 
                               save_path=save_path, 
                               seed=1, 
