@@ -7,11 +7,9 @@ import xml.etree.ElementTree as ET
 import json 
 from pascal_voc_writer import Writer
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
-from halo import Halo
-import multiprocessing
 import os
-import time
 from multiprocessing import pool
+from collections import OrderedDict
 
 def print_red(text):
     print("\033[91m{}\033[0m".format(text))
@@ -138,7 +136,7 @@ class SimpleAugSeq:
             exit()
 
         #Creates a pool with a max processes count of 3
-        pol = multiprocessing.pool.Pool(processes=self.process)
+        pol = pool.Pool(processes=self.process)
 
         for name in self.names:
 
@@ -180,14 +178,9 @@ class SimpleAugSeq:
 
 
 #gets all file names in the directory that end in .jpg
-def getFileNames(path: str):
-    names = []
-    names_Without = []
-    names = [f for f in os.listdir(path) if f.endswith('.jpg')]
-    for f in names:
-        names_Without.append(f[:-4])
-
-    return names_Without
+def getNamesWithoutDescriptors(path: str):
+    names = [f[:f.find('.')] for f in os.listdir(path)]
+    return list(OrderedDict.fromkeys(names))
 
 if __name__ == '__main__':
     path = ''
@@ -202,7 +195,7 @@ if __name__ == '__main__':
         path = d["path"]
         save_path = d["save_path"]
     
-    file_names = getFileNames(path=path)
+    file_names = getNamesWithoutDescriptors(path=path)
 
     simple_aug = SimpleAugSeq(path=path, 
                               save_path=save_path, 
