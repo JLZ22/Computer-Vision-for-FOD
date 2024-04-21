@@ -29,6 +29,11 @@ class SimpleAugSeq:
         self.process = process
         ia.seed(self.seed)
 
+        if len(self.names) == 0:
+            self.names = self.getFileNames()
+
+        
+
     # Return an array of copies of the image stored at 
     # path/img. The array has num_copies number of copies.
     def make_copies_images(self, img: str) -> np.array:
@@ -179,15 +184,15 @@ class SimpleAugSeq:
         self.save_aug_pairs(images_aug, bbs_aug, name, height, width, class_name)
 
 
-#gets all file names in the directory that end in .jpg
-def getFileNames(path: str):
-    names = []
-    names_Without = []
-    names = [f for f in os.listdir(path) if f.endswith('.jpg')]
-    for f in names:
-        names_Without.append(f[:-4])
+    #gets all file names in the directory that end in .jpg
+    def getFileNames(self):
+        names = []
+        names_Without = []
+        names = [f for f in os.listdir(self.path) if f.endswith('.jpg')]
+        for f in names:
+            names_Without.append(f[:-4])
 
-    return names_Without
+        return names_Without
 
 if __name__ == '__main__':
     path = ''
@@ -202,7 +207,6 @@ if __name__ == '__main__':
         path = d["path"]
         save_path = d["save_path"]
     
-    file_names = getFileNames(path=path)
 
     simple_aug = SimpleAugSeq(path=path, 
                               save_path=save_path, 
