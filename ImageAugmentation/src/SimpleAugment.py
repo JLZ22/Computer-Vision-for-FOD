@@ -29,6 +29,7 @@ class SimpleAugSeq:
         self.process = process
         ia.seed(self.seed)
 
+        #Checks if the array that was passed in has a length of 0. If so it populates names array with every image name from read path
         if len(self.names) == 0:
             self.names = self.getFileNames()
 
@@ -111,7 +112,7 @@ class SimpleAugSeq:
     # 
     # Naming convention: name + '_aug_' + i + '.file_extension'
     # e.g. The third synthetic image of 18.jpg will be called
-    #      `18_synth_2.jpg`. Its xml file will have the same name.
+    #      `18_aug_2.jpg`. Its xml file will have the same name.
     def save_aug_pairs(self, 
                        imgs: np.array, 
                        bbss: np.array, 
@@ -131,12 +132,14 @@ class SimpleAugSeq:
             writer.save(xml_path)
 
     # The primary function in charge of 
-    # augmenting everything
+    # This function creates the process that are each in charge of augmenting one image
     def augment(self):
-        # augments every image in the list given to the constructor 
+        # Prints conformation of read and write path
         print(f"Read Location: \"{self.path}\"")
         print(f"Save Location: \"{self.save_path}\"")
         print(f"Num Compies:   {self.num_copies}")
+
+        #Requires user input before starting work
         proceed = input("Type \"y\" to proceed. ")
         if (proceed.lower() != 'y'):
             print_red("Failed to augment images.")
@@ -159,12 +162,12 @@ class SimpleAugSeq:
             #Adds work to the pool 
             pol.apply_async(self.augstart, kwds={'name':name})
             
-        pol.close()
-        pol.join()
+        pol.close() #closes the pool so no further work can be assigned
+        pol.join() #starts pool on running the processes
         
             
 
-    #New function that does the work part of the old augment function. 
+    #This function is the worker function and augments the image of name: "name" at save path and the coresponding xml file
     def augstart(self, name: str):
         tree = ET.parse(self.path + name + '.xml') 
         root = tree.getroot()
@@ -188,7 +191,9 @@ class SimpleAugSeq:
     def getFileNames(self):
         names = []
         names_Without = []
+        #Populates the names array with every file name ending in .jpg from the path
         names = [f for f in os.listdir(self.path) if f.endswith('.jpg')]
+        #removes the .jpg from the end of each name in the names array. The .jpg may be added back in later areas but only on a need basis.
         for f in names:
             names_Without.append(f[:-4])
 
