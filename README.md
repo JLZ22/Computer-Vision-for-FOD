@@ -22,8 +22,13 @@ Computer-Vision-For-FOD/venvFOD
 
 The packages you need to run scripts in `Computer-Vision-For-FOD/src` will be found here. Other directories' `src` folders may require different packages that will be covered in their respective READMEs.<br>
 ```
-# empty for now
+pip install ultralytics
 ```
+(use `pip3` instead of `pip` if you prefer) or<br>
+```
+conda install ultralytics
+```
+if you are using conda. <br>
 
 ## Literature Review<br>
 
