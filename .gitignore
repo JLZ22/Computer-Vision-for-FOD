@@ -1,3 +1,5 @@
 # ignore virtual environments because it varies for everyone
 venv*/
 config.json
+__pycache__/
+models/
