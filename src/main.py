@@ -21,5 +21,5 @@ if __name__ == "__main__":
         warnings.filterwarnings("ignore", category=DeprecationWarning)
 
     model = YOLO("models/yolov8n.pt")
-    detecter = Detect(model, "image", ["data/images/TestImage0.png"])
+    detecter = Detect(model, "image", ["data/images/TestImage1.png"])
     detecter.detect()
