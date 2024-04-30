@@ -1,4 +1,3 @@
-import platform
 from ultralytics import YOLO
 from Detect import Detect
 
