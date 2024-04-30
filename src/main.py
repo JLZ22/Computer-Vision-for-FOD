@@ -16,10 +16,6 @@ yolov8l
 yolov8x (Slowest and Most accurate)
 '''
 if __name__ == "__main__":
-    # ignore "AVCaptureDeviceTypeExternal is deprecated" warning
-    if platform.system() == "Darwin":
-        warnings.filterwarnings("ignore", category=DeprecationWarning)
-
-    model = YOLO("models/yolov8n.pt")
-    detecter = Detect(model, "image", ["data/images/TestImage1.png"])
+    model = YOLO("models/yolov8x.pt")
+    detecter = Detect(model, "camera", camera=0)
     detecter.detect()
