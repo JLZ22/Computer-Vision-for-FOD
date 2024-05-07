@@ -1,4 +1,4 @@
-#Original code "https://imgaug.readthedocs.io/en/latest/source/examples_basics.html"
+# Original code "https://imgaug.readthedocs.io/en/latest/source/examples_basics.html"
 import numpy as np
 import imgaug as ia
 import imgaug.augmenters as iaa
@@ -7,10 +7,8 @@ import xml.etree.ElementTree as ET
 import json 
 from pascal_voc_writer import Writer
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
-from halo import Halo
 import multiprocessing
 import os
-import time
 from multiprocessing import pool
 
 def print_red(text):
@@ -157,7 +155,13 @@ class SimpleAugSeq:
         pol.close()
         pol.join()
         
-            
+    def resizeAndReplace(self, img, width: int, height: int, bbs: BoundingBoxesOnImage):
+        seq = iaa.Sequential([
+            iaa.Resize({"height": height, "width": width})
+        ])
+
+        resizedImage, newBbs = seq(images=[img], bounding_boxes = [bbs])
+        # todo: save the new image and xml file
 
     #New function that does the work part of the old augment function. 
     def augstart(self, name: str):

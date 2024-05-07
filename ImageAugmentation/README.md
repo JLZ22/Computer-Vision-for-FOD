@@ -6,11 +6,11 @@
 
 The package(s) you need to run scripts in `Computer-Vision-For-FOD/ImageAugmentation/src` will be found here. Other directories' `src` folders may require different packages that will be covered in their respective READMEs.<br>
 ```
-pip install imgaug numpy pascal_voc_writer pascal-voc-tools Halo
+pip install imgaug numpy pascal_voc_writer pascal-voc-tools
 ```
 (use `pip3` instead of `pip` if you prefer) or<br>
 ```
-conda install imgaug numpy pascal_voc_writer pascal-voc-tools Halo
+conda install imgaug numpy pascal_voc_writer pascal-voc-tools
 ```
 if you use conda.<br>
 
