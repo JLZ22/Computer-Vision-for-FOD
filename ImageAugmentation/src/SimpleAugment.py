@@ -116,15 +116,16 @@ class SimpleAugSeq:
                        original_name: str, 
                        height, 
                        width, 
-                       class_name) -> None:
+                       class_names) -> None:
         for i in range(imgs.shape[0]):
             curr_path = self.save_path + original_name
             img_path = curr_path + '_aug_' + str(i) + '.jpg'
             xml_path = curr_path + '_aug_' + str(i) + '.xml'
             cv2.imwrite(img_path, imgs[i])
             writer = Writer(img_path, height, width)
-            for box in bbss[i]:
-                writer.addObject(class_name, box.x1, box.y1, box.x2, box.y2)
+            for j in range(len(bbss[i])):
+                box = bbss[j]
+                writer.addObject(class_names[j], box.x1, box.y1, box.x2, box.y2)
 
             writer.save(xml_path)
 
@@ -146,16 +147,6 @@ class SimpleAugSeq:
         pol = pool.Pool(processes=self.process)
 
         for name in self.names:
-
-            #Previous code that ran as many processes as possible. WILL MAX YOUR CPU RAM AND DISK
-            #print('Starting Woker')
-            #p = multiprocessing.Process(target = self.augstart, kwargs={'name':name})
-            #print("Worker Created")
-            #p.start()
-            #print("Work Started")
-            #print("")
-            #time.sleep(300)
-
             #Adds work to the pool 
             pol.apply_async(self.augstart, kwds={'name':name})
             
@@ -170,7 +161,9 @@ class SimpleAugSeq:
         resizedImage, newBbs = seq(images=[img], bounding_boxes = [bbs])
         # todo: save the new image and xml file
 
-    #This function is the worker function and augments the image of name: "name" at save path and the coresponding xml file
+    # This function is the worker function and 
+    # augments the image of name: "name" at 
+    # save path and the coresponding xml file
     def augstart(self, name: str):
         tree = ET.parse(self.path + name + '.xml') 
         root = tree.getroot()
