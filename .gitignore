@@ -1,5 +1,7 @@
 # ignore virtual environments because it varies for everyone
 venv*/
 config.json
+.DS_Store
+*.pt
 __pycache__/
 models/
