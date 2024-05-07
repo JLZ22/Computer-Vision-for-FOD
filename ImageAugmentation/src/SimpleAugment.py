@@ -1,4 +1,4 @@
-#Original code "https://imgaug.readthedocs.io/en/latest/source/examples_basics.html"
+# Original code "https://imgaug.readthedocs.io/en/latest/source/examples_basics.html"
 import numpy as np
 import imgaug as ia
 import imgaug.augmenters as iaa
@@ -9,7 +9,6 @@ from pascal_voc_writer import Writer
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 import os
 from multiprocessing import pool
-from collections import OrderedDict
 
 def print_red(text):
     print("\033[91m{}\033[0m".format(text))
@@ -163,7 +162,13 @@ class SimpleAugSeq:
         pol.close() #closes the pool so no further work can be assigned
         pol.join() #starts pool on running the processes
         
-            
+    def resizeAndReplace(self, img, width: int, height: int, bbs: BoundingBoxesOnImage):
+        seq = iaa.Sequential([
+            iaa.Resize({"height": height, "width": width})
+        ])
+
+        resizedImage, newBbs = seq(images=[img], bounding_boxes = [bbs])
+        # todo: save the new image and xml file
 
     #This function is the worker function and augments the image of name: "name" at save path and the coresponding xml file
     def augstart(self, name: str):
@@ -178,11 +183,11 @@ class SimpleAugSeq:
 
         images_aug, bbs_aug = seq(images=images, bounding_boxes=allbbs)
                 
-        #bbs_aug = bbs_aug.remove_out_of_image().clip_out_of_image() #This is an attempt to fix broken bounding boxes Current issue is list has no attribute 'remove_out_of_image()'
         height = int(root.find("size")[0].text)
         width = int(root.find("size")[1].text)
-        class_name = str(root.find('object')[0].text)
-        self.save_aug_pairs(images_aug, bbs_aug, name, height, width, class_name)
+        class_names = root.findall("object")
+        class_names = [class_names[i][0].text for i in range(len(class_names))]
+        # self.save_aug_pairs(images_aug, bbs_aug, name, height, width, class_name)
 
 
     #gets all file names in the directory that end in .jpg
@@ -214,7 +219,8 @@ if __name__ == '__main__':
     simple_aug = SimpleAugSeq(path=path, 
                               save_path=save_path, 
                               seed=1, 
-                              num_copies=64, 
+                              num_copies=1, 
                               names=file_names,
                               process=Num_Process)
-    simple_aug.augment()
+    # simple_aug.augment()
+    simple_aug.augstart("3277")
