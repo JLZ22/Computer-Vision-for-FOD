@@ -7,11 +7,9 @@ import xml.etree.ElementTree as ET
 import json 
 from pascal_voc_writer import Writer
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
-from halo import Halo
-import multiprocessing
 import os
-import time
 from multiprocessing import pool
+from collections import OrderedDict
 
 def print_red(text):
     print("\033[91m{}\033[0m".format(text))
@@ -28,6 +26,12 @@ class SimpleAugSeq:
         self.names = names
         self.process = process
         ia.seed(self.seed)
+
+        #Checks if the array that was passed in has a length of 0. If so it populates names array with every image name from read path
+        if len(self.names) == 0:
+            self.names = self.getFileNames()
+
+        
 
     # Return an array of copies of the image stored at 
     # path/img. The array has num_copies number of copies.
@@ -106,7 +110,7 @@ class SimpleAugSeq:
     # 
     # Naming convention: name + '_aug_' + i + '.file_extension'
     # e.g. The third synthetic image of 18.jpg will be called
-    #      `18_synth_2.jpg`. Its xml file will have the same name.
+    #      `18_aug_2.jpg`. Its xml file will have the same name.
     def save_aug_pairs(self, 
                        imgs: np.array, 
                        bbss: np.array, 
@@ -126,19 +130,21 @@ class SimpleAugSeq:
             writer.save(xml_path)
 
     # The primary function in charge of 
-    # augmenting everything
+    # This function creates the process that are each in charge of augmenting one image
     def augment(self):
-        # augments every image in the list given to the constructor 
+        # Prints conformation of read and write path
         print(f"Read Location: \"{self.path}\"")
         print(f"Save Location: \"{self.save_path}\"")
         print(f"Num Compies:   {self.num_copies}")
+
+        #Requires user input before starting work
         proceed = input("Type \"y\" to proceed. ")
         if (proceed.lower() != 'y'):
             print_red("Failed to augment images.")
             exit()
 
         #Creates a pool with a max processes count of 3
-        pol = multiprocessing.pool.Pool(processes=self.process)
+        pol = pool.Pool(processes=self.process)
 
         for name in self.names:
 
@@ -154,12 +160,12 @@ class SimpleAugSeq:
             #Adds work to the pool 
             pol.apply_async(self.augstart, kwds={'name':name})
             
-        pol.close()
-        pol.join()
+        pol.close() #closes the pool so no further work can be assigned
+        pol.join() #starts pool on running the processes
         
             
 
-    #New function that does the work part of the old augment function. 
+    #This function is the worker function and augments the image of name: "name" at save path and the coresponding xml file
     def augstart(self, name: str):
         tree = ET.parse(self.path + name + '.xml') 
         root = tree.getroot()
@@ -179,15 +185,17 @@ class SimpleAugSeq:
         self.save_aug_pairs(images_aug, bbs_aug, name, height, width, class_name)
 
 
-#gets all file names in the directory that end in .jpg
-def getFileNames(path: str):
-    names = []
-    names_Without = []
-    names = [f for f in os.listdir(path) if f.endswith('.jpg')]
-    for f in names:
-        names_Without.append(f[:-4])
+    #gets all file names in the directory that end in .jpg
+    def getFileNames(self):
+        names = []
+        names_Without = []
+        #Populates the names array with every file name ending in .jpg from the path
+        names = [f for f in os.listdir(self.path) if f.endswith('.jpg')]
+        #removes the .jpg from the end of each name in the names array. The .jpg may be added back in later areas but only on a need basis.
+        for f in names:
+            names_Without.append(f[:-4])
 
-    return names_Without
+        return names_Without
 
 if __name__ == '__main__':
     path = ''
@@ -202,7 +210,6 @@ if __name__ == '__main__':
         path = d["path"]
         save_path = d["save_path"]
     
-    file_names = getFileNames(path=path)
 
     simple_aug = SimpleAugSeq(path=path, 
                               save_path=save_path, 
