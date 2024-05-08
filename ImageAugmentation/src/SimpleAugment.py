@@ -102,7 +102,7 @@ class SimpleAugSeq:
             ymin = int(float(member[4][1].text))
             xmax = int(float(member[4][2].text))
             ymax = int(float(member[4][3].text))
-            bboxes.append(BoundingBox(x1=xmin, y1=ymin, x2=xmax, y2=ymax))
+            bboxes.append(BoundingBox(x1=xmin, y1=ymin, x2=xmax, y2=ymax, label=member[0].text))
         return BoundingBoxesOnImage(bboxes, shape)
     
     # Save the images and corresponding xml files 
@@ -115,17 +115,15 @@ class SimpleAugSeq:
                        bbss: np.array, 
                        original_name: str, 
                        height, 
-                       width, 
-                       class_names) -> None:
+                       width) -> None:
         for i in range(imgs.shape[0]):
             curr_path = self.save_path + original_name
             img_path = curr_path + '_aug_' + str(i) + '.jpg'
             xml_path = curr_path + '_aug_' + str(i) + '.xml'
             cv2.imwrite(img_path, imgs[i])
             writer = Writer(img_path, height, width)
-            for j in range(len(bbss[i])):
-                box = bbss[j]
-                writer.addObject(class_names[j], box.x1, box.y1, box.x2, box.y2)
+            for box in bbss[i]:
+                writer.addObject(box.label, box.x1, box.y1, box.x2, box.y2)
 
             writer.save(xml_path)
 
@@ -178,9 +176,7 @@ class SimpleAugSeq:
                 
         height = int(root.find("size")[0].text)
         width = int(root.find("size")[1].text)
-        class_names = root.findall("object")
-        class_names = [class_names[i][0].text for i in range(len(class_names))]
-        # self.save_aug_pairs(images_aug, bbs_aug, name, height, width, class_name)
+        self.save_aug_pairs(images_aug, bbs_aug, name, height, width)
 
 
     #gets all file names in the directory that end in .jpg
