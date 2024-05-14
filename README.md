@@ -14,13 +14,10 @@ It is also **STRONGLY RECOMMENDED** that you work in a python virtual environmen
 
 The packages you need to run scripts in `Computer-Vision-For-FOD/src` will be found here. Other directories' `src` folders may require different packages that will be covered in their respective READMEs.<br>
 ```
-pip install ultralytics
+ultralytics 
+opencv-python
 ```
-(use `pip3` instead of `pip` if you prefer) or<br>
-```
-conda install ultralytics
-```
-if you are using conda. <br>
+<br>
 
 ## Literature Review<br>
 
