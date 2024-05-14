@@ -25,7 +25,10 @@ class SimpleAugSeq:
         self.names = names
         self.process = process
         ia.seed(self.seed)
-
+        if (self.path[-1] != '/'):
+            self.path += '/'
+        if (self.save_path[-1] != '/'):
+            self.save_path += '/'
         #Checks if the array that was passed in has a length of 0. If so it populates names array with every image name from read path
         if len(self.names) == 0:
             self.names = self.getFileNames()
@@ -198,18 +201,19 @@ if __name__ == '__main__':
     file_names = []
     Num_Process = 2
 
-
-    with open(json_path) as f:
-        d = json.load(f)
-        path = d["path"]
-        save_path = d["save_path"]
+    path = '../test_data/raw/'
+    save_path = '../test_data/aug/'
+    path=os.path.abspath(path)
+    save_path=os.path.abspath(save_path)
+    # with open(json_path) as f:
+    #     d = json.load(f)
+    #     path = d["path"]
+    #     save_path = d["save_path"]
     
-
     simple_aug = SimpleAugSeq(path=path, 
                               save_path=save_path, 
                               seed=1, 
-                              num_copies=1, 
+                              num_copies=4, 
                               names=file_names,
                               process=Num_Process)
     # simple_aug.augment()
-    simple_aug.augstart("3277")
