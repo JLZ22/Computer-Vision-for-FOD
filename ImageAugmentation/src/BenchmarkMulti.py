@@ -41,5 +41,9 @@ if __name__ == '__main__':
     plt.xlim(0, os.cpu_count()+1)
     plt.ylim(0,20)
     plt.legend()
-    plt.savefig(f'../TimeVsProcesses_Copies{copies}.png')
+    plt.savefig(f'../benchmark_results/TimeVsProcesses_Copies{copies}.png')
+    with open("../benchmark_results/TimeVsProcesses_Copies{copies}.txt", "w") as f:
+        for i in range(len(times)):
+            f.write(f"Time to Augment: {times[i]} seconds with {processes[i]} processes\n")
+        f.write(f"Minimum Time: {times[min]} seconds with {processes[min]} processes\n")
     plt.show()
