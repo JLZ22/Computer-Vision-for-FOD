@@ -9,6 +9,7 @@ from pascal_voc_writer import Writer
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 import os
 from multiprocessing import pool
+import time
 
 def print_red(text):
     print("\033[91m{}\033[0m".format(text))
@@ -17,15 +18,28 @@ def print_green(text):
     print("\033[92m{}\033[0m".format(text))
 
 class SimpleAugSeq:
-    def __init__(self, path: str, save_path: str, seed: int, num_copies: int , names: list, process = 1) -> None:
+    def __init__(self, path: str, 
+                 save_path: str, 
+                 seed: int, 
+                 num_copies: int, 
+                 names: list, 
+                 process=1, 
+                 check=True,
+                 printSteps=False) -> None:
         self.path = path
         self.save_path = save_path
         self.seed = seed
         self.num_copies = num_copies
         self.names = names
         self.process = process
+        self.check = check
+        self.printSteps = printSteps
+        self.duration = -1
         ia.seed(self.seed)
-
+        if (self.path[-1] != '/'):
+            self.path += '/'
+        if (self.save_path[-1] != '/'):
+            self.save_path += '/'
         #Checks if the array that was passed in has a length of 0. If so it populates names array with every image name from read path
         if len(self.names) == 0:
             self.names = self.getFileNames()
@@ -36,7 +50,7 @@ class SimpleAugSeq:
     # path/img. The array has num_copies number of copies.
     def make_copies_images(self, img: str) -> np.array:
         return np.array(
-            [cv2.imread(self.path + img) for _ in range(self.num_copies)],
+            [cv2.imread(os.path.join(self.path, img)) for _ in range(self.num_copies)],
             dtype=np.uint8
         )
 
@@ -102,7 +116,7 @@ class SimpleAugSeq:
             ymin = int(float(member[4][1].text))
             xmax = int(float(member[4][2].text))
             ymax = int(float(member[4][3].text))
-            bboxes.append(BoundingBox(x1=xmin, y1=ymin, x2=xmax, y2=ymax))
+            bboxes.append(BoundingBox(x1=xmin, y1=ymin, x2=xmax, y2=ymax, label=member[0].text))
         return BoundingBoxesOnImage(bboxes, shape)
     
     # Save the images and corresponding xml files 
@@ -115,17 +129,16 @@ class SimpleAugSeq:
                        bbss: np.array, 
                        original_name: str, 
                        height, 
-                       width, 
-                       class_names) -> None:
+                       width) -> None:
+        print('Saving images and xml files for ' + original_name) if self.printSteps else None
         for i in range(imgs.shape[0]):
-            curr_path = self.save_path + original_name
+            curr_path = os.path.join(self.save_path, original_name)
             img_path = curr_path + '_aug_' + str(i) + '.jpg'
             xml_path = curr_path + '_aug_' + str(i) + '.xml'
             cv2.imwrite(img_path, imgs[i])
             writer = Writer(img_path, height, width)
-            for j in range(len(bbss[i])):
-                box = bbss[j]
-                writer.addObject(class_names[j], box.x1, box.y1, box.x2, box.y2)
+            for box in bbss[i]:
+                writer.addObject(box.label, box.x1, box.y1, box.x2, box.y2)
 
             writer.save(xml_path)
 
@@ -136,22 +149,31 @@ class SimpleAugSeq:
         print(f"Read Location: \"{self.path}\"")
         print(f"Save Location: \"{self.save_path}\"")
         print(f"Num Compies:   {self.num_copies}")
-
+        print(f"Num Threads:   {self.process}")
+        start = time.time()
         #Requires user input before starting work
-        proceed = input("Type \"y\" to proceed. ")
-        if (proceed.lower() != 'y'):
-            print_red("Failed to augment images.")
-            exit()
+        if self.check:
+            proceed = input("Type \"y\" to proceed. ")
+            if (proceed.lower() != 'y'):
+                print_red("Failed to augment images.")
+                exit()
 
-        #Creates a pool with a max processes count of 3
+        #Creates a pool with a max processes count of self.process
         pol = pool.Pool(processes=self.process)
 
         for name in self.names:
             #Adds work to the pool 
-            pol.apply_async(self.augstart, kwds={'name':name})
+
+            if name[-4] == '.':
+                name = name[:-4]
+            print(f'Augmenting {name}') if self.printSteps else None
+            pol.apply_async(self.augstart, (name,))
             
         pol.close() #closes the pool so no further work can be assigned
         pol.join() #starts pool on running the processes
+        end = time.time()
+        self.duration = end - start
+        print(f"Time to Augment: {self.duration} seconds")
         
     def resizeAndReplace(self, img, width: int, height: int, bbs: BoundingBoxesOnImage):
         seq = iaa.Sequential([
@@ -167,7 +189,6 @@ class SimpleAugSeq:
     def augstart(self, name: str):
         tree = ET.parse(self.path + name + '.xml') 
         root = tree.getroot()
-
         images = self.make_copies_images(name+'.jpg') # make num_copies number of copies of the current image 
         bbs = self.create_bbs(root, images[0].shape) # create the BoundingBoxesOnImage object for the current image
         allbbs = self.make_copies_bboxes(bbs) # make num_copies number of copies of the current image's corresponding xml file
@@ -175,12 +196,9 @@ class SimpleAugSeq:
         seq = self.create_sequential() # create the sequential object in charge of the augmentation
 
         images_aug, bbs_aug = seq(images=images, bounding_boxes=allbbs)
-                
         height = int(root.find("size")[0].text)
         width = int(root.find("size")[1].text)
-        class_names = root.findall("object")
-        class_names = [class_names[i][0].text for i in range(len(class_names))]
-        # self.save_aug_pairs(images_aug, bbs_aug, name, height, width, class_name)
+        self.save_aug_pairs(images_aug, bbs_aug, name, height, width)
 
 
     #gets all file names in the directory that end in .jpg
@@ -194,26 +212,33 @@ class SimpleAugSeq:
             names_Without.append(f[:-4])
 
         return names_Without
+    
+    def deleteFiles(self, path):
+        for f in os.listdir(path):
+            if os.path.isfile(os.path.join(path, f)):
+                os.remove(os.path.join(path, f))
+        print_green(f"Deleted all files in the directory: '{path}'")
 
 if __name__ == '__main__':
     path = ''
     save_path = ''
     json_path = os.path.join('..','config.json')
-    file_names = []
-    Num_Process = 2
+    file_names = ['3277.jpg', '3278.jpg']
 
-
-    with open(json_path) as f:
-        d = json.load(f)
-        path = d["path"]
-        save_path = d["save_path"]
+    path = '../test_data/raw/'
+    save_path = '../test_data/aug/'
+    path=os.path.abspath(path)
+    save_path=os.path.abspath(save_path)
+    # with open(json_path) as f:
+    #     d = json.load(f)
+    #     path = d["path"]
+    #     save_path = d["save_path"]
     
-
     simple_aug = SimpleAugSeq(path=path, 
                               save_path=save_path, 
                               seed=1, 
-                              num_copies=1, 
+                              num_copies=4, 
                               names=file_names,
-                              process=Num_Process)
-    # simple_aug.augment()
-    simple_aug.augstart("3277")
+                              process=4)
+    simple_aug.deleteFiles(save_path)
+    simple_aug.augment()

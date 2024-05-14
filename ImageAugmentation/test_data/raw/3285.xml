@@ -1,0 +1,38 @@
+<annotation>
+	<folder>Pencil + Tool Bits</folder>
+	<filename>3285.jpg</filename>
+	<path>Z:\Restricted\Research\Project Folders\Active\ADT - Assembly Digital Thread\FOD\Images\Multi Class\Pencil + Tool Bits\3285.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>4000</width>
+		<height>3000</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>pencil</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>2445</xmin>
+			<ymin>64</ymin>
+			<xmax>2609</xmax>
+			<ymax>1187</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>Tool Bit</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>2165</xmin>
+			<ymin>943</ymin>
+			<xmax>2433</xmax>
+			<ymax>1215</ymax>
+		</bndbox>
+	</object>
+</annotation>
