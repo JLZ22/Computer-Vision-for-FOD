@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 if __name__ == '__main__':
     path = '../test_data/raw/'
     save_path = '../test_data/aug/'
-    copies = 4
+    copies = 64
     sass = [SimpleAugSeq(path=path, 
                                 save_path=save_path, 
                                 seed=1, 
@@ -39,7 +39,7 @@ if __name__ == '__main__':
     plt.xlabel('Number of Processes')
     plt.ylabel('Time to Augment (s)')
     plt.xlim(0, os.cpu_count()+1)
-    plt.ylim(0,20)
+    plt.ylim(0, max(times) + 10)
     plt.legend()
     plt.savefig(f'../benchmark_results/TimeVsProcesses_Copies{copies}.png')
     with open(f"../benchmark_results/TimeVsProcesses_Copies{copies}.txt", "w") as f:
