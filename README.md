@@ -19,6 +19,27 @@ opencv-python
 ```
 <br>
 
+## Status
+
+
+### Current Functionality
+
+- Capable of performing image augmentation on jpg/xml pairs
+- Can run the default YOLOv8 model which was trained on the COCO dataset. 
+
+### Issues
+
+- img augmentation with multiprocessing runs into errors with excessive memory consumption
+
+### Todo
+
+- find solution to memory issue
+- finish augmenting rest of the classes
+- resize images and corresponding bounding boxes
+- transform labeling format from PascalVOC to YOLO 
+- rename data points for final dataset
+- train
+
 ## Literature Review<br>
 
 - (March 2024) [Small-Scale Foreign Object Debris Detection Using Deep Learning and Dual Light Modes](https://www.mdpi.com/2076-3417/14/5/2162)<br>
