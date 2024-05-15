@@ -4,7 +4,7 @@ Leveraging computer vision to aid in foreign object detection in a manufacturing
 
 Currently in development. <br>
 
-This is a research project under Professor Nathaniel Hartman at Purdue University. It is meant to be kept private. **DO NOT SHARE WITH ANYONE** who is not also working with/for Professor Hartman.<br>
+This is a research project under Professor Nathaniel Hartman at Purdue University. It is meant to be kept private. **DO NOT SHARE WITH ANYONE** who is not also working with/for Professor Hartman unless given the go-ahead from Professor Hartman.<br>
 
 Before beginning to work on this project, it is important to be familiar with git. A brief git tutorial can be found [here](https://github.com/JLZ22/Git-Tutorial-for-New-Users).<br>
 
