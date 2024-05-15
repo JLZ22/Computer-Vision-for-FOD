@@ -2,7 +2,7 @@
 
 Leveraging computer vision to aid in foreign object detection in a manufacturing setting.<br>
 
-Currently in development. Limited to no functionality.<br>
+Currently in development. <br>
 
 This is a research project under Professor Nathaniel Hartman at Purdue University. It is meant to be kept private. **DO NOT SHARE WITH ANYONE** who is not also working with/for Professor Hartman.<br>
 
