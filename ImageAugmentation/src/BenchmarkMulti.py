@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 if __name__ == '__main__':
     path = '../test_data/raw/'
     save_path = '../test_data/aug/'
-    copies = 64
+    copies = 4
     sass = [SimpleAugSeq(path=path, 
                                 save_path=save_path, 
                                 seed=1, 
