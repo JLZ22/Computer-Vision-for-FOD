@@ -17,10 +17,8 @@ The packages you need to run scripts in `Computer-Vision-For-FOD/src` will be fo
 ultralytics 
 opencv-python
 ```
-<br>
 
 ## Status
-
 
 ### Current Functionality
 
@@ -36,7 +34,7 @@ opencv-python
 - find solution to memory issue
 - finish augmenting rest of the classes
 - resize images and corresponding bounding boxes
-- transform labeling format from PascalVOC to YOLO 
+- transform labels from PascalVOC to YOLO 
 - rename data points for final dataset
 - train
 
