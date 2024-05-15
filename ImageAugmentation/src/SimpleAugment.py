@@ -181,7 +181,7 @@ class SimpleAugSeq:
         ])
 
         resizedImage, newBbs = seq(images=[img], bounding_boxes = [bbs])
-        # todo: save the new image and xml file
+        # TODO: save the new image and xml file
 
     # This function is the worker function and 
     # augments the image of name: "name" at 
