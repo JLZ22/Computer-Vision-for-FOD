@@ -11,6 +11,7 @@ import os
 from multiprocessing import pool
 import time
 import tracemalloc
+import psutil
 
 def print_red(text):
     print("\033[91m{}\033[0m".format(text))
@@ -164,7 +165,6 @@ class SimpleAugSeq:
 
         for name in self.names:
             #Adds work to the pool 
-
             if name[-4] == '.':
                 name = name[:-4]
             print(f'Augmenting {name}') if self.printSteps else None
@@ -243,7 +243,7 @@ if __name__ == '__main__':
                               seed=1, 
                               num_copies=64, 
                               names=file_names,
-                              process=1)
+                              process=1) # 14 optimal for server 
     simple_aug.deleteFiles(save_path)
     simple_aug.augment()
     current, peak = tracemalloc.get_traced_memory()
