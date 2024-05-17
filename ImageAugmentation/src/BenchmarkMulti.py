@@ -16,6 +16,8 @@ if __name__ == '__main__':
                                 check=False) for i in range(1, os.cpu_count()+1)
                                 ]
     times = [0 for i in range(1, os.cpu_count()+1)]
+    print(f'This benchmark will test SimpleAugSeq with processes in the range 1 to {os.cpu_count()} inclusive.')
+    input('Press Enter to continue...')
     for i in range(len(sass)):
         sa = sass[i]
         sa.deleteFiles(save_path)
@@ -41,6 +43,9 @@ if __name__ == '__main__':
     plt.xlim(0, os.cpu_count()+1)
     plt.ylim(0, max(times) + 10)
     plt.legend()
+    benchmark_dir = '../benchmark_results'
+    if not os.path.exists(benchmark_dir):
+        os.makedirs(benchmark_dir)
     plt.savefig(f'../benchmark_results/TimeVsProcesses_Copies{copies}.png')
     with open(f"../benchmark_results/TimeVsProcesses_Copies{copies}.txt", "w") as f:
         for i in range(len(times)):

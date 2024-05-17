@@ -10,6 +10,7 @@ from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 import os
 from multiprocessing import pool
 import time
+import tracemalloc
 
 def print_red(text):
     print("\033[91m{}\033[0m".format(text))
@@ -148,8 +149,8 @@ class SimpleAugSeq:
         # Prints conformation of read and write path
         print(f"Read Location: \"{self.path}\"")
         print(f"Save Location: \"{self.save_path}\"")
-        print(f"Num Compies:   {self.num_copies}")
-        print(f"Num Threads:   {self.process}")
+        print(f"Num Copies:   {self.num_copies}")
+        print(f"Num Processes:   {self.process}")
         start = time.time()
         #Requires user input before starting work
         if self.check:
@@ -200,7 +201,6 @@ class SimpleAugSeq:
         width = int(root.find("size")[1].text)
         self.save_aug_pairs(images_aug, bbs_aug, name, height, width)
 
-
     #gets all file names in the directory that end in .jpg
     def getFileNames(self):
         names = []
@@ -223,7 +223,7 @@ if __name__ == '__main__':
     path = ''
     save_path = ''
     json_path = os.path.join('..','config.json')
-    file_names = ['3277.jpg', '3278.jpg']
+    file_names = []
 
     path = '../test_data/raw/'
     save_path = '../test_data/aug/'
@@ -234,11 +234,22 @@ if __name__ == '__main__':
     #     path = d["path"]
     #     save_path = d["save_path"]
     
+    import psutil
+    process = psutil.Process(os.getpid())
+
+    tracemalloc.start()
     simple_aug = SimpleAugSeq(path=path, 
                               save_path=save_path, 
                               seed=1, 
-                              num_copies=4, 
+                              num_copies=64, 
                               names=file_names,
-                              process=4)
+                              process=1)
     simple_aug.deleteFiles(save_path)
     simple_aug.augment()
+    current, peak = tracemalloc.get_traced_memory()
+    print(f"Current memory usage is {current / 1024**2}MB; Peak was {peak / 1024**2}MB")
+    tracemalloc.stop()
+
+    
+    print(f"Physical memory used: {process.memory_info().rss / 1024**2}MB")
+    print(f"virtual memory allocated: {process.memory_info().vms / 1024**2}MB")
