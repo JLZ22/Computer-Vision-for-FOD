@@ -163,17 +163,19 @@ class SimpleAugSeq:
         #Creates a pool with a max processes count of self.process
         pol = pool.Pool(processes=self.process)
 
+        async_results = []
         for name in self.names:
             #Adds work to the pool 
             if name[-4] == '.':
                 name = name[:-4]
+            async_results.append(pol.apply_async(self.augstart, (name,)))
             print(f'Augmenting {name}') if self.printSteps else None
-            pol.apply_async(self.augstart, (name,))
-            
+        mem = self.get_pool_max_mem_usage(async_results=async_results, pool=pool)
         pol.close() #closes the pool so no further work can be assigned
         pol.join() #starts pool on running the processes
         end = time.time()
         self.duration = end - start
+        print(f"Memory used by pool: {mem}MB")
         print(f"Time to Augment: {self.duration} seconds")
         
     def resizeAndReplace(self, img, width: int, height: int, bbs: BoundingBoxesOnImage):
@@ -219,6 +221,21 @@ class SimpleAugSeq:
                 os.remove(os.path.join(path, f))
         print_green(f"Deleted all files in the directory: '{path}'")
 
+    def get_pool_mem_usage(self, pool):
+        usage = 0
+        for p in pool._pool:
+            usage += psutil.Process(p.pid).memory_info().rss / 1024**2
+        return usage
+    def get_pool_max_mem_usage(self, async_results, pool):
+        max = 0
+        while True:
+            if all([result.ready() for result in async_results]):
+                break
+            usage = self.get_pool_mem_usage(pool)
+            if usage > max:
+                max = usage
+        return max
+
 if __name__ == '__main__':
     path = ''
     save_path = ''
@@ -233,14 +250,14 @@ if __name__ == '__main__':
     #     d = json.load(f)
     #     path = d["path"]
     #     save_path = d["save_path"]
-    
-    import psutil
+
     process = psutil.Process(os.getpid())
 
     tracemalloc.start()
     simple_aug = SimpleAugSeq(path=path, 
                               save_path=save_path, 
                               seed=1, 
+                              check=False,
                               num_copies=64, 
                               names=file_names,
                               process=1) # 14 optimal for server 
