@@ -45,8 +45,8 @@ class SimpleAugSeq:
         #Checks if the array that was passed in has a length of 0. If so it populates names array with every image name from read path
         if len(self.names) == 0:
             self.names = self.getFileNames()
-
-        
+        if not os.path.exists(self.save_path):
+            os.makedirs(self.save_path)
 
     # Return an array of copies of the image stored at 
     # path/img. The array has num_copies number of copies.
