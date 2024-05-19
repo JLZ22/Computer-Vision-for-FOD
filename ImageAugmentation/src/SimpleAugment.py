@@ -278,6 +278,6 @@ if __name__ == '__main__':
                               num_copies=64, 
                               names=file_names,
                               processes=2,
-                              checkMem=True) # 14 optimal for server 
+                              checkMem=True) # 14 optimal for ecn-dec01 
     simple_aug.deleteFiles(save_path)
     simple_aug.augment()
