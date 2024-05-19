@@ -10,6 +10,7 @@ imgaug
 numpy 
 pascal_voc_writer 
 pascal-voc-tools
+tqdm
 ```
 <br>
 

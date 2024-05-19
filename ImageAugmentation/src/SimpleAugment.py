@@ -8,10 +8,11 @@ import json
 from pascal_voc_writer import Writer
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 import os
+import multiprocessing
 from multiprocessing import pool
 import time
-import tracemalloc
 import psutil
+from tqdm import tqdm
 
 def print_red(text):
     print("\033[91m{}\033[0m".format(text))
@@ -25,21 +26,23 @@ class SimpleAugSeq:
                  seed: int, 
                  num_copies: int, 
                  names: list, 
-                 process=1, 
+                 processes=1, 
                  check=True,
-                 printSteps=False) -> None:
+                 printSteps=False,
+                 checkMem=False) -> None:
         self.path = path
         self.save_path = save_path
         self.seed = seed
         self.num_copies = num_copies
         self.names = names
-        self.process = process
+        self.processes = processes
         self.check = check
         self.printSteps = printSteps
         self.duration = -1
+        self.checkMem = checkMem
         ia.seed(self.seed)
         if (self.path[-1] != '/'):
-            self.path += '/'
+            self.path += '/' 
         if (self.save_path[-1] != '/'):
             self.save_path += '/'
         #Checks if the array that was passed in has a length of 0. If so it populates names array with every image name from read path
@@ -151,32 +154,61 @@ class SimpleAugSeq:
         print(f"Read Location: \"{self.path}\"")
         print(f"Save Location: \"{self.save_path}\"")
         print(f"Num Copies:   {self.num_copies}")
-        print(f"Num Processes:   {self.process}")
-        start = time.time()
-        #Requires user input before starting work
+        print(f"Num Processes:   {self.processes}")
+        
+        #Requires user approval to start work
         if self.check:
-            proceed = input("Type \"y\" to proceed. ")
-            if (proceed.lower() != 'y'):
+            try:
+                input("Press Enter to start augmenting images...")
+            except SyntaxError or KeyboardInterrupt:
                 print_red("Failed to augment images.")
                 exit()
 
-        #Creates a pool with a max processes count of self.process
-        pol = pool.Pool(processes=self.process)
+        start = time.time()
+        mem = 0
+        max_used = 0
+        max_percent = 0.0
 
-        async_results = []
-        for name in self.names:
-            #Adds work to the pool 
-            if name[-4] == '.':
-                name = name[:-4]
-            async_results.append(pol.apply_async(self.augstart, (name,)))
-            print(f'Augmenting {name}') if self.printSteps else None
-        mem = self.get_pool_max_mem_usage(async_results=async_results, pool=pool)
-        pol.close() #closes the pool so no further work can be assigned
-        pol.join() #starts pool on running the processes
+        # init pool and assign work 
+        with multiprocessing.Pool(processes=self.processes) as pol:
+            async_results = []
+            for name in self.names:
+                if name[-4] == '.':
+                    name = name[:-4]
+                print(f'Augmenting {name}') if self.printSteps else None
+                async_results.append(pol.apply_async(self.augstart, (name,)))
+
+            # Display progress bar
+            for async_result in tqdm(async_results, desc="Processing", total=len(async_results)):
+                if self.checkMem: 
+                    tempPoolMem = self.get_mem_consumption()
+                    tempMaxUsed = psutil.virtual_memory().used
+                    tempMaxPercent = psutil.virtual_memory().percent
+                    max_percent = tempMaxPercent if tempMaxPercent > max_percent else max_percent
+                    max_used = tempMaxUsed if tempMaxUsed > max_used else max_used
+                    mem = tempPoolMem if tempPoolMem > mem else mem
+                async_result.get()
+                time.sleep(0.1)
+
+            # check memory consumption and system memory usage 
+            # until all processes are done
+            # while True:
+            #     if all([result.ready() for result in async_results]):
+            #         break
+            #     time.sleep(1)
+        
         end = time.time()
         self.duration = end - start
-        print(f"Memory used by pool: {mem}MB")
-        print(f"Time to Augment: {self.duration} seconds")
+        if self.checkMem:
+            print(f"Max Memory Consumption of Pool: {mem / 1024**2} MB")
+            print(f"Max System Memory Used: {max_used / 1024**2} MB")
+            print(f"Max System Memory Percent Used: {max_percent}%")
+        print(f"Time to Augment: {self.duration} seconds")        
+    
+    def get_mem_consumption(self):
+        pid = os.getpid()
+        children = psutil.Process(pid).children(recursive=True)
+        return sum([child.memory_info().rss for child in children])
         
     def resizeAndReplace(self, img, width: int, height: int, bbs: BoundingBoxesOnImage):
         seq = iaa.Sequential([
@@ -220,22 +252,7 @@ class SimpleAugSeq:
             if os.path.isfile(os.path.join(path, f)):
                 os.remove(os.path.join(path, f))
         print_green(f"Deleted all files in the directory: '{path}'")
-
-    def get_pool_mem_usage(self, pool):
-        usage = 0
-        for p in pool._pool:
-            usage += psutil.Process(p.pid).memory_info().rss / 1024**2
-        return usage
-    def get_pool_max_mem_usage(self, async_results, pool):
-        max = 0
-        while True:
-            if all([result.ready() for result in async_results]):
-                break
-            usage = self.get_pool_mem_usage(pool)
-            if usage > max:
-                max = usage
-        return max
-
+    
 if __name__ == '__main__':
     path = ''
     save_path = ''
@@ -251,22 +268,16 @@ if __name__ == '__main__':
     #     path = d["path"]
     #     save_path = d["save_path"]
 
-    process = psutil.Process(os.getpid())
-
-    tracemalloc.start()
+    print(f"Available Physical Memory of System: {psutil.virtual_memory().available / 1024**2}MB")
+    print(f"Total Physical Memory of System: {psutil.virtual_memory().total / 1024**2}MB")
+    print(f"Percentage of Physical Memory Used: {psutil.virtual_memory().percent}%")
     simple_aug = SimpleAugSeq(path=path, 
                               save_path=save_path, 
                               seed=1, 
                               check=False,
                               num_copies=64, 
                               names=file_names,
-                              process=1) # 14 optimal for server 
+                              processes=2,
+                              checkMem=True) # 14 optimal for server 
     simple_aug.deleteFiles(save_path)
     simple_aug.augment()
-    current, peak = tracemalloc.get_traced_memory()
-    print(f"Current memory usage is {current / 1024**2}MB; Peak was {peak / 1024**2}MB")
-    tracemalloc.stop()
-
-    
-    print(f"Physical memory used: {process.memory_info().rss / 1024**2}MB")
-    print(f"virtual memory allocated: {process.memory_info().vms / 1024**2}MB")

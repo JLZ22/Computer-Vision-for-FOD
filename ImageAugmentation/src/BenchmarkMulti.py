@@ -12,7 +12,7 @@ if __name__ == '__main__':
                                 seed=1, 
                                 num_copies=copies, 
                                 names=[],
-                                process=i,
+                                processes=i,
                                 check=False) for i in range(1, os.cpu_count()+1)
                                 ]
     times = [0 for i in range(1, os.cpu_count()+1)]
