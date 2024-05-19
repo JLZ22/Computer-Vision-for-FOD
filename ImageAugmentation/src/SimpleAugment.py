@@ -66,6 +66,8 @@ class SimpleAugSeq:
     def make_copies_bboxes(self, bbs: BoundingBoxesOnImage) -> np.array:
         return [bbs for _ in range(self.num_copies)]
     
+    # Return a Sequential object that is in charge of
+    # augmenting the image
     def create_sequential(self) -> iaa.Sequential:
         return iaa.Sequential([  #randomly transforms the image
             iaa.Fliplr(0.5), # mirror image horizontally 50% of the time 
@@ -150,7 +152,8 @@ class SimpleAugSeq:
             writer.save(xml_path)
 
     # The primary function in charge of 
-    # This function creates the process that are each in charge of augmenting one image
+    # This function creates the processes that are 
+    # each in charge of augmenting one image
     def augment(self):
         # Prints conformation of read and write path
         print(f"Read Location: \"{self.path}\"")
@@ -241,15 +244,19 @@ class SimpleAugSeq:
     def getFileNames(self):
         names = []
         names_Without = []
-        #Populates the names array with every file name ending in .jpg from the path
+        # Populates the names array with every file name ending in .jpg from the path
         names = [f for f in os.listdir(self.path) if f.endswith('.jpg')]
-        #removes the .jpg from the end of each name in the names array. The .jpg may be added back in later areas but only on a need basis.
+        # removes the .jpg from the end of each name in the names array. The .jpg may be added back in later areas but only on a need basis.
         for f in names:
             names_Without.append(f[:-4])
 
         return names_Without
     
+    # delete all files in the given path
     def deleteFiles(self, path):
+        if not os.path.exists(path):
+            print_red(f"Directory: '{path}' does not exist.")
+            return
         for f in os.listdir(path):
             if os.path.isfile(os.path.join(path, f)):
                 os.remove(os.path.join(path, f))
