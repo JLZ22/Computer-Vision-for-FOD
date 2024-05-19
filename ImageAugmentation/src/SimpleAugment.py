@@ -13,6 +13,7 @@ from multiprocessing import pool
 import time
 import psutil
 from tqdm import tqdm
+import gc
 
 def print_red(text):
     print("\033[91m{}\033[0m".format(text))
@@ -241,6 +242,13 @@ class SimpleAugSeq:
         height = int(root.find("size")[0].text)
         width = int(root.find("size")[1].text)
         self.save_aug_pairs(images_aug, bbs_aug, name, height, width)
+        # clean up arrays 
+        del images
+        del bbs
+        del allbbs
+        del images_aug
+        del bbs_aug
+        gc.collect()
 
     #gets all file names in the directory that end in .jpg
     def getFileNames(self):

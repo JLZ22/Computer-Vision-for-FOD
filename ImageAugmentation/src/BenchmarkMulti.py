@@ -2,6 +2,7 @@ from SimpleAugment import SimpleAugSeq
 import os
 import time
 import matplotlib.pyplot as plt
+import gc
 
 if __name__ == '__main__':
     path = '../test_data/raw/'
@@ -25,6 +26,8 @@ if __name__ == '__main__':
         sa.augment()
         end = time.time()
         times[i] = sa.duration
+        del sa
+        gc.collect()
         
     min = times.index(min(times))
     processes = [i for i in range(1, os.cpu_count()+1)]
