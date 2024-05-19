@@ -186,7 +186,7 @@ class SimpleAugSeq:
             # Display progress bar
             for async_result in tqdm(async_results, desc="Processing", total=len(async_results)):
                 if self.checkMem: 
-                    tempPoolMem = self.get_mem_consumption()
+                    tempPoolMem = self.get_children_mem_consumption()
                     tempMaxUsed = psutil.virtual_memory().used
                     tempMaxPercent = psutil.virtual_memory().percent
                     max_percent = tempMaxPercent if tempMaxPercent > max_percent else max_percent
@@ -210,7 +210,9 @@ class SimpleAugSeq:
             print(f"Max System Memory Percent Used: {max_percent}%")
         print(f"Time to Augment: {self.duration} seconds")        
     
-    def get_mem_consumption(self):
+    # Get the memory consumption of all children processes
+    # If no children processes are found, return 0
+    def get_children_mem_consumption(self):
         pid = os.getpid()
         children = psutil.Process(pid).children(recursive=True)
         return sum([child.memory_info().rss for child in children])
