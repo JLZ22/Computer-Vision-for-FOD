@@ -30,16 +30,18 @@ class SimpleAugSeq:
                  check=True,
                  printSteps=False,
                  checkMem=False) -> None:
-        self.path = path
-        self.save_path = save_path
-        self.seed = seed
-        self.num_copies = num_copies
-        self.names = names
-        self.processes = processes
-        self.check = check
-        self.printSteps = printSteps
-        self.duration = -1
-        self.checkMem = checkMem
+        self.path = path # read path
+        self.save_path = save_path # save path
+        self.seed = seed # seed for random augmentation generation
+        self.num_copies = num_copies # number of augmented copies per original image
+        self.names = names # an array of the names of the images to augment 
+                           # excluding the file extension
+        self.processes = processes # number of processes to use for multiprocessing
+        self.check = check # true if user confirmation is required to start augmenting
+        self.printSteps = printSteps # true if the steps of the augmentation process
+                                     # should be printed
+        self.duration = -1 # time taken to augment all images
+        self.checkMem = checkMem # true if memory consumption should be checked
         ia.seed(self.seed)
         if (self.path[-1] != '/'):
             self.path += '/' 
