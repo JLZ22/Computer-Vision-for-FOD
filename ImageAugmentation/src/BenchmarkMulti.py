@@ -4,8 +4,8 @@ import time
 import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
-    path = '../test_data/raw/'
-    save_path = '../test_data/aug/'
+    path = os.path.join('..', 'test_data', 'raw')
+    save_path = os.path.join('..', 'test_data', 'aug')
     copies = 4
     sass = [SimpleAugSeq(path=path, 
                                 save_path=save_path, 
@@ -43,11 +43,13 @@ if __name__ == '__main__':
     plt.xlim(0, os.cpu_count()+1)
     plt.ylim(0, max(times) + 10)
     plt.legend()
-    benchmark_dir = '../benchmark_results'
+    benchmark_dir = os.path.join('..', 'benchmark_results')
     if not os.path.exists(benchmark_dir):
         os.makedirs(benchmark_dir)
-    plt.savefig(f'../benchmark_results/TimeVsProcesses_Copies{copies}.png')
-    with open(f"../benchmark_results/TimeVsProcesses_Copies{copies}.txt", "w") as f:
+    png = os.path.join(benchmark_dir, f'TimeVsProcesses_Copies{copies}.png')
+    txt = os.path.join(benchmark_dir, f'TimeVsProcesses_Copies{copies}.txt')
+    plt.savefig(png)
+    with open(txt, "w") as f:
         for i in range(len(times)):
             f.write(f"Time to Augment: {times[i]} seconds with {processes[i]} processes\n")
         f.write(f"Minimum Time: {times[min]} seconds with {processes[min]} processes\n")

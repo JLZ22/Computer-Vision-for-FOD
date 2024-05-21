@@ -43,10 +43,6 @@ class SimpleAugSeq:
         self.duration = -1 # time taken to augment all images
         self.checkMem = checkMem # true if memory consumption should be checked
         ia.seed(self.seed)
-        if (self.path[-1] != '/'):
-            self.path += '/' 
-        if (self.save_path[-1] != '/'):
-            self.save_path += '/'
         #Checks if the array that was passed in has a length of 0. If so it populates names array with every image name from read path
         if len(self.names) == 0:
             self.names = self.getFileNames()
@@ -270,8 +266,8 @@ if __name__ == '__main__':
     json_path = os.path.join('..','config.json')
     file_names = []
 
-    path = '../test_data/raw/'
-    save_path = '../test_data/aug/'
+    path = os.path.join('..', 'test_data', 'raw')
+    save_path = os.path.join('..', 'test_data', 'aug')
     path=os.path.abspath(path)
     save_path=os.path.abspath(save_path)
     # with open(json_path) as f:

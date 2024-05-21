@@ -15,5 +15,6 @@ def rename(path, startIndex):
         # os.rename(oldJPG, newJPG)
         # os.rename(oldXML, newXML)
         
-path = '../test_data/test'
-rename(path, 0)
+path = os.path.join('..', 'test_data', 'test')
+print(path)
+# rename(path, 0)
