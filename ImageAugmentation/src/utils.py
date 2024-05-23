@@ -115,10 +115,9 @@ def visualize_annotations(path, save_path):
         dom = xml.dom.minidom.parse(str(xml_path))
         root = dom.documentElement
         objects=dom.getElementsByTagName("object")
-        i=0
 
         # get bounding boxes
-        for object in objects:
+        for i in range(objects.shape[0]):
             
             bndbox = root.getElementsByTagName('bndbox')[i]
             xmin = bndbox.getElementsByTagName('xmin')[0]
@@ -130,7 +129,6 @@ def visualize_annotations(path, save_path):
             xmax_data=xmax.childNodes[0].data
             ymax_data=ymax.childNodes[0].data
             
-            i= i + 1 
             # draw bounding boxes
             cv2.rectangle(img,(int(float(xmin_data)),int(float(ymin_data))),
                               (int(float(xmax_data)),int(float(ymax_data))),
