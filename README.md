@@ -2,9 +2,9 @@
 
 Leveraging computer vision to aid in foreign object detection in a manufacturing setting.<br>
 
-Currently in development. Limited to no functionality.<br>
+Currently in development. <br>
 
-This is a research project under Professor Nathaniel Hartman at Purdue University. It is meant to be kept private. **DO NOT SHARE WITH ANYONE** who is not also working with/for Professor Hartman.<br>
+This is a research project under Professor Nathaniel Hartman at Purdue University. It is meant to be kept private. **DO NOT SHARE WITH ANYONE** who is not also working with/for Professor Hartman unless given the go-ahead from Professor Hartman.<br>
 
 Before beginning to work on this project, it is important to be familiar with git. A brief git tutorial can be found [here](https://github.com/JLZ22/Git-Tutorial-for-New-Users).<br>
 
@@ -17,7 +17,26 @@ The packages you need to run scripts in `Computer-Vision-For-FOD/src` will be fo
 ultralytics 
 opencv-python
 ```
-<br>
+
+## Status
+
+### Current Functionality
+
+- Capable of performing image augmentation on jpg/xml pairs
+- Can run the default YOLOv8 model which was trained on the COCO dataset. 
+
+### Issues
+
+- img augmentation with multiprocessing runs into errors with excessive memory consumption
+
+### Todo
+
+- find solution to memory issue
+- finish augmenting rest of the classes
+- resize images and corresponding bounding boxes
+- transform labels from PascalVOC to YOLO 
+- rename data points for final dataset
+- train
 
 ## Literature Review<br>
 
