@@ -96,7 +96,11 @@ def pad_and_resize_all_square(path, save_path, dim, batchsize = 16, bbss = False
             for i, img in enumerate(resized):
                 cv2.imwrite(str(save_path / str('resized_' + str(batch[i].name))) , img)
             if bbss:
-                ...
+                for i, bbs in enumerate(res_bbss):
+                    writer = Writer(str(save_path / str('resized_' + str(batch[i].name))), dim, dim)
+                    for box in bbs.bounding_boxes:
+                        writer.addObject(box.label, box.x1, box.y1, box.x2, box.y2)
+                    writer.save(str(save_path / ('resized_' + str(batch[i].stem + '.xml'))))
     except Exception as e:
         print(e)
         # if we created the save directory, delete it
@@ -138,7 +142,7 @@ def visualize_annotations(path, save_path):
             cv2.rectangle(img,(int(float(xmin_data)),int(float(ymin_data))),
                               (int(float(xmax_data)),int(float(ymax_data))),
                               (55,255,155),
-                               5)
+                               2)
         # save image with bounding boxes drawn
         cv2.imwrite(str(save_path / (filename + '.jpg')),img)
 
