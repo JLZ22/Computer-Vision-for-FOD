@@ -32,8 +32,8 @@ if __name__ == '__main__':
         max_processes = check_first_arg(sys.argv[1])
     if len(sys.argv) == 3:
         copies = check_second_arg(sys.argv[2])
-    path = Path('..', 'test_data', 'raw')
-    save_path = Path('..', 'test_data', 'aug')
+    path = Path('..', 'test_data', 'raw_pairs')
+    save_path = Path('..', 'test_data', 'aug_pairs')
     sass = [SimpleAugSeq(path=path, 
                                 save_path=save_path, 
                                 seed=1, 

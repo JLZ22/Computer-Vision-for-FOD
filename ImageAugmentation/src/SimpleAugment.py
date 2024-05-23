@@ -242,8 +242,8 @@ if __name__ == '__main__':
     json_path = Path('..','config.json')
     file_names = ['3277']
 
-    path = Path('..', 'test_data', 'raw')
-    save_path = Path('..', 'test_data', 'aug')
+    path = Path('..', 'test_data', 'raw_pairs')
+    save_path = Path('..', 'test_data', 'aug_pairs')
     path = path.absolute()
     save_path = save_path.absolute()
     # with json_path.open(mode='r') as f:
