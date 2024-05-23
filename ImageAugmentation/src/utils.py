@@ -129,9 +129,6 @@ def visualize_annotations(path, save_path):
             ymin_data=ymin.childNodes[0].data
             xmax_data=xmax.childNodes[0].data
             ymax_data=ymax.childNodes[0].data
-            print(object)        
-            print(xmin_data)
-            print(ymin_data)
             
             i= i + 1 
             # draw bounding boxes
