@@ -8,20 +8,32 @@ import math
 from pathlib import Path
 import utils
 
+def check_first_arg(arg):
+    if not arg.isdigit():
+        exit(f'Please enter a integer in the range 1 to {os.cpu_count()} for the first argument.')
+    max_processes = int(arg)
+    if max_processes < 1:
+        exit(f'Please enter a integer in the range 1 to {os.cpu_count()} for the first argument.')
+    elif max_processes > os.cpu_count():
+        exit(f'Please enter a integer of processes less than or equal to {os.cpu_count()} for the first argument.')
+    return max_processes
+
+def check_second_arg(arg):
+    if not arg.isdigit() or int(arg) <= 0:
+        exit(f'Please enter a positive integer for the second argument.')
+    return int(arg)
+
 if __name__ == '__main__':
     max_processes = os.cpu_count()
-    if len(sys.argv) == 2:
-        arg = sys.argv[1]
-        if not arg.isdigit():
-            exit(f'Please enter a number in the range 1 to {os.cpu_count()}.')
-        max_processes = int(arg)
-        if max_processes < 1:
-            exit(f'Please enter a number in the range 1 to {os.cpu_count()}.')
-        elif max_processes > os.cpu_count():
-            exit(f'Please enter a number of processes less than or equal to {os.cpu_count()}.')
+    copies = 8
+    if len(sys.argv) > 3:
+        exit('Too many arguments.')
+    if len(sys.argv) >= 2:
+        max_processes = check_first_arg(sys.argv[1])
+    if len(sys.argv) == 3:
+        copies = check_second_arg(sys.argv[2])
     path = Path('..', 'test_data', 'raw')
     save_path = Path('..', 'test_data', 'aug')
-    copies = 2
     sass = [SimpleAugSeq(path=path, 
                                 save_path=save_path, 
                                 seed=1, 
