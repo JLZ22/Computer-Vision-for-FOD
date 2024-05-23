@@ -96,3 +96,47 @@ def pad_and_resize_all_square(path, save_path, dim, batchsize = 16, bbss = False
         # if we created the save directory, delete it
         if not save_exists:
             os.rmdir(str(save_path))
+
+'''
+https://piyush-kulkarni.medium.com/visualize-the-xml-annotations-in-python-c9696ba9c188
+'''
+def visualize_annotations(path, save_path):
+    # get images
+    images = [item for item in path.iterdir() if item.suffix.lower() in {'.jpg', '.jpeg'}]
+    
+    for file in images:
+        filename = file.stem
+        img_path = file
+        xml_path = path / (filename + '.xml')
+        img = cv2.imread(str(img_path))
+        if img is None:
+            pass
+        dom = xml.dom.minidom.parse(str(xml_path))
+        root = dom.documentElement
+        objects=dom.getElementsByTagName("object")
+        i=0
+
+        # get bounding boxes
+        for object in objects:
+            
+            bndbox = root.getElementsByTagName('bndbox')[i]
+            xmin = bndbox.getElementsByTagName('xmin')[0]
+            ymin = bndbox.getElementsByTagName('ymin')[0]
+            xmax = bndbox.getElementsByTagName('xmax')[0]
+            ymax = bndbox.getElementsByTagName('ymax')[0]
+            xmin_data=xmin.childNodes[0].data
+            ymin_data=ymin.childNodes[0].data
+            xmax_data=xmax.childNodes[0].data
+            ymax_data=ymax.childNodes[0].data
+            print(object)        
+            print(xmin_data)
+            print(ymin_data)
+            
+            i= i + 1 
+            # draw bounding boxes
+            cv2.rectangle(img,(int(float(xmin_data)),int(float(ymin_data))),
+                              (int(float(xmax_data)),int(float(ymax_data))),
+                              (55,255,155),
+                               5)
+        # save image with bounding boxes drawn
+        cv2.imwrite(str(save_path / (filename + '.jpg')),img)
