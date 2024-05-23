@@ -110,10 +110,11 @@ class SimpleAugSeq:
     def create_bbs(self, root, shape: int) -> BoundingBoxesOnImage:
         bboxes = []
         for member in root.findall('object'):
-            xmin = int(float(member[4][0].text))
-            ymin = int(float(member[4][1].text))
-            xmax = int(float(member[4][2].text))
-            ymax = int(float(member[4][3].text))
+            bbox = member.find('bndbox')
+            xmin = int(bbox.find('xmin').text)
+            ymin = int(bbox.find('ymin').text)
+            xmax = int(bbox.find('xmax').text)
+            ymax = int(bbox.find('ymax').text)
             bboxes.append(BoundingBox(x1=xmin, y1=ymin, x2=xmax, y2=ymax, label=member[0].text))
         return BoundingBoxesOnImage(bboxes, shape)
     
