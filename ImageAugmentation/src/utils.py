@@ -53,7 +53,13 @@ def subtract_mean(image):
 
 def get_bboxes(path, jpg_files):
     bbss = []
-    
+    for img in jpg_files:
+        name = img.stem
+        xml = path / (name + '.xml')
+        tree = ET.parse(str(xml))
+        root = tree.getroot()
+        bbs = create_bbs(root, cv2.imread(str(img)).shape)
+        bbss.append(bbs)
     return bbss
 
 def pad_and_resize_all_square(path, save_path, dim, batchsize = 16, bbss = False):
@@ -77,7 +83,6 @@ def pad_and_resize_all_square(path, save_path, dim, batchsize = 16, bbss = False
     # read images, pad and resize
     try:
         image_files = list(path.glob('*.jpg')) + list(path.glob('*.jpeg'))
-        xml_files = list(path.glob('*.xml'))
         for i in range(0, len(image_files), batchsize):
             batch = image_files[i:i+batchsize]
             images = [cv2.imread(str(image_path)) for image_path in batch]
