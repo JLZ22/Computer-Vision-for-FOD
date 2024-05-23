@@ -1,4 +1,5 @@
 from pathlib import Path
+from imgaug import augmenters as iaa
 
 def print_red(text):
     print("\033[91m{}\033[0m".format(text))
@@ -33,3 +34,8 @@ def deleteFiles(path):
         if f.is_file():
             f.unlink()
     print_green(f"Deleted all files in the directory: '{path}'")
+
+def resize_All_Images(path, width, height):
+    seq = iaa.Sequential(
+        [iaa.Resize({"height": height, "width": width})]
+        )
