@@ -39,6 +39,13 @@ def deleteFiles(path):
             f.unlink()
     print_green(f"Deleted all files in the directory: '{path}'")
 
+def subtract_mean(image):
+    # calculate per channel mean pixel values
+    mean = np.mean(image, axis=(0, 1))
+    # subtract the mean from the image
+    image = image - mean
+    return image
+
 def resize_All_JPGs(path, save_path, width, height, batchsize = 16):
     if not path.exists() or not path.is_dir():
         print_red(f"Directory: '{path}' does not exist or is not a directory.")
