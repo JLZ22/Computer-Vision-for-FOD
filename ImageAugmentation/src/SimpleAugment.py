@@ -41,22 +41,9 @@ class SimpleAugSeq:
         ia.seed(self.seed)
         #Checks if the array that was passed in has a length of 0. If so it populates names array with every image name from read path
         if len(self.names) == 0:
-            self.names = self.getFileNames()
+            self.names = utils.getFileNames(self.path)
         if not self.save_path.exists() or not self.save_path.is_dir():
             os.makedirs(self.save_path)
-
-    # Return an array of copies of the image stored at 
-    # path/img. The array has num_copies number of copies.
-    def make_copies_images(self, img: str) -> np.array:
-        return np.array(
-            [cv2.imread(str(Path(self.path, img))) for _ in range(self.num_copies)],
-            dtype=np.uint8
-        )
-
-    # Make num_copies number of the bbs object and return it 
-    # in an array
-    def make_copies_bboxes(self, bbs: BoundingBoxesOnImage) -> np.array:
-        return [bbs for _ in range(self.num_copies)]
     
     # Return a Sequential object that is in charge of
     # augmenting the image
@@ -102,21 +89,6 @@ class SimpleAugSeq:
             )
             ], 
             random_order=True) # apply augmenters in random order
-
-    # Return a BoundingBoxesOnImage object with the 
-    # given root and shape by automatically creating a 
-    # new BoundingBox object for every object 
-    # in the root
-    def create_bbs(self, root, shape: int) -> BoundingBoxesOnImage:
-        bboxes = []
-        for member in root.findall('object'):
-            bbox = member.find('bndbox')
-            xmin = int(bbox.find('xmin').text)
-            ymin = int(bbox.find('ymin').text)
-            xmax = int(bbox.find('xmax').text)
-            ymax = int(bbox.find('ymax').text)
-            bboxes.append(BoundingBox(x1=xmin, y1=ymin, x2=xmax, y2=ymax, label=member[0].text))
-        return BoundingBoxesOnImage(bboxes, shape)
     
     # Save the images and corresponding xml files 
     # 
@@ -175,7 +147,7 @@ class SimpleAugSeq:
             # Display progress bar
             for async_result in tqdm(async_results, desc="Processing", total=len(async_results)):
                 if self.checkMem: 
-                    tempPoolMem = self.get_children_mem_consumption()
+                    tempPoolMem = utils.get_children_mem_consumption()
                     tempMaxUsed = psutil.virtual_memory().used
                     tempMaxPercent = psutil.virtual_memory().percent
                     max_percent = tempMaxPercent if tempMaxPercent > max_percent else max_percent
@@ -183,13 +155,6 @@ class SimpleAugSeq:
                     mem = tempPoolMem if tempPoolMem > mem else mem
                 async_result.get()
                 time.sleep(0.1)
-
-            # check memory consumption and system memory usage 
-            # until all processes are done
-            # while True:
-            #     if all([result.ready() for result in async_results]):
-            #         break
-            #     time.sleep(1)
         
         end = time.time()
         self.duration = end - start
@@ -198,13 +163,6 @@ class SimpleAugSeq:
             print(f"Max System Memory Used: {max_used / 1024**2} MB")
             print(f"Max System Memory Percent Used: {max_percent}%")
         print(f"Time to Augment: {self.duration} seconds")        
-    
-    # Get the memory consumption of all children processes
-    # If no children processes are found, return 0
-    def get_children_mem_consumption(self):
-        pid = os.getpid()
-        children = psutil.Process(pid).children(recursive=True)
-        return sum([child.memory_info().rss for child in children])
 
     # This function is the worker function and 
     # augments the image of name: "name" at 
@@ -212,9 +170,12 @@ class SimpleAugSeq:
     def augstart(self, name: str):
         tree = ET.parse(str(Path(self.path, name + '.xml'))) 
         root = tree.getroot()
-        images = self.make_copies_images(name+'.jpg') # make num_copies number of copies of the current image 
-        bbs = self.create_bbs(root, images[0].shape) # create the BoundingBoxesOnImage object for the current image
-        allbbs = self.make_copies_bboxes(bbs) # make num_copies number of copies of the current image's corresponding xml file
+        # make num_copies number of copies of the current image 
+        images = utils.make_copies_images(str(self.path / (name + '.jpg')), self.num_copies) 
+        # create the BoundingBoxesOnImage object for the current image
+        bbs = utils.create_bbs(root, images[0].shape) 
+        # make num_copies number of copies of the current image's corresponding xml file
+        allbbs = utils.make_copies_bboxes(bbs, self.num_copies) 
 
         seq = self.create_sequential() # create the sequential object in charge of the augmentation
 
@@ -229,10 +190,6 @@ class SimpleAugSeq:
         del images_aug
         del bbs_aug
         gc.collect()
-
-    #gets all file names in the directory that end in .jpg
-    def getFileNames(self):
-        return [item.stem for item in self.path.iterdir()]
     
 if __name__ == '__main__':
     path = ''
@@ -262,4 +219,4 @@ if __name__ == '__main__':
                               checkMem=True) # 14 optimal for ecn-dec01 
     utils.deleteFiles(save_path)
     simple_aug.augment()
-    utils.visualize_annotations(save_path, Path('../test_data/out1'))
+    # utils.visualize_annotations(save_path, Path('../test_data/out1'))

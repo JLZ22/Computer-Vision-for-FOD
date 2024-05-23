@@ -8,6 +8,7 @@ from pascal_voc_writer import Writer
 import xml.etree.ElementTree as ET
 import  xml.dom.minidom
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
+import psutil
 
 def print_red(text):
     print("\033[91m{}\033[0m".format(text))
@@ -140,3 +141,42 @@ def visualize_annotations(path, save_path):
                                5)
         # save image with bounding boxes drawn
         cv2.imwrite(str(save_path / (filename + '.jpg')),img)
+
+# Make num_copies number of the bbs object and return it 
+# in an array
+def make_copies_bboxes(bbs: BoundingBoxesOnImage, num_copies: int) -> np.array:
+    return [bbs for _ in range(num_copies)]
+
+# Return an array of copies of the image stored at 
+# path/img. The array has num_copies number of copies.
+def make_copies_images(name, num_copies: int) -> np.array:
+    return np.array(
+        [cv2.imread(name) for _ in range(num_copies)],
+        dtype=np.uint8
+    )
+
+# Return a BoundingBoxesOnImage object with the 
+# given root and shape by automatically creating a 
+# new BoundingBox object for every object 
+# in the root
+def create_bbs(root, shape: int) -> BoundingBoxesOnImage:
+    bboxes = []
+    for member in root.findall('object'):
+        bbox = member.find('bndbox')
+        xmin = int(bbox.find('xmin').text)
+        ymin = int(bbox.find('ymin').text)
+        xmax = int(bbox.find('xmax').text)
+        ymax = int(bbox.find('ymax').text)
+        bboxes.append(BoundingBox(x1=xmin, y1=ymin, x2=xmax, y2=ymax, label=member.find('name').text))
+    return BoundingBoxesOnImage(bboxes, shape)
+
+#gets all file names in the directory that end in .jpg
+def getFileNames(path: Path):
+    return [item.stem for item in path.iterdir()]
+
+# Get the memory consumption of all children processes
+# If no children processes are found, return 0
+def get_children_mem_consumption():
+    pid = os.getpid()
+    children = psutil.Process(pid).children(recursive=True)
+    return sum([child.memory_info().rss for child in children])
