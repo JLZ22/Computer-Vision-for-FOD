@@ -199,12 +199,12 @@ if __name__ == '__main__':
 
     path = Path('..', 'test_data', 'raw_pairs')
     save_path = Path('..', 'test_data', 'out0')
-    path = path.absolute()
-    save_path = save_path.absolute()
     # with json_path.open(mode='r') as f:
     #     d = json.load(f)
     #     path = Path(d["path"])
     #     save_path = Path(d["save_path"])
+    path = path.absolute()
+    save_path = save_path.absolute()
 
     print(f"Available Physical Memory of System: {psutil.virtual_memory().available / 1024**2}MB")
     print(f"Total Physical Memory of System: {psutil.virtual_memory().total / 1024**2}MB")
