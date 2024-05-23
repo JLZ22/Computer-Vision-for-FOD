@@ -262,3 +262,4 @@ if __name__ == '__main__':
                               checkMem=True) # 14 optimal for ecn-dec01 
     utils.deleteFiles(save_path)
     simple_aug.augment()
+    utils.visualize_annotations(save_path, Path('../test_data/out1'))
