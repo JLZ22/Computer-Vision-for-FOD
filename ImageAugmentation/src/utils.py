@@ -117,7 +117,7 @@ def visualize_annotations(path, save_path):
         objects=dom.getElementsByTagName("object")
 
         # get bounding boxes
-        for i in range(objects.shape[0]):
+        for i in range(objects.length):
             
             bndbox = root.getElementsByTagName('bndbox')[i]
             xmin = bndbox.getElementsByTagName('xmin')[0]
