@@ -1,5 +1,4 @@
 from pathlib import Path
-import imgaug as ia
 import imgaug.augmenters as iaa
 import cv2
 import numpy as np
