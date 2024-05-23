@@ -240,7 +240,7 @@ if __name__ == '__main__':
     file_names = ['3277']
 
     path = Path('..', 'test_data', 'raw_pairs')
-    save_path = Path('..', 'test_data', 'aug_pairs')
+    save_path = Path('..', 'test_data', 'out0')
     path = path.absolute()
     save_path = save_path.absolute()
     # with json_path.open(mode='r') as f:

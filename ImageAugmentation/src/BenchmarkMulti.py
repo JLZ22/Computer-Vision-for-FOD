@@ -33,7 +33,7 @@ if __name__ == '__main__':
     if len(sys.argv) == 3:
         copies = check_second_arg(sys.argv[2])
     path = Path('..', 'test_data', 'raw_pairs')
-    save_path = Path('..', 'test_data', 'aug_pairs')
+    save_path = Path('..', 'test_data', 'out0')
     sass = [SimpleAugSeq(path=path, 
                                 save_path=save_path, 
                                 seed=1, 
