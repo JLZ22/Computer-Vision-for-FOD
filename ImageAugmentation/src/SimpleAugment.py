@@ -91,7 +91,7 @@ class SimpleAugSeq:
             iaa.Multiply((0.8, 1.2), per_channel=0.2),
 
             # Apply affine transformations to each image.
-            # Scale/zoom them, translate/move them, rotate them and shear them.
+            # Scale/zoom them, translate/move them.
             iaa.Affine(
 
                 # zoom in or out
@@ -99,9 +99,6 @@ class SimpleAugSeq:
                 
                 # horizontal and vertical shifts
                 translate_percent={"x": (-0.2, 0.2), "y": (-0.2, 0.2)}, # TODO: explore changing the fill color to something that looks like the work station 
-
-                #horizontal and vertical distortion
-                shear=(-8, 8)
             )
             ], 
             random_order=True) # apply augmenters in random order

@@ -18,6 +18,19 @@ ultralytics
 opencv-python
 ```
 
+## Augmentation Notes<br>
+
+Images were subject to the following augmentations in random order for training. 
+- vertical/horizontal flips
+- random crops between 0% and 10% of the image
+- Gaussian Blur (applied 50% of the time)
+- strengthenning or weakenning contrast between 75% and 150% the original value
+- Gaussian Noise (applied 50% of the time)
+- randomly adjust brightness between 80% and 120% the original value for 20% of images
+- Randomly zoomed, or translated
+
+After augmentation, for each image in the dataset, the mean pixel value per channel is subtracted from it according to the 7th source in the literature review section.
+
 ## Status
 
 ### Current Functionality
@@ -40,10 +53,10 @@ opencv-python
 
 ## Literature Review<br>
 
-- (March 2024) [Small-Scale Foreign Object Debris Detection Using Deep Learning and Dual Light Modes](https://www.mdpi.com/2076-3417/14/5/2162)<br>
-- (February 2024) [A two-stage deep learning method for foreign object detection and localization](https://www.spiedigitallibrary.org/conference-proceedings-of-spie/13069/130690G/A-two-stage-deep-learning-method-for-foreign-object-detection/10.1117/12.3024079.full#_=_)<br>
-- (July 2023) [A doubt–confirmation-based visual detection method for foreign object debris aided by assembly models](https://cdnsciencepub.com/doi/full/10.1139/tcsme-2022-0143)<br>
-- (Sept 2022)[Foreign Object Detection on an Assembly Line](https://link.springer.com/content/pdf/10.1007/978-981-19-2600-6_29.pdf)<br>
-- (June 2022) [Foreign objects detection using deep learning techniques for graphic card assembly line](https://link.springer.com/article/10.1007/s10845-022-01980-7)<br>
-- (April 2020) [Deep Learning Models for Visual Inspection on Automotive Assembling Line](https://arxiv.org/ftp/arxiv/papers/2007/2007.01857.pdf)<br>
-- (July 2019) [Best Practices for Preparing and Augmenting Image Data for CNNs](https://machinelearningmastery.com/best-practices-for-preparing-and-augmenting-image-data-for-convolutional-neural-networks/)
+1. (March 2024) [Small-Scale Foreign Object Debris Detection Using Deep Learning and Dual Light Modes](https://www.mdpi.com/2076-3417/14/5/2162)<br>
+2. (February 2024) [A two-stage deep learning method for foreign object detection and localization](https://www.spiedigitallibrary.org/conference-proceedings-of-spie/13069/130690G/A-two-stage-deep-learning-method-for-foreign-object-detection/10.1117/12.3024079.full#_=_)<br>
+3. (July 2023) [A doubt–confirmation-based visual detection method for foreign object debris aided by assembly models](https://cdnsciencepub.com/doi/full/10.1139/tcsme-2022-0143)<br>
+4. (Sept 2022)[Foreign Object Detection on an Assembly Line](https://link.springer.com/content/pdf/10.1007/978-981-19-2600-6_29.pdf)<br>
+5. (June 2022) [Foreign objects detection using deep learning techniques for graphic card assembly line](https://link.springer.com/article/10.1007/s10845-022-01980-7)<br>
+6. (April 2020) [Deep Learning Models for Visual Inspection on Automotive Assembling Line](https://arxiv.org/ftp/arxiv/papers/2007/2007.01857.pdf)<br>
+7. (July 2019) [Best Practices for Preparing and Augmenting Image Data for CNNs](https://machinelearningmastery.com/best-practices-for-preparing-and-augmenting-image-data-for-convolutional-neural-networks/)
