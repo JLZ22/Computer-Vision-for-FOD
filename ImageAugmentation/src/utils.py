@@ -46,33 +46,36 @@ def subtract_mean(image):
     image = image - mean
     return image
 
-def resize_All_JPGs(path, save_path, width, height, batchsize = 16):
+def padAndResizeAllSquare(path, save_path, dim, batchsize = 16):
+    # check read and write paths
     if not path.exists() or not path.is_dir():
         print_red(f"Directory: '{path}' does not exist or is not a directory.")
         return
+    # create save directory if it does not exist
+    # track if we created the save directory
     save_exists = True
     if not save_path.exists() or not save_path.is_dir():
         save_exists = False
         os.mkdir(str(save_path))
     
-    aug = iaa.Resize({'height' : height, 'width' : width})
-    img = cv2.imread('../test_data/test_images/3279.jpg')
-    res = aug.augment_image(img)
-    cv2.imshow('Original', img)
-    cv2.imshow('Resized', res)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # augmenters
+    res = iaa.Resize({'height' : dim, 'width' : dim})
+    pad = iaa.PadToSquare()
 
-
-    # try:
-    #     image_files = list(path.glob('*.jpg')) + list(path.glob('*.jpeg'))
-    #     for i in range(0, len(image_files), batchsize):
-    #         batch = image_files[i:i+batchsize]
-    #         images = [cv2.imread(str(image_path)) for image_path in batch]
-    #         resized = [cv2.resize(img) for img in images]
-    #         for i in resized.shape[0]:
-    #             cv2.imwrite(str(save_path / str('resized_' + str(batch[i].name))) , resized[i])
-    # except Exception as e:
-    #     print(e)
-    #     if not save_exists:
-    #         os.rmdir(str(save_path))
+    # read images, pad and resize
+    try:
+        image_files = list(path.glob('*.jpg')) + list(path.glob('*.jpeg'))
+        for i in range(0, len(image_files), batchsize):
+            batch = image_files[i:i+batchsize]
+            images = [cv2.imread(str(image_path)) for image_path in batch]
+            resized = []
+            for image in images:
+                padded = pad.augment_image(image)
+                resized.append(res.augment_image(padded))
+            for i in range(len(resized)):
+                cv2.imwrite(str(save_path / str('resized_' + str(batch[i].name))) , resized[i])
+    except Exception as e:
+        print(e)
+        # if we created the save directory, delete it
+        if not save_exists:
+            os.rmdir(str(save_path))
