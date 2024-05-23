@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import gc
 import sys
 import math
+from pathlib import Path
+import utils
 
 if __name__ == '__main__':
     max_processes = os.cpu_count()
@@ -17,8 +19,8 @@ if __name__ == '__main__':
             exit(f'Please enter a number in the range 1 to {os.cpu_count()}.')
         elif max_processes > os.cpu_count():
             exit(f'Please enter a number of processes less than or equal to {os.cpu_count()}.')
-    path = os.path.join('..', 'test_data', 'raw')
-    save_path = os.path.join('..', 'test_data', 'aug')
+    path = Path('..', 'test_data', 'raw')
+    save_path = Path('..', 'test_data', 'aug')
     copies = 2
     sass = [SimpleAugSeq(path=path, 
                                 save_path=save_path, 
@@ -34,7 +36,7 @@ if __name__ == '__main__':
     input('Press Enter to continue...')
     for i in range(len(sass)):
         sa = sass[i]
-        sa.deleteFiles(save_path)
+        utils.deleteFiles(save_path)
         start = time.time()
         sa.augment()
         end = time.time()
@@ -59,14 +61,14 @@ if __name__ == '__main__':
     plt.xlim(0, max_processes+1)
     plt.ylim(0, max(times) + 10)
     plt.legend()
-    benchmark_dir = os.path.join('..', f'benchmark_results/{copies}_copies')
-    if not os.path.exists(benchmark_dir):
+    benchmark_dir = Path('..', f'benchmark_results/{copies}_copies')
+    if not benchmark_dir.exists() or not benchmark_dir.is_dir():
         os.makedirs(benchmark_dir)
     save_name = f'Copies{copies}_Processes{max_processes}_TimeVsProcesses'
-    png = os.path.join(benchmark_dir, f'{save_name}.png')
-    txt = os.path.join(benchmark_dir, f'{save_name}.txt')
+    png = Path(benchmark_dir, f'{save_name}.png')
+    txt = Path(benchmark_dir, f'{save_name}.txt')
     plt.savefig(png)
-    with open(txt, "w") as f:
+    with txt.open(mode='w') as f:
         for i in range(len(times)):
             f.write(f"Time to Augment: {times[i]} seconds with {processes[i]} processes\n")
         f.write(f"Minimum Time: {times[min]} seconds with {processes[min]} processes\n")

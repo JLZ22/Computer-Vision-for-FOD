@@ -1,4 +1,3 @@
-# Original code "https://imgaug.readthedocs.io/en/latest/source/examples_basics.html"
 import numpy as np
 import imgaug as ia
 import imgaug.augmenters as iaa
@@ -14,12 +13,8 @@ import time
 import psutil
 from tqdm import tqdm
 import gc
-
-def print_red(text):
-    print("\033[91m{}\033[0m".format(text))
-
-def print_green(text):
-    print("\033[92m{}\033[0m".format(text))
+from pathlib import Path
+import utils
 
 class SimpleAugSeq:
     def __init__(self, path: str, 
@@ -47,14 +42,14 @@ class SimpleAugSeq:
         #Checks if the array that was passed in has a length of 0. If so it populates names array with every image name from read path
         if len(self.names) == 0:
             self.names = self.getFileNames()
-        if not os.path.exists(self.save_path):
+        if not self.save_path.exists() or not self.save_path.is_dir():
             os.makedirs(self.save_path)
 
     # Return an array of copies of the image stored at 
     # path/img. The array has num_copies number of copies.
     def make_copies_images(self, img: str) -> np.array:
         return np.array(
-            [cv2.imread(os.path.join(self.path, img)) for _ in range(self.num_copies)],
+            [cv2.imread(str(Path(self.path, img))) for _ in range(self.num_copies)],
             dtype=np.uint8
         )
 
@@ -138,9 +133,8 @@ class SimpleAugSeq:
                        width) -> None:
         print('Saving images and xml files for ' + original_name) if self.printSteps else None
         for i in range(imgs.shape[0]):
-            curr_path = os.path.join(self.save_path, original_name)
-            img_path = curr_path + '_aug_' + str(i) + '.jpg'
-            xml_path = curr_path + '_aug_' + str(i) + '.xml'
+            img_path = str(self.save_path / (original_name + '_aug_' + str(i) + '.jpg'))
+            xml_path = str(self.save_path / (original_name + '_aug_' + str(i) + '.xml'))
             cv2.imwrite(img_path, imgs[i])
             writer = Writer(img_path, height, width)
             for box in bbss[i]:
@@ -163,7 +157,7 @@ class SimpleAugSeq:
             try:
                 input("Press Enter to start augmenting images...")
             except SyntaxError or KeyboardInterrupt:
-                print_red("Failed to augment images.")
+                utils.print_red("Failed to augment images.")
                 exit()
 
         start = time.time()
@@ -213,20 +207,12 @@ class SimpleAugSeq:
         pid = os.getpid()
         children = psutil.Process(pid).children(recursive=True)
         return sum([child.memory_info().rss for child in children])
-        
-    def resizeAndReplace(self, img, width: int, height: int, bbs: BoundingBoxesOnImage):
-        seq = iaa.Sequential([
-            iaa.Resize({"height": height, "width": width})
-        ])
-
-        resizedImage, newBbs = seq(images=[img], bounding_boxes = [bbs])
-        # TODO: save the new image and xml file
 
     # This function is the worker function and 
     # augments the image of name: "name" at 
     # save path and the coresponding xml file
     def augstart(self, name: str):
-        tree = ET.parse(self.path + name + '.xml') 
+        tree = ET.parse(str(Path(self.path, name + '.xml'))) 
         root = tree.getroot()
         images = self.make_copies_images(name+'.jpg') # make num_copies number of copies of the current image 
         bbs = self.create_bbs(root, images[0].shape) # create the BoundingBoxesOnImage object for the current image
@@ -248,40 +234,22 @@ class SimpleAugSeq:
 
     #gets all file names in the directory that end in .jpg
     def getFileNames(self):
-        names = []
-        names_Without = []
-        # Populates the names array with every file name ending in .jpg from the path
-        names = [f for f in os.listdir(self.path) if f.endswith('.jpg')]
-        # removes the .jpg from the end of each name in the names array. The .jpg may be added back in later areas but only on a need basis.
-        for f in names:
-            names_Without.append(f[:-4])
-
-        return names_Without
-    
-    # delete all files in the given path
-    def deleteFiles(self, path):
-        if not os.path.exists(path):
-            print_red(f"Directory: '{path}' does not exist.")
-            return
-        for f in os.listdir(path):
-            if os.path.isfile(os.path.join(path, f)):
-                os.remove(os.path.join(path, f))
-        print_green(f"Deleted all files in the directory: '{path}'")
+        return [item.stem for item in self.path.iterdir()]
     
 if __name__ == '__main__':
     path = ''
     save_path = ''
-    json_path = os.path.join('..','config.json')
-    file_names = []
+    json_path = Path('..','config.json')
+    file_names = ['3277']
 
-    path = os.path.join('..', 'test_data', 'raw')
-    save_path = os.path.join('..', 'test_data', 'aug')
-    path=os.path.abspath(path)
-    save_path=os.path.abspath(save_path)
-    # with open(json_path) as f:
+    path = Path('..', 'test_data', 'raw')
+    save_path = Path('..', 'test_data', 'aug')
+    path = path.absolute()
+    save_path = save_path.absolute()
+    # with json_path.open(mode='r') as f:
     #     d = json.load(f)
-    #     path = d["path"]
-    #     save_path = d["save_path"]
+    #     path = Path(d["path"])
+    #     save_path = Path(d["save_path"])
 
     print(f"Available Physical Memory of System: {psutil.virtual_memory().available / 1024**2}MB")
     print(f"Total Physical Memory of System: {psutil.virtual_memory().total / 1024**2}MB")
@@ -290,9 +258,9 @@ if __name__ == '__main__':
                               save_path=save_path, 
                               seed=1, 
                               check=False,
-                              num_copies=64, 
+                              num_copies=2, 
                               names=file_names,
                               processes=1,
                               checkMem=True) # 14 optimal for ecn-dec01 
-    simple_aug.deleteFiles(save_path)
+    utils.deleteFiles(save_path)
     simple_aug.augment()
