@@ -46,3 +46,4 @@ opencv-python
 - (Sept 2022)[Foreign Object Detection on an Assembly Line](https://link.springer.com/content/pdf/10.1007/978-981-19-2600-6_29.pdf)<br>
 - (June 2022) [Foreign objects detection using deep learning techniques for graphic card assembly line](https://link.springer.com/article/10.1007/s10845-022-01980-7)<br>
 - (April 2020) [Deep Learning Models for Visual Inspection on Automotive Assembling Line](https://arxiv.org/ftp/arxiv/papers/2007/2007.01857.pdf)<br>
+- (July 2019) [Best Practices for Preparing and Augmenting Image Data for CNNs](https://machinelearningmastery.com/best-practices-for-preparing-and-augmenting-image-data-for-convolutional-neural-networks/)
