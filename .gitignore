@@ -4,7 +4,7 @@ config.json
 *.pt
 __pycache__/
 models/
-aug_pairs/
+aug*/
 benchmark_results/
 .vs
 test.py
