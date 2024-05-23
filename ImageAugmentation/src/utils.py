@@ -1,5 +1,9 @@
 from pathlib import Path
-from imgaug import augmenters as iaa
+import imgaug as ia
+import imgaug.augmenters as iaa
+import cv2
+import numpy as np
+import os
 
 def print_red(text):
     print("\033[91m{}\033[0m".format(text))
@@ -28,14 +32,40 @@ def rename(path, startIndex):
 # delete all files in the given path
 def deleteFiles(path):
     if not path.exists() or not path.is_dir():
-        print_red(f"Directory: '{path}' does not exist.")
+        print_red(f"Directory: '{path}' does not exist or is not a directory.")
         return
     for f in path.iterdir():
         if f.is_file():
             f.unlink()
     print_green(f"Deleted all files in the directory: '{path}'")
 
-def resize_All_Images(path, width, height):
-    seq = iaa.Sequential(
-        [iaa.Resize({"height": height, "width": width})]
-        )
+def resize_All_JPGs(path, save_path, width, height, batchsize = 16):
+    if not path.exists() or not path.is_dir():
+        print_red(f"Directory: '{path}' does not exist or is not a directory.")
+        return
+    save_exists = True
+    if not save_path.exists() or not save_path.is_dir():
+        save_exists = False
+        os.mkdir(str(save_path))
+    
+    aug = iaa.Resize({'height' : height, 'width' : width})
+    img = cv2.imread('../test_data/test_images/3279.jpg')
+    res = aug.augment_image(img)
+    cv2.imshow('Original', img)
+    cv2.imshow('Resized', res)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+
+    # try:
+    #     image_files = list(path.glob('*.jpg')) + list(path.glob('*.jpeg'))
+    #     for i in range(0, len(image_files), batchsize):
+    #         batch = image_files[i:i+batchsize]
+    #         images = [cv2.imread(str(image_path)) for image_path in batch]
+    #         resized = [cv2.resize(img) for img in images]
+    #         for i in resized.shape[0]:
+    #             cv2.imwrite(str(save_path / str('resized_' + str(batch[i].name))) , resized[i])
+    # except Exception as e:
+    #     print(e)
+    #     if not save_exists:
+    #         os.rmdir(str(save_path))
