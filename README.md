@@ -12,10 +12,16 @@ It is also **STRONGLY RECOMMENDED** that you work in a python virtual environmen
 
 ## Package List<br>
 
-The packages you need to run scripts in `Computer-Vision-For-FOD/src` will be found here. Other directories' `src` folders may require different packages that will be covered in their respective READMEs.<br>
+The packages you need to run scripts in `Computer-Vision-For-FOD` repository will be found here.<br>
 ```
 ultralytics 
 opencv-python
+imgaug 
+numpy 
+pascal_voc_writer 
+pascal-voc-tools
+tqdm
+matplotlib
 ```
 
 ## Augmentation Notes<br>
