@@ -61,7 +61,7 @@ def get_bboxes(path, jpg_files):
         bbss.append(bbs)
     return bbss
 
-def pad_and_resize_all_square(path, save_path, dim, batchsize = 16, bbss = False):
+def pad_and_resize_all_square(path, save_path, dim, batchsize = 16):
     # check read and write paths
     if not path.exists() or not path.is_dir():
         print_red(f"Directory: '{path}' does not exist or is not a directory.")
@@ -81,7 +81,12 @@ def pad_and_resize_all_square(path, save_path, dim, batchsize = 16, bbss = False
 
     # read images, pad and resize
     try:
+        bbss = True
         image_files = list(path.glob('*.jpg')) + list(path.glob('*.jpeg'))
+        if list(path.glob('*.xml')) != []:
+            assert len(image_files) == len(list(path.glob('*.xml')))
+        else:
+            bbss = False
         for i in range(0, len(image_files), batchsize):
             batch = image_files[i:i+batchsize]
             images = [cv2.imread(str(image_path)) for image_path in batch]
