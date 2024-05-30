@@ -8,6 +8,7 @@ import xml.etree.ElementTree as ET
 import  xml.dom.minidom
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 import psutil
+import traceback
 
 def print_red(text):
     print("\033[91m{}\033[0m".format(text))
@@ -106,7 +107,7 @@ def pad_and_resize_all_square(path, save_path, dim, batchsize = 16):
                         writer.addObject(box.label, box.x1, box.y1, box.x2, box.y2)
                     writer.save(str(save_path / ('resized_' + str(batch[i].stem + '.xml'))))
     except Exception as e:
-        print(e)
+        traceback.print_exc()
         # if we created the save directory, delete it
         if not save_exists:
             os.rmdir(str(save_path))
