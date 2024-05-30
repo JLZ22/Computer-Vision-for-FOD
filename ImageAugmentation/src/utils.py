@@ -116,6 +116,11 @@ def pad_and_resize_all_square(path, save_path, dim, batchsize = 16):
 https://piyush-kulkarni.medium.com/visualize-the-xml-annotations-in-python-c9696ba9c188
 '''
 def visualize_annotations(path, save_path):
+    if save_path.exists() and not save_path.is_dir():
+        print_red(f"Directory: '{save_path}' exists but is not a directory.")
+        return
+    if not save_path.exists():
+        os.mkdir(str(save_path))
     # get images
     images = [item for item in path.iterdir() if item.suffix.lower() in {'.jpg', '.jpeg'}]
     
