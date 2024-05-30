@@ -172,10 +172,10 @@ def create_bbs(root, shape: int) -> BoundingBoxesOnImage:
     bboxes = []
     for member in root.findall('object'):
         bbox = member.find('bndbox')
-        xmin = int(bbox.find('xmin').text)
-        ymin = int(bbox.find('ymin').text)
-        xmax = int(bbox.find('xmax').text)
-        ymax = int(bbox.find('ymax').text)
+        xmin = int(float(bbox.find('xmin').text))
+        ymin = int(float(bbox.find('ymin').text))
+        xmax = int(float(bbox.find('xmax').text))
+        ymax = int(float(bbox.find('ymax').text))
         bboxes.append(BoundingBox(x1=xmin, y1=ymin, x2=xmax, y2=ymax, label=member.find('name').text))
     return BoundingBoxesOnImage(bboxes, shape)
 
