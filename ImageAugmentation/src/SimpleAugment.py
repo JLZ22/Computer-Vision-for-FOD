@@ -192,31 +192,23 @@ class SimpleAugSeq:
         gc.collect()
     
 if __name__ == '__main__':
-    path = ''
-    save_path = ''
-    json_path = Path('..','config.json')
     file_names = ['3277']
 
-    path = Path('..', 'test_data', 'raw_pairs')
-    save_path = Path('..', 'test_data', 'out0')
-    # with json_path.open(mode='r') as f:
-    #     d = json.load(f)
-    #     path = Path(d["path"])
-    #     save_path = Path(d["save_path"])
-    path = path.absolute()
-    save_path = save_path.absolute()
+    raw_pairs = Path('..', 'test_data', 'raw_pairs')
+    out0 = Path('..', 'test_data', 'out0').absolute()
+    out1 = Path('..', 'test_data', 'out1').absolute()
 
     print(f"Available Physical Memory of System: {psutil.virtual_memory().available / 1024**2}MB")
     print(f"Total Physical Memory of System: {psutil.virtual_memory().total / 1024**2}MB")
     print(f"Percentage of Physical Memory Used: {psutil.virtual_memory().percent}%")
-    simple_aug = SimpleAugSeq(path=path, 
-                              save_path=save_path, 
+    simple_aug = SimpleAugSeq(path=raw_pairs, 
+                              save_path=out0, 
                               seed=1, 
                               check=False,
                               num_copies=2, 
                               names=file_names,
                               processes=1,
                               checkMem=True) # 14 optimal for ecn-dec01 
-    utils.deleteFiles(save_path)
+    utils.deleteFiles(out0)
     simple_aug.augment()
-    utils.visualize_annotations(save_path, Path('../test_data/out1'))
+    utils.visualize_annotations(out0, out1)
