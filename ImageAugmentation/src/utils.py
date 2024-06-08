@@ -5,7 +5,7 @@ import numpy as np
 import os
 from pascal_voc_writer import Writer
 import xml.etree.ElementTree as ET
-import  xml.dom.minidom
+import  xml.dom.minidom as xdm
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 import psutil
 import traceback
@@ -139,7 +139,7 @@ def visualize_annotations(path, save_path):
         img = cv2.imread(str(img_path))
         if img is None:
             pass
-        dom = xml.dom.minidom.parse(str(xml_path))
+        dom = xdm.parse(str(xml_path))
         root = dom.documentElement
         objects=dom.getElementsByTagName("object")
 
