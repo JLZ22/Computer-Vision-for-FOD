@@ -194,7 +194,8 @@ def create_bbs(root, shape: int) -> BoundingBoxesOnImage:
 
 #gets all file names in the directory that end in .jpg
 def getFileNames(path: Path):
-    return [item.stem for item in path.iterdir()]
+    jpg = list(path.glob('*.jpg')) + list(path.glob('*.jpeg'))
+    return [item.stem for item in jpg]
 
 # Get the memory consumption of all children processes
 # If no children processes are found, return 0

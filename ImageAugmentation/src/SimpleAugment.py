@@ -17,9 +17,9 @@ import utils
 class SimpleAugSeq:
     def __init__(self, path: str, 
                  save_path: str, 
-                 seed: int, 
                  num_copies: int, 
-                 names: list, 
+                 seed = 1, 
+                 names = [], 
                  processes=1, 
                  check=True,
                  printSteps=False,
