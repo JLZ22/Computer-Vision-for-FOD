@@ -12,7 +12,6 @@ It is also **STRONGLY RECOMMENDED** that you work in a python virtual environmen
 
 ## Package List<br>
 
-The packages you need to run scripts in `Computer-Vision-For-FOD` repository will be found here.<br>
 ```
 ultralytics 
 opencv-python
@@ -23,6 +22,8 @@ pascal-voc-tools
 tqdm
 matplotlib
 ```
+
+To install using `pip`, run `pip install -r requirements.txt`. 
 
 ## Augmentation Notes<br>
 
