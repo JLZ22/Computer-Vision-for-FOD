@@ -137,8 +137,9 @@ class SimpleAugSeq:
         with multiprocessing.Pool(processes=self.processes) as pol:
             async_results = []
             for name in self.names:
-                if name[-4] == '.':
-                    name = name[:-4]
+                # if name contains the file extension, remove it
+                if '.' in name:
+                    name = name.split('.')[0]
                 print(f'Augmenting {name}') if self.printSteps else None
                 async_results.append(pol.apply_async(self.augstart, (name,)))
 
