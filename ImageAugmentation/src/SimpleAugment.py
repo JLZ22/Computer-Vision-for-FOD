@@ -5,10 +5,8 @@ import cv2
 import xml.etree.ElementTree as ET
 import json 
 from pascal_voc_writer import Writer
-from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 import os
 import multiprocessing
-from multiprocessing import pool
 import time
 import psutil
 from tqdm import tqdm
