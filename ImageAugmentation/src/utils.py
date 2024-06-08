@@ -19,7 +19,7 @@ def print_green(text):
 def get_jpg_names(path):
     return [item for item in path.iterdir() if item.suffix.lower() in {'.jpg', '.jpeg'}]
 
-def rename(path, startIndex):
+def rename(path, startIndex, prefix = ''):
     files = get_jpg_names(path)
     files.sort()
     print(files)
@@ -27,8 +27,8 @@ def rename(path, startIndex):
         name = filename.stem
         oldJPG = Path(path, name + '.jpg')
         oldXML = Path(path, name + '.xml')
-        newJPG = Path(path, str(count) + '.jpg')
-        newXML = Path(path, str(count) + '.xml')
+        newJPG = Path(path, prefix + str(count) + '.jpg')
+        newXML = Path(path, prefix + str(count) + '.xml')
         print(f'{oldJPG} -> {newJPG}')
         print(f'{oldXML} -> {newXML}')
         oldJPG.rename(newJPG)
