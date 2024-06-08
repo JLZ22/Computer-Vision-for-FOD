@@ -20,6 +20,7 @@ def get_jpg_names(path):
     return [item for item in path.iterdir() if item.suffix.lower() in {'.jpg', '.jpeg'}]
 
 def rename(path, startIndex, prefix = ''):
+    path = Path(path)
     files = get_jpg_names(path)
     files.sort()
     print(files)
@@ -36,6 +37,7 @@ def rename(path, startIndex, prefix = ''):
 
 # delete all files in the given path
 def deleteFiles(path):
+    path = Path(path)
     if not path.exists() or not path.is_dir():
         print_red(f"Directory: '{path}' does not exist or is not a directory.")
         return
@@ -52,6 +54,7 @@ def subtract_mean(image):
     return image
 
 def get_bboxes(path, jpg_files):
+    path = Path(path)
     bbss = []
     for img in jpg_files:
         name = img.stem
@@ -63,6 +66,8 @@ def get_bboxes(path, jpg_files):
     return bbss
 
 def pad_and_resize_all_square(path, save_path, dim, batchsize = 16):
+    path = Path(path)
+    save_path = Path(save_path)
     # check read and write paths
     if not path.exists() or not path.is_dir():
         print_red(f"Directory: '{path}' does not exist or is not a directory.")
@@ -116,6 +121,8 @@ def pad_and_resize_all_square(path, save_path, dim, batchsize = 16):
 https://piyush-kulkarni.medium.com/visualize-the-xml-annotations-in-python-c9696ba9c188
 '''
 def visualize_annotations(path, save_path):
+    path = Path(path)
+    save_path = Path(save_path)
     # check read and write paths
     if not path.exists() or not path.is_dir():
         print_red(f"Directory: '{path}' does not exist or is not a directory.")
@@ -194,6 +201,7 @@ def create_bbs(root, shape: int) -> BoundingBoxesOnImage:
 
 #gets all file names in the directory that end in .jpg
 def getFileNames(path: Path):
+    path = Path(path)
     jpg = list(path.glob('*.jpg')) + list(path.glob('*.jpeg'))
     return [item.stem for item in jpg]
 

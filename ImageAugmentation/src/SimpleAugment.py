@@ -3,7 +3,6 @@ import imgaug as ia
 import imgaug.augmenters as iaa
 import cv2
 import xml.etree.ElementTree as ET
-import json 
 from pascal_voc_writer import Writer
 import os
 import multiprocessing
@@ -15,8 +14,8 @@ from pathlib import Path
 import utils
 
 class SimpleAugSeq:
-    def __init__(self, path: str, 
-                 save_path: str, 
+    def __init__(self, path: Path, 
+                 save_path: Path, 
                  num_copies: int, 
                  seed = 1, 
                  names = [], 
@@ -24,8 +23,8 @@ class SimpleAugSeq:
                  check=True,
                  printSteps=False,
                  checkMem=False) -> None:
-        self.path = path # read path
-        self.save_path = save_path # save path
+        self.path = Path(path) # read path
+        self.save_path = Path(save_path) # save path
         self.seed = seed # seed for random augmentation generation
         self.num_copies = num_copies # number of augmented copies per original image
         self.names = names # an array of the names of the images to augment 
