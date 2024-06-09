@@ -19,11 +19,16 @@ def print_green(text):
 def get_jpg_paths(path):
     return [item for item in path.iterdir() if item.suffix.lower() in {'.jpg', '.jpeg'}]
 
-def rename(path, startIndex, prefix = ''):
+def rename(path, startIndex=0, prefix = ''):
     path = Path(path)
     files = get_jpg_paths(path)
     files.sort()
     for count, filename in enumerate(files, start=startIndex):
+        if filename.is_dir():
+            continue
+        elif not filename.is_file():
+            print_red(f"File: '{filename}' does not exist.")
+            continue
         name = filename.stem
         oldJPG = Path(path, name + '.jpg')
         oldXML = Path(path, name + '.xml')
@@ -31,8 +36,10 @@ def rename(path, startIndex, prefix = ''):
         newXML = Path(path, prefix + str(count) + '.xml')
         print(f'{oldJPG} -> {newJPG}')
         print(f'{oldXML} -> {newXML}')
-        oldJPG.rename(newJPG)
-        oldXML.rename(newXML)
+        if oldJPG.is_file():
+            oldJPG.rename(newJPG)
+        if oldXML.is_file():
+            oldXML.rename(newXML)
 
 # delete all files in the given path
 def deleteFiles(path):
@@ -52,10 +59,10 @@ def subtract_mean(image):
     image = image - mean
     return image
 
-def get_bboxes(path, jpg_files):
+def get_bboxes(path, jpg_paths: list[Path]):
     path = Path(path)
     bbss = []
-    for img in jpg_files:
+    for img in jpg_paths:
         name = img.stem
         xml = path / (name + '.xml')
         tree = ET.parse(str(xml))
@@ -198,7 +205,7 @@ def create_bbs(root, shape: int) -> BoundingBoxesOnImage:
         bboxes.append(BoundingBox(x1=xmin, y1=ymin, x2=xmax, y2=ymax, label=member.find('name').text))
     return BoundingBoxesOnImage(bboxes, shape)
 
-#gets all file names in the directory that end in .jpg
+# Gets all file names in the directory that end in .jpg
 def getJPGFileNames(path: Path):
     path = Path(path)
     jpg = list(path.glob('*.jpg')) + list(path.glob('*.jpeg'))
@@ -211,10 +218,29 @@ def get_children_mem_consumption():
     children = psutil.Process(pid).children(recursive=True)
     return sum([child.memory_info().rss for child in children])
 
-def flipHorizontal(path):
+def flipHorizontal(path, save_path):
     path = Path(path)
+    save_path = Path(save_path)
     if not path.exists() or not path.is_dir():
         print_red(f"Directory: '{path}' does not exist or is not a directory.")
         return
     
-    get_bboxes
+    jpgPaths = get_jpg_paths(path)
+    bboxes = get_bboxes(path, jpgPaths)
+    aug = iaa.Fliplr(1.0)
+    for i, img in enumerate(jpgPaths):
+        image = cv2.imread(str(img))
+        if image is None:
+            print_red(f"Failed to read image: {img}")
+            continue
+        bbs = bboxes[i]
+        imgaug, bbsaug = aug.augment(image=image, bounding_boxes=bbs)
+        # save augmented image
+        cv2.imwrite(str(save_path / img.name), imgaug)
+
+        # save augmented bboxes
+        height, width, _ = imgaug.shape
+        writer = Writer(str(save_path / img.name), width=width, height=height)
+        for box in bbsaug.bounding_boxes:
+            writer.addObject(box.label, box.x1, box.y1, box.x2, box.y2)
+        writer.save(str(save_path / (img.stem + '.xml')))
