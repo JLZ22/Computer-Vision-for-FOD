@@ -301,3 +301,34 @@ def lowerCaseLabels(path, save_path):
         tree.write(str(save_path / (img.stem + '.xml')))
         # save corresponding jpg in save_path
         cv2.imwrite(str(save_path / img.name), cv2.imread(str(img)))
+
+def updatePath(path, save_path='', new_path=''):
+    path = Path(path).absolute()
+    if save_path == '':
+        save_path = path
+    if new_path == '':
+        new_path = path
+    save_path = Path(save_path).absolute()
+    new_path = Path(new_path).absolute()
+    if not path.exists() or not path.is_dir():
+        print_red(f"Directory: '{path}' does not exist or is not a directory.")
+        return
+    if not save_path.exists() or not save_path.is_dir():
+        print_red(f"Directory: '{save_path}' does not exist or is not a directory.")
+        return
+    if not new_path.exists() or not new_path.is_dir():
+        print_red(f"Directory: '{new_path}' does not exist or is not a directory.")
+        return
+    jpgPaths = get_jpg_paths(path)
+    for i, img in enumerate(jpgPaths):
+        xml = path / (img.stem + '.xml')
+        if not xml.exists():
+            print_red(f"XML file: '{xml}' does not exist.")
+            continue
+        tree = ET.parse(str(xml))
+        root = tree.getroot()
+        for member in root.findall('path'):
+            member.text = str(new_path / img.name)
+        tree.write(str(save_path / (img.stem + '.xml')))
+        # save corresponding jpg in save_path
+        cv2.imwrite(str(save_path / img.name), cv2.imread(str(img)))
