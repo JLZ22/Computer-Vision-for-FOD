@@ -103,7 +103,7 @@ class SimpleAugSeq:
             img_path = str(self.save_path / (original_name + '_aug_' + str(i) + '.jpg'))
             xml_path = str(self.save_path / (original_name + '_aug_' + str(i) + '.xml'))
             cv2.imwrite(img_path, imgs[i])
-            writer = Writer(img_path, height, width)
+            writer = Writer(img_path, width=width, height=height)
             for box in bbss[i]:
                 writer.addObject(box.label, box.x1, box.y1, box.x2, box.y2)
 
