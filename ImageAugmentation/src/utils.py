@@ -16,14 +16,13 @@ def print_red(text):
 def print_green(text):
     print("\033[92m{}\033[0m".format(text))
 
-def get_jpg_names(path):
+def get_jpg_paths(path):
     return [item for item in path.iterdir() if item.suffix.lower() in {'.jpg', '.jpeg'}]
 
 def rename(path, startIndex, prefix = ''):
     path = Path(path)
-    files = get_jpg_names(path)
+    files = get_jpg_paths(path)
     files.sort()
-    print(files)
     for count, filename in enumerate(files, start=startIndex):
         name = filename.stem
         oldJPG = Path(path, name + '.jpg')
@@ -200,7 +199,7 @@ def create_bbs(root, shape: int) -> BoundingBoxesOnImage:
     return BoundingBoxesOnImage(bboxes, shape)
 
 #gets all file names in the directory that end in .jpg
-def getFileNames(path: Path):
+def getJPGFileNames(path: Path):
     path = Path(path)
     jpg = list(path.glob('*.jpg')) + list(path.glob('*.jpeg'))
     return [item.stem for item in jpg]
@@ -211,3 +210,11 @@ def get_children_mem_consumption():
     pid = os.getpid()
     children = psutil.Process(pid).children(recursive=True)
     return sum([child.memory_info().rss for child in children])
+
+def flipHorizontal(path):
+    path = Path(path)
+    if not path.exists() or not path.is_dir():
+        print_red(f"Directory: '{path}' does not exist or is not a directory.")
+        return
+    
+    get_bboxes

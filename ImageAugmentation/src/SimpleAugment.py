@@ -38,7 +38,7 @@ class SimpleAugSeq:
         ia.seed(self.seed)
         #Checks if the array that was passed in has a length of 0. If so it populates names array with every image name from read path
         if len(self.names) == 0:
-            self.names = utils.getFileNames(self.path)
+            self.names = utils.getJPGFileNames(self.path)
         if not self.save_path.exists() or not self.save_path.is_dir():
             os.makedirs(self.save_path)
     
