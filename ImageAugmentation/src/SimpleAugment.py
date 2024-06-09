@@ -178,8 +178,8 @@ class SimpleAugSeq:
         seq = self.create_sequential() # create the sequential object in charge of the augmentation
 
         images_aug, bbs_aug = seq(images=images, bounding_boxes=allbbs)
-        height = int(root.find("size")[0].text)
-        width = int(root.find("size")[1].text)
+        height = int(root.find("size").find("height").text)
+        width = int(root.find("size").find("width").text)
         self.save_aug_pairs(images_aug, bbs_aug, name, height, width)
         # clean up arrays 
         del images
