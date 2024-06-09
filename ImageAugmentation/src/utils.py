@@ -173,7 +173,18 @@ def visualize_annotations(path, save_path):
             cv2.rectangle(img,(int(float(xmin_data)),int(float(ymin_data))),
                               (int(float(xmax_data)),int(float(ymax_data))),
                               (55,255,155),
-                               2)
+                               1)
+            # add label
+            label = root.getElementsByTagName('name')[i]
+            label_data = label.childNodes[0].data
+
+            cv2.putText(img, 
+                        label_data, 
+                        [int(float(xmin_data)) + 2, int(float(ymin_data)) - 2], 
+                        cv2.FONT_HERSHEY_SIMPLEX, 
+                        0.3, 
+                        (0,0,0), 
+                        1)
         # save image with bounding boxes drawn
         cv2.imwrite(str(save_path / (filename + '.jpg')),img)
 
@@ -271,3 +282,22 @@ def flipVerticalInDirectory(path, save_path):
         for box in bbsaug.bounding_boxes:
             writer.addObject(box.label, box.x1, box.y1, box.x2, box.y2)
         writer.save(str(save_path / (img.stem + '.xml')))
+
+def lowerCaseLabels(path, save_path):
+    path = Path(path)
+    if not path.exists() or not path.is_dir():
+        print_red(f"Directory: '{path}' does not exist or is not a directory.")
+        return
+    jpgPaths = get_jpg_paths(path)
+    for i, img in enumerate(jpgPaths):
+        xml = path / (img.stem + '.xml')
+        if not xml.exists():
+            print_red(f"XML file: '{xml}' does not exist.")
+            continue
+        tree = ET.parse(str(xml))
+        root = tree.getroot()
+        for member in root.findall('object'):
+            member.find('name').text = member.find('name').text.lower()
+        tree.write(str(save_path / (img.stem + '.xml')))
+        # save corresponding jpg in save_path
+        cv2.imwrite(str(save_path / img.name), cv2.imread(str(img)))
