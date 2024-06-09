@@ -1,7 +1,7 @@
 <annotation>
 	<folder>Wrench</folder>
 	<filename>20240418_111531.jpg</filename>
-	<path>Z:\Restricted\Research\Project Folders\Active\ADT - Assembly Digital Thread\FOD\Images\Wrench\20240418_111531.jpg</path>
+	<path>../test_data/test_pairs/20240418_111531.jpg</path>
 	<source>
 		<database>Unknown</database>
 	</source>
