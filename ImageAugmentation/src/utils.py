@@ -283,8 +283,11 @@ def flipVerticalInDirectory(path, save_path):
             writer.addObject(box.label, box.x1, box.y1, box.x2, box.y2)
         writer.save(str(save_path / (img.stem + '.xml')))
 
-def lowerCaseLabels(path, save_path):
+def lowerCaseLabels(path, save_path=None):
     path = Path(path)
+    if save_path == None:
+        save_path = path
+    save_path = Path(save_path)
     if not path.exists() or not path.is_dir():
         print_red(f"Directory: '{path}' does not exist or is not a directory.")
         return
@@ -302,14 +305,14 @@ def lowerCaseLabels(path, save_path):
         # save corresponding jpg in save_path
         cv2.imwrite(str(save_path / img.name), cv2.imread(str(img)))
 
-def updatePath(path, save_path='', new_path=''):
-    path = Path(path).absolute()
-    if save_path == '':
+def updatePath(path, save_path=None, new_path=None):
+    path = Path(path)
+    if save_path == None:
         save_path = path
-    if new_path == '':
+    if new_path == None:
         new_path = path
-    save_path = Path(save_path).absolute()
-    new_path = Path(new_path).absolute()
+    save_path = Path(save_path)
+    new_path = Path(new_path)
     if not path.exists() or not path.is_dir():
         print_red(f"Directory: '{path}' does not exist or is not a directory.")
         return

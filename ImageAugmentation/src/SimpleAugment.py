@@ -193,8 +193,8 @@ if __name__ == '__main__':
     file_names = ['3277']
 
     raw_pairs = Path('..', 'test_data', 'raw_pairs')
-    out0 = Path('..', 'test_data', 'out0').absolute()
-    out1 = Path('..', 'test_data', 'out1').absolute()
+    out0 = Path('..', 'test_data', 'out0')
+    out1 = Path('..', 'test_data', 'out1')
 
     print(f"Available Physical Memory of System: {psutil.virtual_memory().available / 1024**2}MB")
     print(f"Total Physical Memory of System: {psutil.virtual_memory().total / 1024**2}MB")
