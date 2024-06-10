@@ -196,7 +196,7 @@ def lowercase_labels_in_directory(path: Path, save_path=None):
         print_red(f"Directory: '{path}' does not exist or is not a directory.")
         return
     jpgPaths = get_jpg_paths(path)
-    for i, img in enumerate(jpgPaths):
+    for img in jpgPaths:
         xml = path / (img.stem + '.xml')
         if not xml.exists():
             print_red(f"XML file: '{xml}' does not exist.")
