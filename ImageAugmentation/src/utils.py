@@ -60,7 +60,7 @@ def subtract_mean(image):
     image = image - mean
     return image
 
-def get_bbox(path: Path, jpg_path: Path):
+def get_corresponding_bbox(path: Path, jpg_path: Path):
     path = Path(path)
     jpg_path = Path(jpg_path)
     name = jpg_path.stem
@@ -71,15 +71,6 @@ def get_bbox(path: Path, jpg_path: Path):
     root = tree.getroot()
     bbs = create_bbs(root, cv2.imread(str(jpg_path)).shape)
     return bbs
-
-def get_bboxes(path: Path, jpg_paths: list[Path]):
-    path = Path(path)
-    bbss = []
-    for img in jpg_paths:
-        bbs = get_bbox(path, img)
-        if bbs is not None:
-            bbss.append(bbs)
-    return bbss
 
 '''
 https://piyush-kulkarni.medium.com/visualize-the-xml-annotations-in-python-c9696ba9c188
@@ -143,6 +134,7 @@ def visualize_annotations(path, save_path):
                         0.3, 
                         (0,0,0), 
                         1)
+            
         # save image with bounding boxes drawn
         cv2.imwrite(str(save_path / (filename + '.jpg')),img)
 
@@ -174,7 +166,7 @@ def create_bbs(root, shape: int) -> BoundingBoxesOnImage:
         bboxes.append(BoundingBox(x1=xmin, y1=ymin, x2=xmax, y2=ymax, label=member.find('name').text))
     return BoundingBoxesOnImage(bboxes, shape)
 
-# Gets all file names in the directory that end in .jpg
+# Gets all file names in the directory that end in .jpg or .jpeg
 def get_JPG_file_names(path: Path):
     path = Path(path)
     jpg = list(path.glob('*.jpg')) + list(path.glob('*.jpeg'))
@@ -247,12 +239,12 @@ def aug_in_directory(path, save_path, aug):
         print_red(f"Directory: '{path}' does not exist or is not a directory.")
         return
     jpgPaths = get_jpg_paths(path)
-    for i, img in enumerate(jpgPaths):
+    for img in jpgPaths:
         image = cv2.imread(str(img))
         if image is None:
             print_red(f"Failed to read image: {img}")
             continue
-        bbs = get_bbox(path, img)
+        bbs = get_corresponding_bbox(path, img)
         hasXML = bbs is not None
         if hasXML:
             image, bbs = aug.augment(image=image, bounding_boxes=bbs)
