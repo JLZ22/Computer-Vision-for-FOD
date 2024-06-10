@@ -277,11 +277,14 @@ def flip_vertical_in_directory(path, save_path):
     aug_in_directory(path, save_path, aug)
 
 def rotate_in_directory(path, save_path, angle):
-    aug = iaa.Affine(rotate=angle)
-    aug_in_directory(path, save_path, aug)
+    if angle % 90 != 0:
+        aug = iaa.Affine(rotate=angle)
+        aug_in_directory(path, save_path, aug)
+    else:
+        rotate_90_in_directory(path, save_path, angle // 90)
 
-def rotate_90_in_directory(path, save_path):
-    aug = iaa.Rot90(1)
+def rotate_90_in_directory(path, save_path, repetitions=1):
+    aug = iaa.Rot90(repetitions)
     aug_in_directory(path, save_path, aug)
 
 def pad_and_resize_in_directory(path: Path, save_path: Path, width=512, height=512):
