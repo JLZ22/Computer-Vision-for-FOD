@@ -241,43 +241,51 @@ def aug_in_directory(path, save_path, aug, includeXML=True):
         return
     
     # create save directory if it does not exist
+    save_exists = True
     if not save_path.exists():
         os.mkdir(str(save_path))
+        save_exists = False
 
     # get image paths
     jpgPaths = get_jpg_paths(path)
 
-    # augment images
-    for img in jpgPaths:
-        # read image and check if it is valid
-        image = cv2.imread(str(img))
-        if image is None:
-            print_red(f"Failed to read image: {img}")
-            continue
+    try:
+        # augment images
+        for img in jpgPaths:
+            # read image and check if it is valid
+            image = cv2.imread(str(img))
+            if image is None:
+                print_red(f"Failed to read image: {img}")
+                continue
 
-        # get corresponding bounding boxes
-        bbs = get_corresponding_bbox(path, img)
+            # get corresponding bounding boxes
+            bbs = get_corresponding_bbox(path, img)
 
-        # check if we should augment the bounding boxes
-        hasXML = bbs is not None and includeXML
+            # check if we should augment the bounding boxes
+            hasXML = bbs is not None and includeXML
 
-        # augment image and bounding boxes if bounding boxes exists 
-        # and the user wants to include the xml files (aka bounding boxes)
-        # in the augmentation 
-        if hasXML:
-            image, bbs = aug.augment(image=image, bounding_boxes=bbs)
-            # save augmented bboxes
-            height, width, _ = image.shape
-            writer = Writer(str(save_path / img.name), width=width, height=height)
-            for box in bbs.bounding_boxes:
-                writer.addObject(box.label, box.x1, box.y1, box.x2, box.y2)
-            writer.save(str(save_path / (img.stem + '.xml'))
-            )
-        else:
-            image = aug.augment(image=image)
+            # augment image and bounding boxes if bounding boxes exists 
+            # and the user wants to include the xml files (aka bounding boxes)
+            # in the augmentation 
+            if hasXML:
+                image, bbs = aug.augment(image=image, bounding_boxes=bbs)
+                # save augmented bboxes
+                height, width, _ = image.shape
+                writer = Writer(str(save_path / img.name), width=width, height=height)
+                for box in bbs.bounding_boxes:
+                    writer.addObject(box.label, box.x1, box.y1, box.x2, box.y2)
+                writer.save(str(save_path / (img.stem + '.xml'))
+                )
+            else:
+                image = aug.augment(image=image)
 
-        # save augmented image
-        cv2.imwrite(str(save_path / img.name), image)
+            # save augmented image
+            cv2.imwrite(str(save_path / img.name), image)
+    except Exception as e:
+        traceback.print_exc()
+        # if we created the save directory, delete it
+        if not save_exists:
+            os.rmdir(str(save_path))
 
 def flip_horizontal_in_directory(path, save_path):
     aug = iaa.Fliplr(1.0)
@@ -299,30 +307,9 @@ def rotate_90_in_directory(path, save_path, repetitions=1):
     aug_in_directory(path, save_path, aug)
 
 def pad_and_resize_in_directory(path: Path, save_path: Path, width=512, height=512):
-    path = Path(path)
-    save_path = Path(save_path)
-    # check read and write paths
-    if not path.exists() or not path.is_dir():
-        print_red(f"Directory: '{path}' does not exist or is not a directory.")
-        return
-    # create save directory if it does not exist
-    # track if we created the save directory
-    save_exists = True
-    if not save_path.exists() or not save_path.is_dir():
-        save_exists = False
-        os.mkdir(str(save_path))
-    
     # augmenters
     aug = iaa.Sequential([
         iaa.PadToSquare(),
         iaa.Resize({'height' : height, 'width' : width})
     ])
-
-    # read images, pad and resize
-    try:
-        aug_in_directory(path, save_path, aug)
-    except Exception as e:
-        traceback.print_exc()
-        # if we created the save directory, delete it
-        if not save_exists:
-            os.rmdir(str(save_path))
+    aug_in_directory(path, save_path, aug)
