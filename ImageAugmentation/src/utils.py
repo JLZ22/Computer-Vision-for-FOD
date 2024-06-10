@@ -343,7 +343,8 @@ def flip_vertical_in_directory(read_path, save_path, includeXML=True):
     aug_in_directory(read_path, save_path, aug, includeXML)
 
 '''
-Rotate the images in the directory by the given angle and save them.
+Rotate the images in the directory by the given angle and save them
+without altering the aspect ratio.
 If includeXML is True, the bounding boxes will be rotated as well.
 '''
 def rotate_in_directory(read_path, save_path, angle, includeXML=True):
@@ -354,7 +355,8 @@ def rotate_in_directory(read_path, save_path, angle, includeXML=True):
         rotate_90_in_directory(read_path, save_path, angle // 90)
 
 '''
-Rotate the images in the directory by 90 degrees and save them.
+Rotate the images in the directory by 90 degrees and save them and save 
+them without altering the aspect ratio.
 If includeXML is True, the bounding boxes will be rotated as well.
 '''
 def rotate_90_in_directory(read_path, save_path, repetitions=1, includeXML=True):
@@ -363,6 +365,7 @@ def rotate_90_in_directory(read_path, save_path, repetitions=1, includeXML=True)
 
 '''
 Resize the images in the directory to the given width and height and save them.
+This does not guarantee that the aspect ratio will remain the same.
 If includeXML is True, the bounding boxes will be resized as well.
 '''
 def resize_in_directory(read_path: Path, save_path: Path, width=512, height=512, includeXML=True):
