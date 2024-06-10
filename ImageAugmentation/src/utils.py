@@ -42,7 +42,7 @@ def rename(path: Path, startIndex=0, prefix = ''):
             oldXML.rename(newXML)
 
 # delete all files in the given path
-def deleteFiles(path: Path):
+def delete_files(path: Path):
     path = Path(path)
     if not path.exists() or not path.is_dir():
         print_red(f"Directory: '{path}' does not exist or is not a directory.")
@@ -80,35 +80,6 @@ def get_bboxes(path: Path, jpg_paths: list[Path]):
         if bbs is not None:
             bbss.append(bbs)
     return bbss
-
-def pad_and_resize_in_directory(path: Path, save_path: Path, width=512, height=512):
-    path = Path(path)
-    save_path = Path(save_path)
-    # check read and write paths
-    if not path.exists() or not path.is_dir():
-        print_red(f"Directory: '{path}' does not exist or is not a directory.")
-        return
-    # create save directory if it does not exist
-    # track if we created the save directory
-    save_exists = True
-    if not save_path.exists() or not save_path.is_dir():
-        save_exists = False
-        os.mkdir(str(save_path))
-    
-    # augmenters
-    aug = iaa.Sequential([
-        iaa.PadToSquare(),
-        iaa.Resize({'height' : height, 'width' : width})
-    ])
-
-    # read images, pad and resize
-    try:
-        augInDirectory(path, save_path, aug)
-    except Exception as e:
-        traceback.print_exc()
-        # if we created the save directory, delete it
-        if not save_exists:
-            os.rmdir(str(save_path))
 
 '''
 https://piyush-kulkarni.medium.com/visualize-the-xml-annotations-in-python-c9696ba9c188
@@ -204,7 +175,7 @@ def create_bbs(root, shape: int) -> BoundingBoxesOnImage:
     return BoundingBoxesOnImage(bboxes, shape)
 
 # Gets all file names in the directory that end in .jpg
-def getJPGFileNames(path: Path):
+def get_JPG_file_names(path: Path):
     path = Path(path)
     jpg = list(path.glob('*.jpg')) + list(path.glob('*.jpeg'))
     return [item.stem for item in jpg]
@@ -216,7 +187,7 @@ def get_children_mem_consumption():
     children = psutil.Process(pid).children(recursive=True)
     return sum([child.memory_info().rss for child in children])
 
-def lowerCaseLabels(path: Path, save_path=None):
+def lowercase_labels_in_directory(path: Path, save_path=None):
     path = Path(path)
     if save_path == None:
         save_path = path
@@ -238,7 +209,7 @@ def lowerCaseLabels(path: Path, save_path=None):
         # save corresponding jpg in save_path
         cv2.imwrite(str(save_path / img.name), cv2.imread(str(img)))
 
-def updatePath(path, save_path=None, new_path=None):
+def update_path(path, save_path=None, new_path=None):
     path = Path(path)
     if save_path == None:
         save_path = path
@@ -269,23 +240,7 @@ def updatePath(path, save_path=None, new_path=None):
         # save corresponding jpg in save_path
         cv2.imwrite(str(save_path / img.name), cv2.imread(str(img)))
 
-def flipHorizontalInDirectory(path, save_path):
-    aug = iaa.Fliplr(1.0)
-    augInDirectory(path, save_path, aug)
-
-def flipVerticalInDirectory(path, save_path):
-    aug = iaa.Flipud(1.0)
-    augInDirectory(path, save_path, aug)
-
-def rotateInDirectory(path, save_path, angle):
-    aug = iaa.Affine(rotate=angle)
-    augInDirectory(path, save_path, aug)
-
-def rotate90InDirectory(path, save_path):
-    aug = iaa.Rot90(1)
-    augInDirectory(path, save_path, aug)
-
-def augInDirectory(path, save_path, aug):
+def aug_in_directory(path, save_path, aug):
     path = Path(path)
     save_path = Path(save_path)
     if not path.exists() or not path.is_dir():
@@ -312,3 +267,48 @@ def augInDirectory(path, save_path, aug):
             image = aug.augment(image=image)
         # save augmented image
         cv2.imwrite(str(save_path / img.name), image)
+
+def flip_horizontal_in_directory(path, save_path):
+    aug = iaa.Fliplr(1.0)
+    aug_in_directory(path, save_path, aug)
+
+def flip_vertical_in_directory(path, save_path):
+    aug = iaa.Flipud(1.0)
+    aug_in_directory(path, save_path, aug)
+
+def rotate_in_directory(path, save_path, angle):
+    aug = iaa.Affine(rotate=angle)
+    aug_in_directory(path, save_path, aug)
+
+def rotate_90_in_directory(path, save_path):
+    aug = iaa.Rot90(1)
+    aug_in_directory(path, save_path, aug)
+
+def pad_and_resize_in_directory(path: Path, save_path: Path, width=512, height=512):
+    path = Path(path)
+    save_path = Path(save_path)
+    # check read and write paths
+    if not path.exists() or not path.is_dir():
+        print_red(f"Directory: '{path}' does not exist or is not a directory.")
+        return
+    # create save directory if it does not exist
+    # track if we created the save directory
+    save_exists = True
+    if not save_path.exists() or not save_path.is_dir():
+        save_exists = False
+        os.mkdir(str(save_path))
+    
+    # augmenters
+    aug = iaa.Sequential([
+        iaa.PadToSquare(),
+        iaa.Resize({'height' : height, 'width' : width})
+    ])
+
+    # read images, pad and resize
+    try:
+        aug_in_directory(path, save_path, aug)
+    except Exception as e:
+        traceback.print_exc()
+        # if we created the save directory, delete it
+        if not save_exists:
+            os.rmdir(str(save_path))
