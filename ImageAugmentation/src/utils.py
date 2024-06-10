@@ -81,7 +81,7 @@ def get_bboxes(path: Path, jpg_paths: list[Path]):
             bbss.append(bbs)
     return bbss
 
-def pad_and_resize_all_square(path: Path, save_path: Path, dim, batchsize = 16):
+def pad_and_resize_in_directory(path: Path, save_path: Path, width=512, height=512):
     path = Path(path)
     save_path = Path(save_path)
     # check read and write paths
@@ -98,35 +98,12 @@ def pad_and_resize_all_square(path: Path, save_path: Path, dim, batchsize = 16):
     # augmenters
     aug = iaa.Sequential([
         iaa.PadToSquare(),
-        iaa.Resize({'height' : dim, 'width' : dim})
+        iaa.Resize({'height' : height, 'width' : width})
     ])
 
     # read images, pad and resize
     try:
-        bbss = True
-        image_files = list(path.glob('*.jpg')) + list(path.glob('*.jpeg'))
-        if list(path.glob('*.xml')) != []:
-            assert len(image_files) == len(list(path.glob('*.xml')))
-        else:
-            bbss = False
-        for i in range(0, len(image_files), batchsize):
-            batch = image_files[i:i+batchsize]
-            images = [cv2.imread(str(image_path)) for image_path in batch]
-            resized = []
-            res_bbss = []
-            if bbss:
-                boxes = get_bboxes(path, batch)
-                resized, res_bbss = aug(images=images, bounding_boxes=boxes)
-            else:
-                resized = aug(images=images)
-            for i, img in enumerate(resized):
-                cv2.imwrite(str(save_path / str('resized_' + str(batch[i].name))) , img)
-            if bbss:
-                for i, bbs in enumerate(res_bbss):
-                    writer = Writer(str(save_path / str('resized_' + str(batch[i].name))), dim, dim)
-                    for box in bbs.bounding_boxes:
-                        writer.addObject(box.label, box.x1, box.y1, box.x2, box.y2)
-                    writer.save(str(save_path / ('resized_' + str(batch[i].stem + '.xml'))))
+        augInDirectory(path, save_path, aug)
     except Exception as e:
         traceback.print_exc()
         # if we created the save directory, delete it
@@ -315,20 +292,23 @@ def augInDirectory(path, save_path, aug):
         print_red(f"Directory: '{path}' does not exist or is not a directory.")
         return
     jpgPaths = get_jpg_paths(path)
-    bboxes = get_bboxes(path, jpgPaths)
     for i, img in enumerate(jpgPaths):
         image = cv2.imread(str(img))
         if image is None:
             print_red(f"Failed to read image: {img}")
             continue
-        bbs = bboxes[i]
-        imgaug, bbsaug = aug.augment(image=image, bounding_boxes=bbs)
+        bbs = get_bbox(path, img)
+        hasXML = bbs is not None
+        if hasXML:
+            image, bbs = aug.augment(image=image, bounding_boxes=bbs)
+            # save augmented bboxes
+            height, width, _ = image.shape
+            writer = Writer(str(save_path / img.name), width=width, height=height)
+            for box in bbs.bounding_boxes:
+                writer.addObject(box.label, box.x1, box.y1, box.x2, box.y2)
+            writer.save(str(save_path / (img.stem + '.xml'))
+            )
+        else:
+            image = aug.augment(image=image)
         # save augmented image
-        cv2.imwrite(str(save_path / img.name), imgaug)
-
-        # save augmented bboxes
-        height, width, _ = imgaug.shape
-        writer = Writer(str(save_path / img.name), width=width, height=height)
-        for box in bbsaug.bounding_boxes:
-            writer.addObject(box.label, box.x1, box.y1, box.x2, box.y2)
-        writer.save(str(save_path / (img.stem + '.xml')))
+        cv2.imwrite(str(save_path / img.name), image)
