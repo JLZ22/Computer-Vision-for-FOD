@@ -232,20 +232,38 @@ def update_path(path, save_path=None, new_path=None):
         # save corresponding jpg in save_path
         cv2.imwrite(str(save_path / img.name), cv2.imread(str(img)))
 
-def aug_in_directory(path, save_path, aug):
+def aug_in_directory(path, save_path, aug, includeXML=True):
+    # check read and write paths
     path = Path(path)
     save_path = Path(save_path)
     if not path.exists() or not path.is_dir():
         print_red(f"Directory: '{path}' does not exist or is not a directory.")
         return
+    
+    # create save directory if it does not exist
+    if not save_path.exists():
+        os.mkdir(str(save_path))
+
+    # get image paths
     jpgPaths = get_jpg_paths(path)
+
+    # augment images
     for img in jpgPaths:
+        # read image and check if it is valid
         image = cv2.imread(str(img))
         if image is None:
             print_red(f"Failed to read image: {img}")
             continue
+
+        # get corresponding bounding boxes
         bbs = get_corresponding_bbox(path, img)
-        hasXML = bbs is not None
+
+        # check if we should augment the bounding boxes
+        hasXML = bbs is not None and includeXML
+
+        # augment image and bounding boxes if bounding boxes exists 
+        # and the user wants to include the xml files (aka bounding boxes)
+        # in the augmentation 
         if hasXML:
             image, bbs = aug.augment(image=image, bounding_boxes=bbs)
             # save augmented bboxes
@@ -257,6 +275,7 @@ def aug_in_directory(path, save_path, aug):
             )
         else:
             image = aug.augment(image=image)
+
         # save augmented image
         cv2.imwrite(str(save_path / img.name), image)
 
