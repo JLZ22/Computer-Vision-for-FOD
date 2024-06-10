@@ -19,7 +19,7 @@ def print_green(text):
 def get_jpg_paths(path):
     return [item for item in path.iterdir() if item.suffix.lower() in {'.jpg', '.jpeg'}]
 
-def rename(path, startIndex=0, prefix = ''):
+def rename(path: Path, startIndex=0, prefix = ''):
     path = Path(path)
     files = get_jpg_paths(path)
     files.sort()
@@ -42,7 +42,7 @@ def rename(path, startIndex=0, prefix = ''):
             oldXML.rename(newXML)
 
 # delete all files in the given path
-def deleteFiles(path):
+def deleteFiles(path: Path):
     path = Path(path)
     if not path.exists() or not path.is_dir():
         print_red(f"Directory: '{path}' does not exist or is not a directory.")
@@ -53,25 +53,35 @@ def deleteFiles(path):
     print_green(f"Deleted all files in the directory: '{path}'")
 
 def subtract_mean(image):
+    image = np.array(image)
     # calculate per channel mean pixel values
     mean = np.mean(image, axis=(0, 1))
     # subtract the mean from the image
     image = image - mean
     return image
 
-def get_bboxes(path, jpg_paths: list[Path]):
+def get_bbox(path: Path, jpg_path: Path):
+    path = Path(path)
+    jpg_path = Path(jpg_path)
+    name = jpg_path.stem
+    xml = path / (name + '.xml')
+    if not xml.exists():
+        return None
+    tree = ET.parse(str(xml))
+    root = tree.getroot()
+    bbs = create_bbs(root, cv2.imread(str(jpg_path)).shape)
+    return bbs
+
+def get_bboxes(path: Path, jpg_paths: list[Path]):
     path = Path(path)
     bbss = []
     for img in jpg_paths:
-        name = img.stem
-        xml = path / (name + '.xml')
-        tree = ET.parse(str(xml))
-        root = tree.getroot()
-        bbs = create_bbs(root, cv2.imread(str(img)).shape)
-        bbss.append(bbs)
+        bbs = get_bbox(path, img)
+        if bbs is not None:
+            bbss.append(bbs)
     return bbss
 
-def pad_and_resize_all_square(path, save_path, dim, batchsize = 16):
+def pad_and_resize_all_square(path: Path, save_path: Path, dim, batchsize = 16):
     path = Path(path)
     save_path = Path(save_path)
     # check read and write paths
@@ -229,61 +239,7 @@ def get_children_mem_consumption():
     children = psutil.Process(pid).children(recursive=True)
     return sum([child.memory_info().rss for child in children])
 
-def flipHorizontalInDirectory(path, save_path):
-    path = Path(path)
-    save_path = Path(save_path)
-    if not path.exists() or not path.is_dir():
-        print_red(f"Directory: '{path}' does not exist or is not a directory.")
-        return
-    
-    jpgPaths = get_jpg_paths(path)
-    bboxes = get_bboxes(path, jpgPaths)
-    aug = iaa.Fliplr(1.0)
-    for i, img in enumerate(jpgPaths):
-        image = cv2.imread(str(img))
-        if image is None:
-            print_red(f"Failed to read image: {img}")
-            continue
-        bbs = bboxes[i]
-        imgaug, bbsaug = aug.augment(image=image, bounding_boxes=bbs)
-        # save augmented image
-        cv2.imwrite(str(save_path / img.name), imgaug)
-
-        # save augmented bboxes
-        height, width, _ = imgaug.shape
-        writer = Writer(str(save_path / img.name), width=width, height=height)
-        for box in bbsaug.bounding_boxes:
-            writer.addObject(box.label, box.x1, box.y1, box.x2, box.y2)
-        writer.save(str(save_path / (img.stem + '.xml')))
-
-def flipVerticalInDirectory(path, save_path):
-    path = Path(path)
-    save_path = Path(save_path)
-    if not path.exists() or not path.is_dir():
-        print_red(f"Directory: '{path}' does not exist or is not a directory.")
-        return
-    
-    jpgPaths = get_jpg_paths(path)
-    bboxes = get_bboxes(path, jpgPaths)
-    aug = iaa.Flipud(1.0)
-    for i, img in enumerate(jpgPaths):
-        image = cv2.imread(str(img))
-        if image is None:
-            print_red(f"Failed to read image: {img}")
-            continue
-        bbs = bboxes[i]
-        imgaug, bbsaug = aug.augment(image=image, bounding_boxes=bbs)
-        # save augmented image
-        cv2.imwrite(str(save_path / img.name), imgaug)
-
-        # save augmented bboxes
-        height, width, _ = imgaug.shape
-        writer = Writer(str(save_path / img.name), width=width, height=height)
-        for box in bbsaug.bounding_boxes:
-            writer.addObject(box.label, box.x1, box.y1, box.x2, box.y2)
-        writer.save(str(save_path / (img.stem + '.xml')))
-
-def lowerCaseLabels(path, save_path=None):
+def lowerCaseLabels(path: Path, save_path=None):
     path = Path(path)
     if save_path == None:
         save_path = path
@@ -335,3 +291,44 @@ def updatePath(path, save_path=None, new_path=None):
         tree.write(str(save_path / (img.stem + '.xml')))
         # save corresponding jpg in save_path
         cv2.imwrite(str(save_path / img.name), cv2.imread(str(img)))
+
+def flipHorizontalInDirectory(path, save_path):
+    aug = iaa.Fliplr(1.0)
+    augInDirectory(path, save_path, aug)
+
+def flipVerticalInDirectory(path, save_path):
+    aug = iaa.Flipud(1.0)
+    augInDirectory(path, save_path, aug)
+
+def rotateInDirectory(path, save_path, angle):
+    aug = iaa.Affine(rotate=angle)
+    augInDirectory(path, save_path, aug)
+
+def rotate90InDirectory(path, save_path):
+    aug = iaa.Rot90(1)
+    augInDirectory(path, save_path, aug)
+
+def augInDirectory(path, save_path, aug):
+    path = Path(path)
+    save_path = Path(save_path)
+    if not path.exists() or not path.is_dir():
+        print_red(f"Directory: '{path}' does not exist or is not a directory.")
+        return
+    jpgPaths = get_jpg_paths(path)
+    bboxes = get_bboxes(path, jpgPaths)
+    for i, img in enumerate(jpgPaths):
+        image = cv2.imread(str(img))
+        if image is None:
+            print_red(f"Failed to read image: {img}")
+            continue
+        bbs = bboxes[i]
+        imgaug, bbsaug = aug.augment(image=image, bounding_boxes=bbs)
+        # save augmented image
+        cv2.imwrite(str(save_path / img.name), imgaug)
+
+        # save augmented bboxes
+        height, width, _ = imgaug.shape
+        writer = Writer(str(save_path / img.name), width=width, height=height)
+        for box in bbsaug.bounding_boxes:
+            writer.addObject(box.label, box.x1, box.y1, box.x2, box.y2)
+        writer.save(str(save_path / (img.stem + '.xml')))
