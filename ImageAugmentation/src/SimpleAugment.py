@@ -14,7 +14,7 @@ from pathlib import Path
 import utils
 
 class SimpleAugSeq:
-    def __init__(self, path: Path, 
+    def __init__(self, read_path: Path, 
                  save_path: Path, 
                  num_copies: int, 
                  seed = 1, 
@@ -23,7 +23,7 @@ class SimpleAugSeq:
                  check=True,
                  printSteps=False,
                  checkMem=False) -> None:
-        self.path = Path(path) # read path
+        self.read_path = Path(read_path) # read path
         self.save_path = Path(save_path) # save path
         self.seed = seed # seed for random augmentation generation
         self.num_copies = num_copies # number of augmented copies per original image
@@ -38,7 +38,7 @@ class SimpleAugSeq:
         ia.seed(self.seed)
         #Checks if the array that was passed in has a length of 0. If so it populates names array with every image name from read path
         if len(self.names) == 0:
-            self.names = utils.getJPGFileNames(self.path)
+            self.names = utils.getJPGFileNames(self.read_path)
         if not self.save_path.exists() or not self.save_path.is_dir():
             os.makedirs(self.save_path)
     
@@ -114,7 +114,7 @@ class SimpleAugSeq:
     # each in charge of augmenting one image
     def augment(self):
         # Prints conformation of read and write path
-        print(f"Read Location: \"{self.path}\"")
+        print(f"Read Location: \"{self.read_path}\"")
         print(f"Save Location: \"{self.save_path}\"")
         print(f"Num Copies:   {self.num_copies}")
         print(f"Num Processes:   {self.processes}")
@@ -166,10 +166,10 @@ class SimpleAugSeq:
     # augments the image of name: "name" at 
     # save path and the coresponding xml file
     def augstart(self, name: str):
-        tree = ET.parse(str(Path(self.path, name + '.xml'))) 
+        tree = ET.parse(str(Path(self.read_path, name + '.xml'))) 
         root = tree.getroot()
         # make num_copies number of copies of the current image 
-        images = utils.make_copies_images(str(self.path / (name + '.jpg')), self.num_copies) 
+        images = utils.make_copies_images(str(self.read_path / (name + '.jpg')), self.num_copies) 
         # create the BoundingBoxesOnImage object for the current image
         bbs = utils.create_bbs(root, images[0].shape) 
         # make num_copies number of copies of the current image's corresponding xml file
@@ -199,7 +199,7 @@ if __name__ == '__main__':
     print(f"Available Physical Memory of System: {psutil.virtual_memory().available / 1024**2}MB")
     print(f"Total Physical Memory of System: {psutil.virtual_memory().total / 1024**2}MB")
     print(f"Percentage of Physical Memory Used: {psutil.virtual_memory().percent}%")
-    simple_aug = SimpleAugSeq(path=raw_pairs, 
+    simple_aug = SimpleAugSeq(read_path=raw_pairs, 
                               save_path=out0, 
                               seed=1, 
                               check=False,

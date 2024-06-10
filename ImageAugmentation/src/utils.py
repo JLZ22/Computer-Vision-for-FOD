@@ -16,12 +16,22 @@ def print_red(text):
 def print_green(text):
     print("\033[92m{}\033[0m".format(text))
 
+'''
+Get the paths to all jpg files in the directory.
+'''
 def get_jpg_paths(path):
+    path = Path(path)
     return [item for item in path.iterdir() if item.suffix.lower() in {'.jpg', '.jpeg'}]
 
-def rename(path: Path, startIndex=0, prefix = ''):
-    path = Path(path)
-    files = get_jpg_paths(path)
+'''
+Rename all the jpg and xml files in the directory to the
+format prefix + index + '.jpg' and prefix + index + '.xml'.
+
+This function has no recursive functionality.
+'''
+def rename(read_path: Path, startIndex=0, prefix = ''):
+    read_path = Path(read_path)
+    files = get_jpg_paths(read_path)
     files.sort()
     for count, filename in enumerate(files, start=startIndex):
         if filename.is_dir():
@@ -30,10 +40,10 @@ def rename(path: Path, startIndex=0, prefix = ''):
             print_red(f"File: '{filename}' does not exist.")
             continue
         name = filename.stem
-        oldJPG = Path(path, name + '.jpg')
-        oldXML = Path(path, name + '.xml')
-        newJPG = Path(path, prefix + str(count) + '.jpg')
-        newXML = Path(path, prefix + str(count) + '.xml')
+        oldJPG = Path(read_path, name + '.jpg')
+        oldXML = Path(read_path, name + '.xml')
+        newJPG = Path(read_path, prefix + str(count) + '.jpg')
+        newXML = Path(read_path, prefix + str(count) + '.xml')
         print(f'{oldJPG} -> {newJPG}')
         print(f'{oldXML} -> {newXML}')
         if oldJPG.is_file():
@@ -41,17 +51,22 @@ def rename(path: Path, startIndex=0, prefix = ''):
         if oldXML.is_file():
             oldXML.rename(newXML)
 
-# delete all files in the given path
-def delete_files(path: Path):
-    path = Path(path)
-    if not path.exists() or not path.is_dir():
-        print_red(f"Directory: '{path}' does not exist or is not a directory.")
+'''
+Delete all files in the directory.
+'''
+def delete_files(read_path: Path):
+    read_path = Path(read_path)
+    if not read_path.exists() or not read_path.is_dir():
+        print_red(f"Directory: '{read_path}' does not exist or is not a directory.")
         return
-    for f in path.iterdir():
+    for f in read_path.iterdir():
         if f.is_file():
             f.unlink()
-    print_green(f"Deleted all files in the directory: '{path}'")
+    print_green(f"Deleted all files in the directory: '{read_path}'")
 
+'''
+Subtract the mean pixel values from the image.
+'''
 def subtract_mean(image):
     image = np.array(image)
     # calculate per channel mean pixel values
@@ -60,11 +75,16 @@ def subtract_mean(image):
     image = image - mean
     return image
 
-def get_corresponding_bbox(path: Path, jpg_path: Path):
-    path = Path(path)
+'''
+Get the bounding boxes from the xml file in the read_path
+that corresponds to the jpg file. If the xml file does not 
+exist, return None.
+'''
+def get_corresponding_bbox(read_path: Path, jpg_path: Path):
+    read_path = Path(read_path)
     jpg_path = Path(jpg_path)
     name = jpg_path.stem
-    xml = path / (name + '.xml')
+    xml = read_path / (name + '.xml')
     if not xml.exists():
         return None
     tree = ET.parse(str(xml))
@@ -75,12 +95,12 @@ def get_corresponding_bbox(path: Path, jpg_path: Path):
 '''
 https://piyush-kulkarni.medium.com/visualize-the-xml-annotations-in-python-c9696ba9c188
 '''
-def visualize_annotations(path, save_path):
-    path = Path(path)
+def visualize_annotations(read_path, save_path):
+    read_path = Path(read_path)
     save_path = Path(save_path)
     # check read and write paths
-    if not path.exists() or not path.is_dir():
-        print_red(f"Directory: '{path}' does not exist or is not a directory.")
+    if not read_path.exists() or not read_path.is_dir():
+        print_red(f"Directory: '{read_path}' does not exist or is not a directory.")
         return
     if save_path.exists() and not save_path.is_dir():
         print_red(f"Directory: '{save_path}' exists but is not a directory.")
@@ -89,15 +109,15 @@ def visualize_annotations(path, save_path):
         os.mkdir(str(save_path))
 
     # get images and xml files
-    images = list(path.glob('*.jpg')) + list(path.glob('*.jpeg'))
-    xml = list(path.glob('*.xml'))
+    images = list(read_path.glob('*.jpg')) + list(read_path.glob('*.jpeg'))
+    xml = list(read_path.glob('*.xml'))
     # assert they are the same length
     assert(len(images) == len(xml))
     
     for file in images:
         filename = file.stem
         img_path = file
-        xml_path = path / (filename + '.xml')
+        xml_path = read_path / (filename + '.xml')
         img = cv2.imread(str(img_path))
         if img is None:
             pass
@@ -138,23 +158,28 @@ def visualize_annotations(path, save_path):
         # save image with bounding boxes drawn
         cv2.imwrite(str(save_path / (filename + '.jpg')),img)
 
-# Make num_copies number of the bbs object and return it 
-# in an array
+'''
+Make num_copies number of the bbs object and return it 
+in an array
+'''
 def make_copies_bboxes(bbs: BoundingBoxesOnImage, num_copies: int) -> np.array:
     return [bbs for _ in range(num_copies)]
 
-# Return an array of copies of the image stored at 
-# path/img. The array has num_copies number of copies.
+'''
+Return an array of copies of the image stored at 
+path/img. The array has num_copies number of copies.
+'''
 def make_copies_images(name, num_copies: int) -> np.array:
     return np.array(
         [cv2.imread(name) for _ in range(num_copies)],
         dtype=np.uint8
     )
 
-# Return a BoundingBoxesOnImage object with the 
-# given root and shape by automatically creating a 
-# new BoundingBox object for every object 
-# in the root
+'''
+Return a BoundingBoxesOnImage object with the
+given root and shape by automatically creating a
+new BoundingBox object for every object in the root.
+'''
 def create_bbs(root, shape: int) -> BoundingBoxesOnImage:
     bboxes = []
     for member in root.findall('object'):
@@ -166,30 +191,38 @@ def create_bbs(root, shape: int) -> BoundingBoxesOnImage:
         bboxes.append(BoundingBox(x1=xmin, y1=ymin, x2=xmax, y2=ymax, label=member.find('name').text))
     return BoundingBoxesOnImage(bboxes, shape)
 
-# Gets all file names in the directory that end in .jpg or .jpeg
-def get_JPG_file_names(path: Path):
-    path = Path(path)
-    jpg = list(path.glob('*.jpg')) + list(path.glob('*.jpeg'))
+'''
+Get the names of all the jpg files in the directory
+'''
+def get_JPG_file_names(read_path: Path):
+    read_path = Path(read_path)
+    jpg = list(read_path.glob('*.jpg')) + list(read_path.glob('*.jpeg'))
     return [item.stem for item in jpg]
 
-# Get the memory consumption of all children processes
-# If no children processes are found, return 0
+'''
+Get the memory consumption of all children processes
+If no children processes are found, return 0
+'''
 def get_children_mem_consumption():
     pid = os.getpid()
     children = psutil.Process(pid).children(recursive=True)
     return sum([child.memory_info().rss for child in children])
 
-def lowercase_labels_in_directory(path: Path, save_path=None):
-    path = Path(path)
+'''
+Lowercase the labels in the xml files in the directory.
+If save_path is None, the xml files will be saved in the same directory.
+'''
+def lowercase_labels_in_directory(read_path: Path, save_path=None):
+    read_path = Path(read_path)
     if save_path == None:
-        save_path = path
+        save_path = read_path
     save_path = Path(save_path)
-    if not path.exists() or not path.is_dir():
-        print_red(f"Directory: '{path}' does not exist or is not a directory.")
+    if not read_path.exists() or not read_path.is_dir():
+        print_red(f"Directory: '{read_path}' does not exist or is not a directory.")
         return
-    jpgPaths = get_jpg_paths(path)
+    jpgPaths = get_jpg_paths(read_path)
     for img in jpgPaths:
-        xml = path / (img.stem + '.xml')
+        xml = read_path / (img.stem + '.xml')
         if not xml.exists():
             print_red(f"XML file: '{xml}' does not exist.")
             continue
@@ -201,16 +234,21 @@ def lowercase_labels_in_directory(path: Path, save_path=None):
         # save corresponding jpg in save_path
         cv2.imwrite(str(save_path / img.name), cv2.imread(str(img)))
 
-def update_path(path, save_path=None, new_path=None):
-    path = Path(path)
+'''
+Update the path in the xml files to the new path.
+If save_path is None, the xml files will be saved in the same directory.
+If new_path is None, the path in the xml files will be updated to the read path.
+'''
+def update_path(read_path, save_path=None, new_path=None):
+    read_path = Path(read_path)
     if save_path == None:
-        save_path = path
+        save_path = read_path
     if new_path == None:
-        new_path = path
+        new_path = read_path
     save_path = Path(save_path)
     new_path = Path(new_path)
-    if not path.exists() or not path.is_dir():
-        print_red(f"Directory: '{path}' does not exist or is not a directory.")
+    if not read_path.exists() or not read_path.is_dir():
+        print_red(f"Directory: '{read_path}' does not exist or is not a directory.")
         return
     if not save_path.exists() or not save_path.is_dir():
         print_red(f"Directory: '{save_path}' does not exist or is not a directory.")
@@ -218,9 +256,9 @@ def update_path(path, save_path=None, new_path=None):
     if not new_path.exists() or not new_path.is_dir():
         print_red(f"Directory: '{new_path}' does not exist or is not a directory.")
         return
-    jpgPaths = get_jpg_paths(path)
+    jpgPaths = get_jpg_paths(read_path)
     for i, img in enumerate(jpgPaths):
-        xml = path / (img.stem + '.xml')
+        xml = read_path / (img.stem + '.xml')
         if not xml.exists():
             print_red(f"XML file: '{xml}' does not exist.")
             continue
@@ -232,12 +270,17 @@ def update_path(path, save_path=None, new_path=None):
         # save corresponding jpg in save_path
         cv2.imwrite(str(save_path / img.name), cv2.imread(str(img)))
 
-def aug_in_directory(path, save_path, aug, includeXML=True):
+'''
+Perform the augmentation on the images in the directory
+and save the augmented images in the save_path directory.
+If includeXML is True, the bounding boxes will be augmented.
+'''
+def aug_in_directory(read_path, save_path, aug, includeXML=True):
     # check read and write paths
-    path = Path(path)
+    read_path = Path(read_path)
     save_path = Path(save_path)
-    if not path.exists() or not path.is_dir():
-        print_red(f"Directory: '{path}' does not exist or is not a directory.")
+    if not read_path.exists() or not read_path.is_dir():
+        print_red(f"Directory: '{read_path}' does not exist or is not a directory.")
         return
     
     # create save directory if it does not exist
@@ -247,7 +290,7 @@ def aug_in_directory(path, save_path, aug, includeXML=True):
         save_exists = False
 
     # get image paths
-    jpgPaths = get_jpg_paths(path)
+    jpgPaths = get_jpg_paths(read_path)
 
     try:
         # augment images
@@ -259,7 +302,7 @@ def aug_in_directory(path, save_path, aug, includeXML=True):
                 continue
 
             # get corresponding bounding boxes
-            bbs = get_corresponding_bbox(path, img)
+            bbs = get_corresponding_bbox(read_path, img)
 
             # check if we should augment the bounding boxes
             hasXML = bbs is not None and includeXML
@@ -287,32 +330,59 @@ def aug_in_directory(path, save_path, aug, includeXML=True):
         if not save_exists:
             os.rmdir(str(save_path))
 
-def flip_horizontal_in_directory(path, save_path, includeXML=True):
+'''
+Flip the images in the directory horizontally and save them. 
+If includeXML is True, the bounding boxes will be flipped as well.
+'''
+def flip_horizontal_in_directory(read_path, save_path, includeXML=True):
     aug = iaa.Fliplr(1.0)
-    aug_in_directory(path, save_path, aug, includeXML)
+    aug_in_directory(read_path, save_path, aug, includeXML)
 
-def flip_vertical_in_directory(path, save_path, includeXML=True):
+'''
+Flip the images in the directory vertically and save them.
+If includeXML is True, the bounding boxes will be flipped as well.
+'''
+def flip_vertical_in_directory(read_path, save_path, includeXML=True):
     aug = iaa.Flipud(1.0)
-    aug_in_directory(path, save_path, aug, includeXML)
+    aug_in_directory(read_path, save_path, aug, includeXML)
 
-def rotate_in_directory(path, save_path, angle, includeXML=True):
+'''
+Rotate the images in the directory by the given angle and save them.
+If includeXML is True, the bounding boxes will be rotated as well.
+'''
+def rotate_in_directory(read_path, save_path, angle, includeXML=True):
     if angle % 90 != 0:
         aug = iaa.Affine(rotate=angle)
-        aug_in_directory(path, save_path, aug, includeXML)
+        aug_in_directory(read_path, save_path, aug, includeXML)
     else:
-        rotate_90_in_directory(path, save_path, angle // 90)
+        rotate_90_in_directory(read_path, save_path, angle // 90)
 
-def rotate_90_in_directory(path, save_path, repetitions=1, includeXML=True):
+'''
+Rotate the images in the directory by 90 degrees and save them.
+If includeXML is True, the bounding boxes will be rotated as well.
+'''
+def rotate_90_in_directory(read_path, save_path, repetitions=1, includeXML=True):
     aug = iaa.Rot90(repetitions)
-    aug_in_directory(path, save_path, aug, includeXML)
+    aug_in_directory(read_path, save_path, aug, includeXML)
 
-def pad_and_resize_in_directory(path: Path, save_path: Path, width=512, height=512, includeXML=True):
+'''
+Resize the images in the directory to the given width and height and save them.
+If includeXML is True, the bounding boxes will be resized as well.
+'''
+def resize_in_directory(read_path: Path, save_path: Path, width=512, height=512, includeXML=True):
+    # augmenters
+    aug = iaa.Resize({"height": height, "width": width})
+    aug_in_directory(read_path, save_path, aug, includeXML)
+
+'''
+Pad the images in the directory to make them square and 
+resize them to the given dimension while maintaining aspect ratio.
+If includeXML is True, the bounding boxes will be resized as well.
+'''
+def pad_and_resize_square_in_directory(read_path: Path, save_path: Path, dim=512, includeXML=True):
     # augmenters
     aug = iaa.Sequential([
         iaa.PadToSquare(),
-        iaa.Resize({'height' : height, 'width' : width})
+        iaa.Resize(dim)
     ])
-    aug_in_directory(path, save_path, aug, includeXML)
-
-def pad_and_resize_square_in_directory(path: Path, save_path: Path, dim=512, includeXML=True):
-    pad_and_resize_in_directory(path, save_path, dim, dim, includeXML)
+    aug_in_directory(read_path, save_path, aug, includeXML)
