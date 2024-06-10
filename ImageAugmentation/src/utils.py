@@ -32,12 +32,8 @@ This function has no recursive functionality.
 def rename(read_path: Path, startIndex=0, prefix = ''):
     read_path = Path(read_path)
     files = get_jpg_paths(read_path)
-    files.sort()
     for count, filename in enumerate(files, start=startIndex):
         if filename.is_dir():
-            continue
-        elif not filename.is_file():
-            print_red(f"File: '{filename}' does not exist.")
             continue
         name = filename.stem
         oldJPG = Path(read_path, name + '.jpg')
