@@ -287,29 +287,32 @@ def aug_in_directory(path, save_path, aug, includeXML=True):
         if not save_exists:
             os.rmdir(str(save_path))
 
-def flip_horizontal_in_directory(path, save_path):
+def flip_horizontal_in_directory(path, save_path, includeXML=True):
     aug = iaa.Fliplr(1.0)
-    aug_in_directory(path, save_path, aug)
+    aug_in_directory(path, save_path, aug, includeXML)
 
-def flip_vertical_in_directory(path, save_path):
+def flip_vertical_in_directory(path, save_path, includeXML=True):
     aug = iaa.Flipud(1.0)
-    aug_in_directory(path, save_path, aug)
+    aug_in_directory(path, save_path, aug, includeXML)
 
-def rotate_in_directory(path, save_path, angle):
+def rotate_in_directory(path, save_path, angle, includeXML=True):
     if angle % 90 != 0:
         aug = iaa.Affine(rotate=angle)
-        aug_in_directory(path, save_path, aug)
+        aug_in_directory(path, save_path, aug, includeXML)
     else:
         rotate_90_in_directory(path, save_path, angle // 90)
 
-def rotate_90_in_directory(path, save_path, repetitions=1):
+def rotate_90_in_directory(path, save_path, repetitions=1, includeXML=True):
     aug = iaa.Rot90(repetitions)
-    aug_in_directory(path, save_path, aug)
+    aug_in_directory(path, save_path, aug, includeXML)
 
-def pad_and_resize_in_directory(path: Path, save_path: Path, width=512, height=512):
+def pad_and_resize_in_directory(path: Path, save_path: Path, width=512, height=512, includeXML=True):
     # augmenters
     aug = iaa.Sequential([
         iaa.PadToSquare(),
         iaa.Resize({'height' : height, 'width' : width})
     ])
-    aug_in_directory(path, save_path, aug)
+    aug_in_directory(path, save_path, aug, includeXML)
+
+def pad_and_resize_square_in_directory(path: Path, save_path: Path, dim=512, includeXML=True):
+    pad_and_resize_in_directory(path, save_path, dim, dim, includeXML)
