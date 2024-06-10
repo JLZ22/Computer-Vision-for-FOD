@@ -402,3 +402,24 @@ def copy_files_in_directory(read_path: Path, save_path: Path):
     for f in files:
         if f.is_file():
             os.system(f'cp {f} {save_path}')
+
+'''
+Rotate the image at img_read_path by the given angle and save it in img_save_dir.
+The rotateCode is the cv2 rotate code.
+'''
+def rotate_image_and_save(img_read_path: Path, img_save_dir: Path, rotateCode: int):
+    img_read_path = Path(img_read_path)
+    img_save_dir = Path(img_save_dir)
+    if not img_read_path.exists() or not img_read_path.is_file():
+        print_red(f"Directory: '{img_read_path}' does not exist or is not a file.")
+        return
+    if not img_save_dir.is_dir():
+        print_red(f"Directory: '{img_save_dir}' is not a directory.")
+        return
+    
+    img = cv2.imread(str(img_read_path))
+    if img is None:
+        print_red(f"Failed to read image: {img_read_path}")
+        return
+    img = cv2.rotate(img, rotateCode=rotateCode)
+    cv2.imwrite(str(img_save_dir / img_read_path.name), img)
