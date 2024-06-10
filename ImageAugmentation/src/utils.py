@@ -382,3 +382,23 @@ def pad_and_resize_square_in_directory(read_path: Path, save_path: Path, dim=512
         iaa.Resize(dim)
     ])
     aug_in_directory(read_path, save_path, aug, includeXML)
+
+'''
+Copy the files in the read_path directory to the save_path directory.
+'''
+def copy_files_in_directory(read_path: Path, save_path: Path):
+    read_path = Path(read_path)
+    save_path = Path(save_path)
+    if not read_path.exists() or not read_path.is_dir():
+        print_red(f"Directory: '{read_path}' does not exist or is not a directory.")
+        return
+    if not save_path.exists():
+        os.mkdir(str(save_path))
+
+    # get all files in the directory
+    files = list(read_path.iterdir())
+    
+    # copy data to save_path
+    for f in files:
+        if f.is_file():
+            os.system(f'cp {f} {save_path}')
