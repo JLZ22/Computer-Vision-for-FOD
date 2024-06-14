@@ -181,7 +181,7 @@ def visualize_annotations(read_path, save_path):
                         [int(float(xmin_data)) + 2, int(float(ymin_data)) - 2], 
                         cv2.FONT_HERSHEY_SIMPLEX, 
                         fontScale, 
-                        (0,0,0), 
+                        (176, 38, 255), 
                         math.ceil(fontThickness))
             
         # save image with bounding boxes drawn
