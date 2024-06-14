@@ -9,6 +9,7 @@ import  xml.dom.minidom as xdm
 from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 import psutil
 import traceback
+import math
 
 def print_red(text):
     print("\033[91m{}\033[0m".format(text))
@@ -145,6 +146,14 @@ def visualize_annotations(read_path, save_path):
         root = dom.documentElement
         objects=dom.getElementsByTagName("object")
 
+        width =  img.shape[1]
+        height = img.shape[0]
+        # calculate thickness of bounding boxes and font 
+        # with respect to image size (the constants are manually tuned)
+        boxThickness = max(width, height) / 500
+        fontScale = min(width, height) / 1200
+        fontThickness = max(width, height) / 1000
+
         # get bounding boxes
         for i in range(objects.length):
             
@@ -162,7 +171,7 @@ def visualize_annotations(read_path, save_path):
             cv2.rectangle(img,(int(float(xmin_data)),int(float(ymin_data))),
                               (int(float(xmax_data)),int(float(ymax_data))),
                               (55,255,155),
-                               1)
+                               round(boxThickness) if round(boxThickness) > 0 else 1)
             # add label
             label = root.getElementsByTagName('name')[i]
             label_data = label.childNodes[0].data
@@ -171,9 +180,9 @@ def visualize_annotations(read_path, save_path):
                         label_data, 
                         [int(float(xmin_data)) + 2, int(float(ymin_data)) - 2], 
                         cv2.FONT_HERSHEY_SIMPLEX, 
-                        0.3, 
+                        fontScale, 
                         (0,0,0), 
-                        1)
+                        math.ceil(fontThickness))
             
         # save image with bounding boxes drawn
         cv2.imwrite(str(save_path / (filename + '.jpg')),img)
