@@ -8,3 +8,4 @@ out*/
 benchmark_results/
 .vs
 test.py
+temp.*
