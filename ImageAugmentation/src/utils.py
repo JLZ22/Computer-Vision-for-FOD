@@ -19,9 +19,33 @@ def print_green(text):
 '''
 Get the paths to all jpg files in the directory.
 '''
-def get_jpg_paths(path):
+def get_jpg_paths(path, range=(-1, -1)):
+    # check if range is valid
+    if range[0] == -1 and range[1] != -1:
+        print_red("Invalid range.")
+        return 
+    if range[0] != -1 and range[1] == -1:
+        print_red("Invalid range.")
+        return
+    if range[0] > range[1]:
+        print_red("Invalid range.")
+        return
+    # check path is valid
     path = Path(path)
-    return [item for item in path.iterdir() if item.suffix.lower() in {'.jpg', '.jpeg'}]
+    if not path.exists() or not path.is_dir():
+        print_red(f"Directory: '{path}' does not exist or is not a directory.")
+        return
+    # get all jpg files in the directory
+    if range == (-1, -1):
+        return [item for item in path.iterdir() if item.suffix.lower() in {'.jpg', '.jpeg'}]
+    # get all jpg files in the directory within the range
+    out = []
+    for item in path.iterdir():
+        if item.suffix.lower() in {'.jpg', '.jpeg'}:
+            stem = int(item.stem)
+            if stem >= range[0] and stem <= range[1]:
+                out.append(item)
+    return out
 
 '''
 Rename all the jpg and xml files in the directory to the
