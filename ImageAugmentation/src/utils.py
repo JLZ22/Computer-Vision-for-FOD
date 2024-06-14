@@ -450,3 +450,23 @@ def rotate_image_and_save(img_read_path: Path, img_save_dir: Path, rotateCode: i
         return
     img = cv2.rotate(img, rotateCode=rotateCode)
     cv2.imwrite(str(img_save_dir / img_read_path.name), img)
+
+'''
+Rotate all the images in the directory by the given rotate code 
+and save them in the save_path directory if range is (-1, -1).
+If range is not (-1, -1), only rotate the images in the range.
+'''
+def rotate_images_and_save(read_path: Path, save_path=None, rotateCode=cv2.ROTATE_90_CLOCKWISE, range=(-1, -1)):
+    read_path = Path(read_path)
+    if save_path == None:
+        save_path = read_path
+    save_path = Path(save_path)
+
+    if not read_path.exists() or not read_path.is_dir():
+        print_red(f"Directory: '{read_path}' does not exist or is not a directory.")
+        return
+    if not save_path.exists():
+        os.mkdir(str(save_path))
+    jpgPaths = get_jpg_paths(read_path, range)
+    for img in jpgPaths:
+        rotate_image_and_save(img, save_path, rotateCode)
