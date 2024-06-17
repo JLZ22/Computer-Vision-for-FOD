@@ -37,15 +37,15 @@ def get_jpg_paths(path, range=(-1, -1)):
         print_red(f"Directory: '{path}' does not exist or is not a directory.")
         return
     # get all jpg files in the directory
+    jpgs = list(path.glob('*.jpg')) + list(path.glob('*.jpeg'))
     if range == (-1, -1):
-        return [item for item in path.iterdir() if item.suffix.lower() in {'.jpg', '.jpeg'}]
+        return jpgs
     # get all jpg files in the directory within the range
     out = []
-    for item in path.iterdir():
-        if item.suffix.lower() in {'.jpg', '.jpeg'}:
-            stem = int(item.stem)
-            if stem >= range[0] and stem <= range[1]:
-                out.append(item)
+    for item in jpgs:
+        index = int(item.stem)
+        if index >= range[0] and index <= range[1]:
+            out.append(item)
     return out
 
 '''
@@ -219,14 +219,6 @@ def create_bbs(root, shape: int) -> BoundingBoxesOnImage:
         ymax = int(float(bbox.find('ymax').text))
         bboxes.append(BoundingBox(x1=xmin, y1=ymin, x2=xmax, y2=ymax, label=member.find('name').text))
     return BoundingBoxesOnImage(bboxes, shape)
-
-'''
-Get the names of all the jpg files in the directory
-'''
-def get_JPG_file_names(read_path: Path):
-    read_path = Path(read_path)
-    jpg = list(read_path.glob('*.jpg')) + list(read_path.glob('*.jpeg'))
-    return [item.stem for item in jpg]
 
 '''
 Get the memory consumption of all children processes
@@ -508,3 +500,12 @@ def count_files_in_directory(read_path: Path):
         if f.is_file():
             count += 1
     return count
+
+def jpeg_to_jpg(read_path: Path):
+    read_path = Path(read_path)
+    if not read_path.exists() or not read_path.is_dir():
+        print_red(f"Directory: '{read_path}' does not exist or is not a directory.")
+        return
+    jpg = list(read_path.glob('*.jpeg'))
+    for img in jpg:
+        img.rename(read_path / (str(img.stem) + '.jpg'))
