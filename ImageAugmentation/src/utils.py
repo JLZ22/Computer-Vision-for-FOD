@@ -494,3 +494,18 @@ def delete_all_xml_without_jpg(read_path: Path):
         name = xml.stem
         if not any([jpg.stem == name for jpg in jpgPaths]):
             xml.unlink()
+
+
+'''
+Count the number of files in the directory.
+'''
+def count_files_in_directory(read_path: Path):
+    read_path = Path(read_path)
+    if not read_path.exists() or not read_path.is_dir():
+        print_red(f"Directory: '{read_path}' does not exist or is not a directory.")
+        return
+    count = 0
+    for f in read_path.iterdir():
+        if f.is_file():
+            count += 1
+    return count
