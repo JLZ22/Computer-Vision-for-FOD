@@ -479,3 +479,18 @@ def rotate_images_and_save(read_path: Path, save_path=None, rotateCode=cv2.ROTAT
     jpgPaths = get_jpg_paths(read_path, range)
     for img in jpgPaths:
         rotate_image_and_save(img, save_path, rotateCode)
+
+'''
+Delete all xml files in the directory that do not have a corresponding jpg file
+'''
+def delete_all_xml_without_jpg(read_path: Path):
+    read_path = Path(read_path)
+    if not read_path.exists() or not read_path.is_dir():
+        print_red(f"Directory: '{read_path}' does not exist or is not a directory.")
+        return
+    jpgPaths = get_jpg_paths(read_path)
+    xmlPaths = list(read_path.glob('*.xml'))
+    for xml in xmlPaths:
+        name = xml.stem
+        if not any([jpg.stem == name for jpg in jpgPaths]):
+            xml.unlink()
