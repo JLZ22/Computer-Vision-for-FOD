@@ -495,7 +495,6 @@ def delete_all_xml_without_jpg(read_path: Path):
         if not any([jpg.stem == name for jpg in jpgPaths]):
             xml.unlink()
 
-
 '''
 Count the number of files in the directory.
 '''
