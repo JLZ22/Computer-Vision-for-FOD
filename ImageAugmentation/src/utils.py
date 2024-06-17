@@ -10,6 +10,7 @@ from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 import psutil
 import traceback
 import math
+import shutil
 
 def print_red(text):
     print("\033[91m{}\033[0m".format(text))
@@ -429,14 +430,16 @@ def copy_files_in_directory(read_path: Path, save_path: Path):
     # copy data to save_path
     for f in files:
         if f.is_file():
-            os.system(f'cp {f} {save_path}')
+            shutil.copy2(f, save_path)
 
 '''
 Rotate the image at img_read_path by the given angle and save it in img_save_dir.
 The rotateCode is the cv2 rotate code.
 '''
-def rotate_image_and_save(img_read_path: Path, img_save_dir: Path, rotateCode=cv2.ROTATE_90_CLOCKWISE):
+def rotate_image_and_save(img_read_path: Path, img_save_dir=None, rotateCode=cv2.ROTATE_90_CLOCKWISE):
     img_read_path = Path(img_read_path)
+    if img_save_dir == None:
+        img_save_dir = img_read_path.parent
     img_save_dir = Path(img_save_dir)
     if not img_read_path.exists() or not img_read_path.is_file():
         print_red(f"Directory: '{img_read_path}' does not exist or is not a file.")
