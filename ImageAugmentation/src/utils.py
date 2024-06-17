@@ -501,11 +501,14 @@ def count_files_in_directory(read_path: Path):
             count += 1
     return count
 
+'''
+Convert all jpeg files in the directory to jpg files.
+'''
 def jpeg_to_jpg(read_path: Path):
     read_path = Path(read_path)
     if not read_path.exists() or not read_path.is_dir():
         print_red(f"Directory: '{read_path}' does not exist or is not a directory.")
         return
-    jpg = list(read_path.glob('*.jpeg'))
-    for img in jpg:
+    jpeg = list(read_path.glob('*.jpeg'))
+    for img in jpeg:
         img.rename(read_path / (str(img.stem) + '.jpg'))
