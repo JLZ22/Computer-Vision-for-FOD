@@ -435,7 +435,7 @@ def copy_files_in_directory(read_path: Path, save_path: Path):
 Rotate the image at img_read_path by the given angle and save it in img_save_dir.
 The rotateCode is the cv2 rotate code.
 '''
-def rotate_image_and_save(img_read_path: Path, img_save_dir: Path, rotateCode: int):
+def rotate_image_and_save(img_read_path: Path, img_save_dir: Path, rotateCode=cv2.ROTATE_90_CLOCKWISE):
     img_read_path = Path(img_read_path)
     img_save_dir = Path(img_save_dir)
     if not img_read_path.exists() or not img_read_path.is_file():
