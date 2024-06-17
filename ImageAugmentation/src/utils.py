@@ -61,7 +61,7 @@ def rename(read_path: Path, startIndex=0, prefix = ''):
         if filename.is_dir():
             continue
         name = filename.stem
-        oldJPG = Path(read_path, name + '.jpg')
+        oldJPG = Path(read_path, filename.name)
         oldXML = Path(read_path, name + '.xml')
         newJPG = Path(read_path, prefix + str(count) + '.jpg')
         newXML = Path(read_path, prefix + str(count) + '.xml')
