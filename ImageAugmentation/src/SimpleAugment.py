@@ -38,7 +38,7 @@ class SimpleAugSeq:
         ia.seed(self.seed)
         #Checks if the array that was passed in has a length of 0. If so it populates names array with every image name from read path
         if len(self.names) == 0:
-            self.names = utils.getJPGFileNames(self.read_path)
+            self.names = [i.stem for i in utils.get_jpg_paths(self.read_path)]
         if not self.save_path.exists() or not self.save_path.is_dir():
             os.makedirs(self.save_path)
     
@@ -100,8 +100,8 @@ class SimpleAugSeq:
                        width) -> None:
         print('Saving images and xml files for ' + original_name) if self.printSteps else None
         for i in range(imgs.shape[0]):
-            img_path = str(self.save_path / (original_name + '_aug_' + str(i) + '.jpg'))
-            xml_path = str(self.save_path / (original_name + '_aug_' + str(i) + '.xml'))
+            img_path = str(self.save_path / (original_name + '_aug_' + str(i+1) + '.jpg'))
+            xml_path = str(self.save_path / (original_name + '_aug_' + str(i+1) + '.xml'))
             cv2.imwrite(img_path, imgs[i])
             writer = Writer(img_path, width=width, height=height)
             for box in bbss[i]:
