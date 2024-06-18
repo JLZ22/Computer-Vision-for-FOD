@@ -407,7 +407,7 @@ If includeXML is True, the bounding boxes will be resized as well.
 def pad_and_resize_square_in_directory(read_path: Path, save_path: Path, dim=512, includeXML=True):
     # augmenters
     aug = iaa.Sequential([
-        iaa.PadToSquare(pad_mode=ia.ALL, pad_cval=(0, 255)),
+        iaa.PadToSquare(pad_mode="edge"),
         iaa.Resize(dim)
     ])
     aug_in_directory(read_path, save_path, aug, includeXML)
