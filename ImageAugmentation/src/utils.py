@@ -261,7 +261,7 @@ Update the path in the xml files to the new path.
 If save_path is None, the xml files will be saved in the same directory.
 If new_path is None, the path in the xml files will be updated to the read path.
 '''
-def update_path(read_path, save_path=None, new_path=None):
+def update_jpg_path_in_xml(read_path, save_path=None, new_path=None):
     read_path = Path(read_path)
     if save_path == None:
         save_path = read_path
@@ -520,22 +520,23 @@ Cut off the bounding box in the xml file that is outside the image.
 '''
 def cut_off_bbox(xml_pth: Path):
     xml_pth = Path(xml_pth)
-    if not xml_pth.exists() or not xml_pth.is_file():
-        print_red(f"File: '{xml_pth}' does not exist or is not a file.")
+    if not xml_pth.exists() or not xml_pth.is_file() or xml_pth.suffix != '.xml':
+        print_red(f"File: '{xml_pth}' does not exist or is not an xml file.")
         return
     
     tree = ET.parse(str(xml_pth))
     root = tree.getroot()
+    width = int(root.find("size").find("width").text)
+    height = int(root.find("size").find("height").text)
     for member in root.findall('object'):
+        # get bounding box
         bbox = member.find('bndbox')
         xmin = int(float(bbox.find('xmin').text))
         ymin = int(float(bbox.find('ymin').text))
         xmax = int(float(bbox.find('xmax').text))
         ymax = int(float(bbox.find('ymax').text))
 
-        width = int(bbox.find('width').text)
-        height = int(bbox.find('height').text)
-
+        # cut off bounding box if it is outside the image
         if xmin < 0:
             xmin = 0
         elif xmin > width:
@@ -555,8 +556,15 @@ def cut_off_bbox(xml_pth: Path):
             ymax = 0
         elif ymax > height:
             ymax = height
-    tree.write(str(xml_pth))
 
+        # update bounding box
+        bbox.find('xmin').text = str(xmin)
+        bbox.find('ymin').text = str(ymin)
+        bbox.find('xmax').text = str(xmax)
+        bbox.find('ymax').text = str(ymax)
+        
+    tree.write(str(xml_pth))
+    
 '''
 Cut off the bounding boxes in the xml files that are outside the image.
 '''
@@ -567,4 +575,7 @@ def cut_off_bboxes(read_path: Path):
         return
     xmlPaths = list(read_path.glob('*.xml'))
     for p in xmlPaths:
-        cut_off_bbox(p)
+        try: 
+            cut_off_bbox(p)
+        except:
+            print_red(f"Failed to cut off bbox in file: {p}")
