@@ -189,25 +189,3 @@ class SimpleAugSeq:
         del images_aug
         del bbs_aug
         gc.collect()
-    
-if __name__ == '__main__':
-    file_names = ['3277']
-
-    raw_pairs = Path('..', 'test_data', 'raw_pairs')
-    out0 = Path('..', 'test_data', 'out0')
-    out1 = Path('..', 'test_data', 'out1')
-
-    print(f"Available Physical Memory of System: {psutil.virtual_memory().available / 1024**2}MB")
-    print(f"Total Physical Memory of System: {psutil.virtual_memory().total / 1024**2}MB")
-    print(f"Percentage of Physical Memory Used: {psutil.virtual_memory().percent}%")
-    simple_aug = SimpleAugSeq(read_path=raw_pairs, 
-                              save_path=out0, 
-                              seed=1, 
-                              check=False,
-                              num_copies=2, 
-                              names=file_names,
-                              processes=1,
-                              checkMem=True) # 14 optimal for ecn-dec01 
-    utils.deleteFiles(out0)
-    simple_aug.augment()
-    utils.visualize_annotations(out0, out1)
