@@ -82,7 +82,7 @@ class SimpleAugSeq:
                 scale={"x": (0.8, 1.2), "y": (0.8, 1.2)}, 
                 
                 # horizontal and vertical shifts
-                translate_percent={"x": (-0.2, 0.2), "y": (-0.2, 0.2)}, # TODO: explore changing the fill color to something that looks like the work station 
+                translate_percent={"x": (-0.2, 0.2), "y": (-0.2, 0.2)},
             )
             ], 
             random_order=True) # apply augmenters in random order
