@@ -568,7 +568,7 @@ def cut_off_bbox(xml_pth: Path):
 '''
 Cut off the bounding boxes in the xml files that are outside the image.
 '''
-def cut_off_bboxes(read_path: Path):
+def cut_off_bboxes_in_directory(read_path: Path):
     read_path = Path(read_path)
     if not read_path.exists() or not read_path.is_dir():
         print_red(f"Directory: '{read_path}' does not exist or is not a directory.")
