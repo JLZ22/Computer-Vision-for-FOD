@@ -339,8 +339,7 @@ def aug_in_directory(read_path, save_path, aug, includeXML=True):
                 writer = Writer(str(save_path / img.name), width=width, height=height)
                 for box in bbs.bounding_boxes:
                     writer.addObject(box.label, box.x1, box.y1, box.x2, box.y2)
-                writer.save(str(save_path / (img.stem + '.xml'))
-                )
+                writer.save(str(save_path / (img.stem + '.xml')))
             else:
                 image = aug.augment(image=image)
 
@@ -515,3 +514,57 @@ def jpeg_to_jpg(read_path: Path):
     jpeg = list(read_path.glob('*.jpeg'))
     for img in jpeg:
         img.rename(read_path / (str(img.stem) + '.jpg'))
+
+'''
+Cut off the bounding box in the xml file that is outside the image.
+'''
+def cut_off_bbox(xml_pth: Path):
+    xml_pth = Path(xml_pth)
+    if not xml_pth.exists() or not xml_pth.is_file():
+        print_red(f"File: '{xml_pth}' does not exist or is not a file.")
+        return
+    
+    tree = ET.parse(str(xml_pth))
+    root = tree.getroot()
+    for member in root.findall('object'):
+        bbox = member.find('bndbox')
+        xmin = int(float(bbox.find('xmin').text))
+        ymin = int(float(bbox.find('ymin').text))
+        xmax = int(float(bbox.find('xmax').text))
+        ymax = int(float(bbox.find('ymax').text))
+
+        width = int(bbox.find('width').text)
+        height = int(bbox.find('height').text)
+
+        if xmin < 0:
+            xmin = 0
+        elif xmin > width:
+            xmin = width
+
+        if ymin < 0:
+            ymin = 0
+        elif ymin > height:
+            ymin = height
+
+        if xmax < 0:
+            xmax = 0
+        elif xmax > width:
+            xmax = width
+        
+        if ymax < 0:
+            ymax = 0
+        elif ymax > height:
+            ymax = height
+    tree.write(str(xml_pth))
+
+'''
+Cut off the bounding boxes in the xml files that are outside the image.
+'''
+def cut_off_bboxes(read_path: Path):
+    read_path = Path(read_path)
+    if not read_path.exists() or not read_path.is_dir():
+        print_red(f"Directory: '{read_path}' does not exist or is not a directory.")
+        return
+    xmlPaths = list(read_path.glob('*.xml'))
+    for p in xmlPaths:
+        cut_off_bbox(p)
