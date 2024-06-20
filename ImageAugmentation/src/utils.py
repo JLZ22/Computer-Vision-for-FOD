@@ -720,3 +720,22 @@ def pascalvoc_to_yolo(xml_path: Path, save_path: Path, json_path: Path):
         if save_created:
             save_path.unlink()
 
+'''
+Convert all pascal voc xml files in the directory to yolo txt files.
+'''
+def pascalvoc_to_yolo_in_directory(read_dir: Path, save_dir: Path, json: Path):
+    read_dir = Path(read_dir)
+    save_dir = Path(save_dir)
+    if not read_dir.exists() or not read_dir.is_dir():
+        print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
+        return
+    if not save_dir.exists():
+        os.mkdir(str(save_dir))
+        
+    xmlPaths = list(read_dir.glob('*.xml'))
+    for xml in xmlPaths:
+        try:
+            pascalvoc_to_yolo(xml, save_dir / (xml.stem + '.txt'), json)
+        except:
+            print_red(f"Failed to convert xml file: {xml}")
+            continue
