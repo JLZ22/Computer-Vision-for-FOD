@@ -119,9 +119,10 @@ def get_corresponding_bbox(read_path: Path, jpg_path: Path):
 '''
 https://piyush-kulkarni.medium.com/visualize-the-xml-annotations-in-python-c9696ba9c188
 '''
-def visualize_annotations(read_path, save_path):
+def visualize_pascalvoc_annotations(read_path: Path, save_path: Path):
     read_path = Path(read_path)
     save_path = Path(save_path)
+    save_created = False
     # check read and write paths
     if not read_path.exists() or not read_path.is_dir():
         print_red(f"Directory: '{read_path}' does not exist or is not a directory.")
@@ -131,64 +132,69 @@ def visualize_annotations(read_path, save_path):
         return
     if not save_path.exists():
         os.mkdir(str(save_path))
+        save_created = True
+    try:
+        # get images and xml files
+        images = list(read_path.glob('*.jpg')) + list(read_path.glob('*.jpeg'))
+        xml = list(read_path.glob('*.xml'))
+        # assert they are the same length
+        assert(len(images) == len(xml))
+        
+        for file in images:
+            filename = file.stem
+            img_path = file
+            xml_path = read_path / (filename + '.xml')
+            img = cv2.imread(str(img_path))
+            if img is None:
+                pass
+            dom = xdm.parse(str(xml_path))
+            root = dom.documentElement
+            objects=dom.getElementsByTagName("object")
 
-    # get images and xml files
-    images = list(read_path.glob('*.jpg')) + list(read_path.glob('*.jpeg'))
-    xml = list(read_path.glob('*.xml'))
-    # assert they are the same length
-    assert(len(images) == len(xml))
-    
-    for file in images:
-        filename = file.stem
-        img_path = file
-        xml_path = read_path / (filename + '.xml')
-        img = cv2.imread(str(img_path))
-        if img is None:
-            pass
-        dom = xdm.parse(str(xml_path))
-        root = dom.documentElement
-        objects=dom.getElementsByTagName("object")
+            width =  img.shape[1]
+            height = img.shape[0]
+            # calculate thickness of bounding boxes and font 
+            # with respect to image size (the constants are manually tuned)
+            boxThickness = max(width, height) / 500
+            fontScale = min(width, height) / 1200
+            fontThickness = max(width, height) / 1000
 
-        width =  img.shape[1]
-        height = img.shape[0]
-        # calculate thickness of bounding boxes and font 
-        # with respect to image size (the constants are manually tuned)
-        boxThickness = max(width, height) / 500
-        fontScale = min(width, height) / 1200
-        fontThickness = max(width, height) / 1000
+            # get bounding boxes
+            for i in range(objects.length):
+                
+                bndbox = root.getElementsByTagName('bndbox')[i]
+                xmin = bndbox.getElementsByTagName('xmin')[0]
+                ymin = bndbox.getElementsByTagName('ymin')[0]
+                xmax = bndbox.getElementsByTagName('xmax')[0]
+                ymax = bndbox.getElementsByTagName('ymax')[0]
+                xmin_data=xmin.childNodes[0].data
+                ymin_data=ymin.childNodes[0].data
+                xmax_data=xmax.childNodes[0].data
+                ymax_data=ymax.childNodes[0].data
+                
+                # draw bounding boxes
+                cv2.rectangle(img,(int(float(xmin_data)),int(float(ymin_data))),
+                                (int(float(xmax_data)),int(float(ymax_data))),
+                                (55,255,155),
+                                round(boxThickness) if round(boxThickness) > 0 else 1)
+                # add label
+                label = root.getElementsByTagName('name')[i]
+                label_data = label.childNodes[0].data
 
-        # get bounding boxes
-        for i in range(objects.length):
-            
-            bndbox = root.getElementsByTagName('bndbox')[i]
-            xmin = bndbox.getElementsByTagName('xmin')[0]
-            ymin = bndbox.getElementsByTagName('ymin')[0]
-            xmax = bndbox.getElementsByTagName('xmax')[0]
-            ymax = bndbox.getElementsByTagName('ymax')[0]
-            xmin_data=xmin.childNodes[0].data
-            ymin_data=ymin.childNodes[0].data
-            xmax_data=xmax.childNodes[0].data
-            ymax_data=ymax.childNodes[0].data
-            
-            # draw bounding boxes
-            cv2.rectangle(img,(int(float(xmin_data)),int(float(ymin_data))),
-                              (int(float(xmax_data)),int(float(ymax_data))),
-                              (55,255,155),
-                               round(boxThickness) if round(boxThickness) > 0 else 1)
-            # add label
-            label = root.getElementsByTagName('name')[i]
-            label_data = label.childNodes[0].data
-
-            cv2.putText(img, 
-                        label_data, 
-                        [int(float(xmin_data)) + 2, int(float(ymin_data)) - 2], 
-                        cv2.FONT_HERSHEY_SIMPLEX, 
-                        fontScale, 
-                        (176, 38, 255), 
-                        math.ceil(fontThickness))
-            
-        # save image with bounding boxes drawn
-        cv2.imwrite(str(save_path / (filename + '.jpg')),img)
+                cv2.putText(img, 
+                            label_data, 
+                            [int(float(xmin_data)) + 2, int(float(ymin_data)) - 2], 
+                            cv2.FONT_HERSHEY_SIMPLEX, 
+                            fontScale, 
+                            (176, 38, 255), 
+                            math.ceil(fontThickness))
+                
+            # save image with bounding boxes drawn
+            cv2.imwrite(str(save_path / (filename + '.jpg')),img)
+    except:
+        traceback.print_exc()
+        if save_created:
+            os.rmdir(str(save_path))
 
 '''
 Make num_copies number of the bbs object and return it 
