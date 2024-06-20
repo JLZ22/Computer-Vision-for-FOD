@@ -1,0 +1,29 @@
+{
+  "categories": [
+    {
+      "id": 0,
+      "name": "Allen Wrench"
+    },
+    {
+      "id": 1,
+      "name": "Pencil"
+    },
+    {
+      "id": 2,
+      "name": "Screwdriver"
+    },
+    {
+      "id": 3,
+      "name": "Tool Bit"
+    },
+    {
+      "id": 4,
+      "name": "Wrench"
+    }
+  ],
+  "info": {
+    "year": 2024,
+    "version": "1.0",
+    "contributor": "Label Studio"
+  }
+}
