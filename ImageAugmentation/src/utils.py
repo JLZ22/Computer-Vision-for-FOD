@@ -119,7 +119,7 @@ def get_corresponding_bbox(read_dir: Path, jpg_path: Path):
 '''
 Get the label map from the json file.
 '''
-def get_label_map(json_path: Path):
+def get_label_map(json_path: Path, key_is_id=True):
     json_path = Path(json_path)
     if not json_path.exists() or not json_path.is_file() or json_path.suffix != '.json':
         print_red(f"File: '{json_path}' does not exist or is not a json file.")
@@ -128,7 +128,10 @@ def get_label_map(json_path: Path):
     with open(json_path) as f:
         categories = json.load(f)['categories']
         for category in categories:
-            label_map[category['name']] = category['id']
+            if key_is_id:
+                label_map[category['id']] = category['name']
+            else:
+                label_map[category['name']] = category['id']
     return label_map
 
 '''
@@ -230,10 +233,14 @@ def visualize_yolo_annotations(read_dir: Path, save_path: Path, json_path: Path)
     if not save_path.exists():
         os.mkdir(str(save_path))
         save_created = True
+
+    
     try:
         label_map = get_label_map(json_path)
         # get images and txt files
         image_paths = get_jpg_paths(read_dir)
+        txt = list(read_dir.glob('*.txt'))
+        assert(len(image_paths) == len(txt))
         for img_path in image_paths:
             txt = Path(read_dir / (img_path.stem + '.txt'))
             img = cv2.imread(str(img_path))
@@ -271,12 +278,15 @@ def visualize_yolo_annotations(read_dir: Path, save_path: Path, json_path: Path)
                 cv2.rectangle(img, (x1, y1), (x2, y2), (55,255,155), boxThickness)
                 # add label
                 cv2.putText(img, 
-                            label_map.get(label), 
+                            label_map[int(label)], 
                             [x1 + 2, y1 - 2], 
                             cv2.FONT_HERSHEY_SIMPLEX, 
                             fontScale, 
                             (176, 38, 255), 
                             fontThickness)
+                
+            # save image with bounding boxes drawn
+            cv2.imwrite(str(save_path / (img_path.name)), img)
 
     except Exception as e:
         traceback.print_exc()
@@ -694,13 +704,19 @@ def pascalvoc_to_yolo(xml_path: Path, save_path: Path, json_path: Path):
         save_created = True
     
     try:
-        label_map = get_label_map(json_path)
+        label_map = get_label_map(json_path, key_is_id=False)
         # get the bounding boxes from the xml file
         ann = annotation_from_xml(xml_path)
         # write the bounding boxes to the yolo txt file
         with open((save_path), 'w') as f:
             f.write(ann.to_yolo(label_map, 5))
+
+        # move the corresponding image
+        img_path = xml_path.with_suffix('.jpg')
+        if img_path.exists():
+            shutil.copy2(img_path, save_path.with_suffix('.jpg'))
     except Exception as e:
         traceback.print_exc()
         if save_created:
             save_path.unlink()
+
