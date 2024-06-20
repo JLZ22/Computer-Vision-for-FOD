@@ -23,7 +23,7 @@ def print_green(text):
 '''
 Get the paths to all jpg files in the directory.
 '''
-def get_jpg_paths(path, range=(-1, -1)):
+def get_jpg_paths(dir, range=(-1, -1)):
     # check if range is valid
     if range[0] == -1 and range[1] != -1:
         print_red("Invalid range.")
@@ -35,12 +35,12 @@ def get_jpg_paths(path, range=(-1, -1)):
         print_red("Invalid range.")
         return
     # check path is valid
-    path = Path(path)
-    if not path.exists() or not path.is_dir():
-        print_red(f"Directory: '{path}' does not exist or is not a directory.")
+    dir = Path(dir)
+    if not dir.exists() or not dir.is_dir():
+        print_red(f"Directory: '{dir}' does not exist or is not a directory.")
         return
     # get all jpg files in the directory
-    jpgs = list(path.glob('*.jpg')) + list(path.glob('*.jpeg'))
+    jpgs = list(dir.glob('*.jpg')) + list(dir.glob('*.jpeg'))
     if range == (-1, -1):
         return jpgs
     # get all jpg files in the directory within the range
@@ -57,17 +57,17 @@ format prefix + index + '.jpg' and prefix + index + '.xml'.
 
 This function has no recursive functionality.
 '''
-def rename(read_path: Path, startIndex=0, prefix = ''):
-    read_path = Path(read_path)
-    files = get_jpg_paths(read_path)
+def rename_in_directory(read_dir: Path, startIndex=0, prefix = ''):
+    read_dir = Path(read_dir)
+    files = get_jpg_paths(read_dir)
     for count, filename in enumerate(files, start=startIndex):
         if filename.is_dir():
             continue
         name = filename.stem
-        oldJPG = Path(read_path, filename.name)
-        oldXML = Path(read_path, name + '.xml')
-        newJPG = Path(read_path, prefix + str(count) + '.jpg')
-        newXML = Path(read_path, prefix + str(count) + '.xml')
+        oldJPG = Path(read_dir, filename.name)
+        oldXML = Path(read_dir, name + '.xml')
+        newJPG = Path(read_dir, prefix + str(count) + '.jpg')
+        newXML = Path(read_dir, prefix + str(count) + '.xml')
         print(f'{oldJPG} -> {newJPG}')
         print(f'{oldXML} -> {newXML}')
         if oldJPG.is_file():
@@ -78,15 +78,15 @@ def rename(read_path: Path, startIndex=0, prefix = ''):
 '''
 Delete all files in the directory.
 '''
-def delete_files(read_path: Path):
-    read_path = Path(read_path)
-    if not read_path.exists() or not read_path.is_dir():
-        print_red(f"Directory: '{read_path}' does not exist or is not a directory.")
+def delete_files(read_dir: Path):
+    read_dir = Path(read_dir)
+    if not read_dir.exists() or not read_dir.is_dir():
+        print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
-    for f in read_path.iterdir():
+    for f in read_dir.iterdir():
         if f.is_file():
             f.unlink()
-    print_green(f"Deleted all files in the directory: '{read_path}'")
+    print_green(f"Deleted all files in the directory: '{read_dir}'")
 
 '''
 Subtract the mean pixel values from the image.
@@ -100,15 +100,15 @@ def subtract_mean(image):
     return image
 
 '''
-Get the bounding boxes from the xml file in the read_path
+Get the bounding boxes from the xml file in the read_dir
 that corresponds to the jpg file. If the xml file does not 
 exist, return None.
 '''
-def get_corresponding_bbox(read_path: Path, jpg_path: Path):
-    read_path = Path(read_path)
+def get_corresponding_bbox(read_dir: Path, jpg_path: Path):
+    read_dir = Path(read_dir)
     jpg_path = Path(jpg_path)
     name = jpg_path.stem
-    xml = read_path / (name + '.xml')
+    xml = read_dir / (name + '.xml')
     if not xml.exists():
         return None
     tree = ET.parse(str(xml))
@@ -117,15 +117,30 @@ def get_corresponding_bbox(read_path: Path, jpg_path: Path):
     return bbs
 
 '''
+Get the label map from the json file.
+'''
+def get_label_map(json_path: Path):
+    json_path = Path(json_path)
+    if not json_path.exists() or not json_path.is_file() or json_path.suffix != '.json':
+        print_red(f"File: '{json_path}' does not exist or is not a json file.")
+        return
+    label_map = {}
+    with open(json_path) as f:
+        categories = json.load(f)['categories']
+        for category in categories:
+            label_map[category['name']] = category['id']
+    return label_map
+
+'''
 https://piyush-kulkarni.medium.com/visualize-the-xml-annotations-in-python-c9696ba9c188
 '''
-def visualize_pascalvoc_annotations(read_path: Path, save_path: Path):
-    read_path = Path(read_path)
+def visualize_pascalvoc_annotations(read_dir: Path, save_path: Path):
+    read_dir = Path(read_dir)
     save_path = Path(save_path)
     save_created = False
     # check read and write paths
-    if not read_path.exists() or not read_path.is_dir():
-        print_red(f"Directory: '{read_path}' does not exist or is not a directory.")
+    if not read_dir.exists() or not read_dir.is_dir():
+        print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
     if save_path.exists() and not save_path.is_dir():
         print_red(f"Directory: '{save_path}' exists but is not a directory.")
@@ -135,15 +150,15 @@ def visualize_pascalvoc_annotations(read_path: Path, save_path: Path):
         save_created = True
     try:
         # get images and xml files
-        images = list(read_path.glob('*.jpg')) + list(read_path.glob('*.jpeg'))
-        xml = list(read_path.glob('*.xml'))
+        images = list(read_dir.glob('*.jpg')) + list(read_dir.glob('*.jpeg'))
+        xml = list(read_dir.glob('*.xml'))
         # assert they are the same length
         assert(len(images) == len(xml))
         
         for file in images:
             filename = file.stem
             img_path = file
-            xml_path = read_path / (filename + '.xml')
+            xml_path = read_dir / (filename + '.xml')
             img = cv2.imread(str(img_path))
             if img is None:
                 pass
@@ -195,7 +210,7 @@ def visualize_pascalvoc_annotations(read_path: Path, save_path: Path):
         traceback.print_exc()
         if save_created:
             os.rmdir(str(save_path))
-
+            
 '''
 Make num_copies number of the bbs object and return it 
 in an array
@@ -242,17 +257,17 @@ def get_children_mem_consumption():
 Lowercase the labels in the xml files in the directory.
 If save_path is None, the xml files will be saved in the same directory.
 '''
-def lowercase_labels_in_directory(read_path: Path, save_path=None):
-    read_path = Path(read_path)
+def lowercase_labels_in_directory(read_dir: Path, save_path=None):
+    read_dir = Path(read_dir)
     if save_path == None:
-        save_path = read_path
+        save_path = read_dir
     save_path = Path(save_path)
-    if not read_path.exists() or not read_path.is_dir():
-        print_red(f"Directory: '{read_path}' does not exist or is not a directory.")
+    if not read_dir.exists() or not read_dir.is_dir():
+        print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
-    jpgPaths = get_jpg_paths(read_path)
+    jpgPaths = get_jpg_paths(read_dir)
     for img in jpgPaths:
-        xml = read_path / (img.stem + '.xml')
+        xml = read_dir / (img.stem + '.xml')
         if not xml.exists():
             print_red(f"XML file: '{xml}' does not exist.")
             continue
@@ -269,16 +284,16 @@ Update the path in the xml files to the new path.
 If save_path is None, the xml files will be saved in the same directory.
 If new_path is None, the path in the xml files will be updated to the read path.
 '''
-def update_jpg_path_in_xml(read_path, save_path=None, new_path=None):
-    read_path = Path(read_path)
+def update_jpg_path_in_xml(read_dir, save_path=None, new_path=None):
+    read_dir = Path(read_dir)
     if save_path == None:
-        save_path = read_path
+        save_path = read_dir
     if new_path == None:
-        new_path = read_path
+        new_path = read_dir
     save_path = Path(save_path)
     new_path = Path(new_path)
-    if not read_path.exists() or not read_path.is_dir():
-        print_red(f"Directory: '{read_path}' does not exist or is not a directory.")
+    if not read_dir.exists() or not read_dir.is_dir():
+        print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
     if not save_path.exists() or not save_path.is_dir():
         print_red(f"Directory: '{save_path}' does not exist or is not a directory.")
@@ -286,9 +301,9 @@ def update_jpg_path_in_xml(read_path, save_path=None, new_path=None):
     if not new_path.exists() or not new_path.is_dir():
         print_red(f"Directory: '{new_path}' does not exist or is not a directory.")
         return
-    jpgPaths = get_jpg_paths(read_path)
+    jpgPaths = get_jpg_paths(read_dir)
     for i, img in enumerate(jpgPaths):
-        xml = read_path / (img.stem + '.xml')
+        xml = read_dir / (img.stem + '.xml')
         if not xml.exists():
             print_red(f"XML file: '{xml}' does not exist.")
             continue
@@ -305,12 +320,12 @@ Perform the augmentation on the images in the directory
 and save the augmented images in the save_path directory.
 If includeXML is True, the bounding boxes will be augmented.
 '''
-def aug_in_directory(read_path, save_path, aug, includeXML=True):
+def aug_in_directory(read_dir, save_path, aug, includeXML=True):
     # check read and write paths
-    read_path = Path(read_path)
+    read_dir = Path(read_dir)
     save_path = Path(save_path)
-    if not read_path.exists() or not read_path.is_dir():
-        print_red(f"Directory: '{read_path}' does not exist or is not a directory.")
+    if not read_dir.exists() or not read_dir.is_dir():
+        print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
     
     # create save directory if it does not exist
@@ -320,7 +335,7 @@ def aug_in_directory(read_path, save_path, aug, includeXML=True):
         save_exists = False
 
     # get image paths
-    jpgPaths = get_jpg_paths(read_path)
+    jpgPaths = get_jpg_paths(read_dir)
 
     try:
         # augment images
@@ -332,7 +347,7 @@ def aug_in_directory(read_path, save_path, aug, includeXML=True):
                 continue
 
             # get corresponding bounding boxes
-            bbs = get_corresponding_bbox(read_path, img)
+            bbs = get_corresponding_bbox(read_dir, img)
 
             # check if we should augment the bounding boxes
             hasXML = bbs is not None and includeXML
@@ -363,76 +378,76 @@ def aug_in_directory(read_path, save_path, aug, includeXML=True):
 Flip the images in the directory horizontally and save them. 
 If includeXML is True, the bounding boxes will be flipped as well.
 '''
-def flip_horizontal_in_directory(read_path, save_path, includeXML=True):
+def flip_horizontal_in_directory(read_dir, save_path, includeXML=True):
     aug = iaa.Fliplr(1.0)
-    aug_in_directory(read_path, save_path, aug, includeXML)
+    aug_in_directory(read_dir, save_path, aug, includeXML)
 
 '''
 Flip the images in the directory vertically and save them.
 If includeXML is True, the bounding boxes will be flipped as well.
 '''
-def flip_vertical_in_directory(read_path, save_path, includeXML=True):
+def flip_vertical_in_directory(read_dir, save_path, includeXML=True):
     aug = iaa.Flipud(1.0)
-    aug_in_directory(read_path, save_path, aug, includeXML)
+    aug_in_directory(read_dir, save_path, aug, includeXML)
 
 '''
 Rotate the images in the directory by the given angle and save them
 without altering the aspect ratio.
 If includeXML is True, the bounding boxes will be rotated as well.
 '''
-def rotate_in_directory(read_path, save_path, angle, includeXML=True):
+def rotate_in_directory(read_dir, save_path, angle, includeXML=True):
     if angle % 90 != 0:
         aug = iaa.Affine(rotate=angle)
-        aug_in_directory(read_path, save_path, aug, includeXML)
+        aug_in_directory(read_dir, save_path, aug, includeXML)
     else:
-        rotate_90_in_directory(read_path, save_path, angle // 90)
+        rotate_90_in_directory(read_dir, save_path, angle // 90)
 
 '''
 Rotate the images in the directory by 90 degrees and save them and save 
 them without altering the aspect ratio.
 If includeXML is True, the bounding boxes will be rotated as well.
 '''
-def rotate_90_in_directory(read_path, save_path, repetitions=1, includeXML=True):
+def rotate_90_in_directory(read_dir, save_path, repetitions=1, includeXML=True):
     aug = iaa.Rot90(repetitions)
-    aug_in_directory(read_path, save_path, aug, includeXML)
+    aug_in_directory(read_dir, save_path, aug, includeXML)
 
 '''
 Resize the images in the directory to the given width and height and save them.
 This does not guarantee that the aspect ratio will remain the same.
 If includeXML is True, the bounding boxes will be resized as well.
 '''
-def resize_in_directory(read_path: Path, save_path: Path, width=512, height=512, includeXML=True):
+def resize_in_directory(read_dir: Path, save_path: Path, width=512, height=512, includeXML=True):
     # augmenters
     aug = iaa.Resize({"height": height, "width": width})
-    aug_in_directory(read_path, save_path, aug, includeXML)
+    aug_in_directory(read_dir, save_path, aug, includeXML)
 
 '''
 Pad the images in the directory to make them square and 
 resize them to the given dimension while maintaining aspect ratio.
 If includeXML is True, the bounding boxes will be resized as well.
 '''
-def pad_and_resize_square_in_directory(read_path: Path, save_path: Path, dim=512, includeXML=True):
+def pad_and_resize_square_in_directory(read_dir: Path, save_path: Path, dim=512, includeXML=True):
     # augmenters
     aug = iaa.Sequential([
         iaa.PadToSquare(pad_mode="edge"),
         iaa.Resize(dim)
     ])
-    aug_in_directory(read_path, save_path, aug, includeXML)
+    aug_in_directory(read_dir, save_path, aug, includeXML)
 
 '''
-Copy the files in the read_path directory to the save_path directory.
+Copy the files in the read_dir directory to the save_path directory.
 '''
-def copy_files_in_directory(read_path: Path, save_path: Path):
-    read_path = Path(read_path)
+def copy_files_in_directory(read_dir: Path, save_path: Path):
+    read_dir = Path(read_dir)
     save_path = Path(save_path)
-    if not read_path.exists() or not read_path.is_dir():
-        print_red(f"Directory: '{read_path}' does not exist or is not a directory.")
+    if not read_dir.exists() or not read_dir.is_dir():
+        print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
     if not save_path.exists():
         os.mkdir(str(save_path))
 
     # get all files in the directory
-    files = list(read_path.iterdir())
+    files = list(read_dir.iterdir())
     
     # copy data to save_path
     for f in files:
@@ -440,7 +455,7 @@ def copy_files_in_directory(read_path: Path, save_path: Path):
             shutil.copy2(f, save_path)
 
 '''
-Rotate the image at img_read_path by the given angle and save it in img_save_dir.
+Rotate the image at img_read_dir by the given angle and save it in img_save_dir.
 The rotateCode is the cv2 rotate code.
 '''
 def rotate_image_and_save(img_read_path: Path, img_save_dir=None, rotateCode=cv2.ROTATE_90_CLOCKWISE):
@@ -467,31 +482,31 @@ Rotate all the images in the directory by the given rotate code
 and save them in the save_path directory if range is (-1, -1).
 If range is not (-1, -1), only rotate the images in the range.
 '''
-def rotate_images_and_save(read_path: Path, save_path=None, rotateCode=cv2.ROTATE_90_CLOCKWISE, range=(-1, -1)):
-    read_path = Path(read_path)
+def rotate_images_and_save(read_dir: Path, save_path=None, rotateCode=cv2.ROTATE_90_CLOCKWISE, range=(-1, -1)):
+    read_dir = Path(read_dir)
     if save_path == None:
-        save_path = read_path
+        save_path = read_dir
     save_path = Path(save_path)
 
-    if not read_path.exists() or not read_path.is_dir():
-        print_red(f"Directory: '{read_path}' does not exist or is not a directory.")
+    if not read_dir.exists() or not read_dir.is_dir():
+        print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
     if not save_path.exists():
         os.mkdir(str(save_path))
-    jpgPaths = get_jpg_paths(read_path, range)
+    jpgPaths = get_jpg_paths(read_dir, range)
     for img in jpgPaths:
         rotate_image_and_save(img, save_path, rotateCode)
 
 '''
 Delete all xml files in the directory that do not have a corresponding jpg file
 '''
-def delete_all_xml_without_jpg(read_path: Path):
-    read_path = Path(read_path)
-    if not read_path.exists() or not read_path.is_dir():
-        print_red(f"Directory: '{read_path}' does not exist or is not a directory.")
+def delete_all_xml_without_jpg(read_dir: Path):
+    read_dir = Path(read_dir)
+    if not read_dir.exists() or not read_dir.is_dir():
+        print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
-    jpgPaths = get_jpg_paths(read_path)
-    xmlPaths = list(read_path.glob('*.xml'))
+    jpgPaths = get_jpg_paths(read_dir)
+    xmlPaths = list(read_dir.glob('*.xml'))
     for xml in xmlPaths:
         name = xml.stem
         if not any([jpg.stem == name for jpg in jpgPaths]):
@@ -500,13 +515,13 @@ def delete_all_xml_without_jpg(read_path: Path):
 '''
 Count the number of files in the directory.
 '''
-def count_files_in_directory(read_path: Path):
-    read_path = Path(read_path)
-    if not read_path.exists() or not read_path.is_dir():
-        print_red(f"Directory: '{read_path}' does not exist or is not a directory.")
+def count_files_in_directory(read_dir: Path):
+    read_dir = Path(read_dir)
+    if not read_dir.exists() or not read_dir.is_dir():
+        print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
     count = 0
-    for f in read_path.iterdir():
+    for f in read_dir.iterdir():
         if f.is_file():
             count += 1
     return count
@@ -514,14 +529,14 @@ def count_files_in_directory(read_path: Path):
 '''
 Convert all jpeg files in the directory to jpg files.
 '''
-def jpeg_to_jpg(read_path: Path):
-    read_path = Path(read_path)
-    if not read_path.exists() or not read_path.is_dir():
-        print_red(f"Directory: '{read_path}' does not exist or is not a directory.")
+def jpeg_to_jpg(read_dir: Path):
+    read_dir = Path(read_dir)
+    if not read_dir.exists() or not read_dir.is_dir():
+        print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
-    jpeg = list(read_path.glob('*.jpeg'))
+    jpeg = list(read_dir.glob('*.jpeg'))
     for img in jpeg:
-        img.rename(read_path / (str(img.stem) + '.jpg'))
+        img.rename(read_dir / (str(img.stem) + '.jpg'))
 
 '''
 Cut off the bounding box in the xml file that is outside the image.
@@ -576,12 +591,12 @@ def cut_off_bbox(xml_pth: Path):
 '''
 Cut off the bounding boxes in the xml files that are outside the image.
 '''
-def cut_off_bboxes_in_directory(read_path: Path):
-    read_path = Path(read_path)
-    if not read_path.exists() or not read_path.is_dir():
-        print_red(f"Directory: '{read_path}' does not exist or is not a directory.")
+def cut_off_bboxes_in_directory(read_dir: Path):
+    read_dir = Path(read_dir)
+    if not read_dir.exists() or not read_dir.is_dir():
+        print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
-    xmlPaths = list(read_path.glob('*.xml'))
+    xmlPaths = list(read_dir.glob('*.xml'))
     for p in xmlPaths:
         try: 
             cut_off_bbox(p)
@@ -591,16 +606,13 @@ def cut_off_bboxes_in_directory(read_path: Path):
 '''
 Convert pascal voc xml file to yolo txt file.
 '''
-def pascalvoc_to_yolo(read_path: Path, save_path: Path, json_path: Path):
-    read_path = Path(read_path)
+def pascalvoc_to_yolo(xml_path: Path, save_path: Path, json_path: Path):
+    xml_path = Path(xml_path)
     save_path = Path(save_path)
     json_path = Path(json_path)
     save_created = False
-    if not json_path.exists() or not json_path.is_file() or json_path.suffix != '.json':
-        print_red(f"File: '{json_path}' does not exist or is not a json file.")
-        return
-    if not read_path.exists() or not read_path.is_file() or read_path.suffix != '.xml':
-        print_red(f"File: '{read_path}' does not exist or is not an xml file.")
+    if not xml_path.exists() or not xml_path.is_file() or xml_path.suffix != '.xml':
+        print_red(f"File: '{xml_path}' does not exist or is not an xml file.")
         return
     if not save_path.suffix == '.txt':
         print_red(f"File: '{save_path}' is not a txt file.")
@@ -610,14 +622,9 @@ def pascalvoc_to_yolo(read_path: Path, save_path: Path, json_path: Path):
         save_created = True
     
     try:
-        label_map = {}
-        with open(json_path) as f:
-            categories = json.load(f)['categories']
-            for category in categories:
-                label_map[category['name']] = category['id']
-        print(label_map)
+        label_map = get_label_map(json_path)
         # get the bounding boxes from the xml file
-        ann = annotation_from_xml(read_path)
+        ann = annotation_from_xml(xml_path)
         # write the bounding boxes to the yolo txt file
         with open((save_path), 'w') as f:
             f.write(ann.to_yolo(label_map, 5))
