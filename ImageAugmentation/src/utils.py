@@ -1,9 +1,9 @@
 from pathlib import Path
-import imgaug as ia
 import imgaug.augmenters as iaa
 import cv2
 import numpy as np
 import os
+from pascal import annotation_from_xml
 from pascal_voc_writer import Writer
 import xml.etree.ElementTree as ET
 import  xml.dom.minidom as xdm
@@ -11,6 +11,7 @@ from imgaug.augmentables.bbs import BoundingBox, BoundingBoxesOnImage
 import psutil
 import traceback
 import math
+import json
 import shutil
 
 def print_red(text):
@@ -580,3 +581,41 @@ def cut_off_bboxes_in_directory(read_path: Path):
             cut_off_bbox(p)
         except:
             print_red(f"Failed to cut off bbox in file: {p}")
+
+'''
+Convert pascal voc xml file to yolo txt file.
+'''
+def pascalvoc_to_yolo(read_path: Path, save_path: Path, json_path: Path):
+    read_path = Path(read_path)
+    save_path = Path(save_path)
+    json_path = Path(json_path)
+    save_created = False
+    if not json_path.exists() or not json_path.is_file() or json_path.suffix != '.json':
+        print_red(f"File: '{json_path}' does not exist or is not a json file.")
+        return
+    if not read_path.exists() or not read_path.is_file() or read_path.suffix != '.xml':
+        print_red(f"File: '{read_path}' does not exist or is not an xml file.")
+        return
+    if not save_path.suffix == '.txt':
+        print_red(f"File: '{save_path}' is not a txt file.")
+        return
+    elif not save_path.is_file():
+        save_path.touch()
+        save_created = True
+    
+    try:
+        label_map = {}
+        with open(json_path) as f:
+            categories = json.load(f)['categories']
+            for category in categories:
+                label_map[category['name']] = category['id']
+        print(label_map)
+        # get the bounding boxes from the xml file
+        ann = annotation_from_xml(read_path)
+        # write the bounding boxes to the yolo txt file
+        with open((save_path), 'w') as f:
+            f.write(ann.to_yolo(label_map, 5))
+    except Exception as e:
+        traceback.print_exc()
+        if save_created:
+            save_path.unlink()
