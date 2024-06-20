@@ -2,23 +2,23 @@
   "categories": [
     {
       "id": 0,
-      "name": "Allen Wrench"
+      "name": "allen wrench"
     },
     {
       "id": 1,
-      "name": "Pencil"
+      "name": "pencil"
     },
     {
       "id": 2,
-      "name": "Screwdriver"
+      "name": "screwdriver"
     },
     {
       "id": 3,
-      "name": "Tool Bit"
+      "name": "tool Bit"
     },
     {
       "id": 4,
-      "name": "Wrench"
+      "name": "wrench"
     }
   ],
   "info": {
