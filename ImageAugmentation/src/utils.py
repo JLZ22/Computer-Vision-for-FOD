@@ -171,8 +171,9 @@ def visualize_pascalvoc_annotations(read_dir: Path, save_path: Path):
             # calculate thickness of bounding boxes and font 
             # with respect to image size (the constants are manually tuned)
             boxThickness = max(width, height) / 500
+            boxThickness = round(boxThickness) if round(boxThickness) > 0 else 1
             fontScale = min(width, height) / 1200
-            fontThickness = max(width, height) / 1000
+            fontThickness = math.ceil(max(width, height) / 1000)
 
             # get bounding boxes
             for i in range(objects.length):
@@ -191,7 +192,7 @@ def visualize_pascalvoc_annotations(read_dir: Path, save_path: Path):
                 cv2.rectangle(img,(int(float(xmin_data)),int(float(ymin_data))),
                                 (int(float(xmax_data)),int(float(ymax_data))),
                                 (55,255,155),
-                                round(boxThickness) if round(boxThickness) > 0 else 1)
+                                boxThickness)
                 # add label
                 label = root.getElementsByTagName('name')[i]
                 label_data = label.childNodes[0].data
@@ -210,7 +211,78 @@ def visualize_pascalvoc_annotations(read_dir: Path, save_path: Path):
         traceback.print_exc()
         if save_created:
             os.rmdir(str(save_path))
+
+'''
+Visualize bounding boxes from YOLO txt file on the image.
+'''
+def visualize_yolo_annotations(read_dir: Path, save_path: Path, json_path: Path):
+    read_dir = Path(read_dir)
+    save_path = Path(save_path)
+    json_path = Path(json_path)
+    save_created = False
+    # check read and write paths
+    if not read_dir.exists() or not read_dir.is_dir():
+        print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
+        return
+    if save_path.exists() and not save_path.is_dir():
+        print_red(f"Directory: '{save_path}' exists but is not a directory.")
+        return
+    if not save_path.exists():
+        os.mkdir(str(save_path))
+        save_created = True
+    try:
+        label_map = get_label_map(json_path)
+        # get images and txt files
+        image_paths = get_jpg_paths(read_dir)
+        for img_path in image_paths:
+            txt = Path(read_dir / (img_path.stem + '.txt'))
+            img = cv2.imread(str(img_path))
+            if not txt.exists() or img is None:
+                continue
+
+            with open(txt, 'r') as f:
+                lines = f.readlines()
             
+            width =  img.shape[1]
+            height = img.shape[0]
+
+            for line in lines:
+                line = line.split()
+                label = line[0]
+                x = float(line[1])
+                y = float(line[2])
+                w = float(line[3])
+                h = float(line[4])
+                # calculate bounding box coordinates
+                x1 = int((x - w / 2) * img.shape[1])
+                y1 = int((y - h / 2) * img.shape[0])
+                x2 = int((x + w / 2) * img.shape[1])
+                y2 = int((y + h / 2) * img.shape[0])
+
+
+                # calculate thickness of bounding boxes and font 
+                # with respect to image size (the constants are manually tuned)
+                boxThickness = max(width, height) / 500
+                boxThickness = round(boxThickness) if round(boxThickness) > 0 else 1
+                fontScale = min(width, height) / 1200
+                fontThickness = math.ceil(max(width, height) / 1000)
+
+                # draw bounding box
+                cv2.rectangle(img, (x1, y1), (x2, y2), (55,255,155), boxThickness)
+                # add label
+                cv2.putText(img, 
+                            label_map.get(label), 
+                            [x1 + 2, y1 - 2], 
+                            cv2.FONT_HERSHEY_SIMPLEX, 
+                            fontScale, 
+                            (176, 38, 255), 
+                            fontThickness)
+
+    except Exception as e:
+        traceback.print_exc()
+        if save_created:
+            os.rmdir(str(save_path))
+
 '''
 Make num_copies number of the bbs object and return it 
 in an array
