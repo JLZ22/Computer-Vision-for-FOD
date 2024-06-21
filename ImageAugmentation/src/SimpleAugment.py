@@ -108,7 +108,7 @@ class SimpleAugSeq:
                 writer.addObject(box.label, box.x1, box.y1, box.x2, box.y2)
             writer.save(xml_path)
 
-        utils.cut_off_bboxes(self.save_path)
+        utils.cut_off_bboxes_in_directory(self.save_path)
 
     # The primary function in charge of 
     # This function creates the processes that are 
