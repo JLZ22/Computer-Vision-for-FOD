@@ -108,8 +108,6 @@ class SimpleAugSeq:
                 writer.addObject(box.label, box.x1, box.y1, box.x2, box.y2)
             writer.save(xml_path)
 
-        utils.cut_off_bboxes_in_directory(self.save_path)
-
     # The primary function in charge of 
     # This function creates the processes that are 
     # each in charge of augmenting one image
@@ -156,6 +154,7 @@ class SimpleAugSeq:
                 time.sleep(0.1)
         
         end = time.time()
+        utils.cut_off_bboxes_in_directory(self.save_path)
         self.duration = end - start
         if self.checkMem:
             print(f"Max Memory Consumption of Pool: {mem / 1024**2} MB")
