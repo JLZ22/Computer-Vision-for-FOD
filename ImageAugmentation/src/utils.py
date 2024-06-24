@@ -52,7 +52,7 @@ def get_jpg_paths(dir, range=(-1, -1)):
     return out
 
 '''
-Rename all the jpg and xml files in the directory to the
+Rename all the jpg, xml, and txt files in the directory to the
 format prefix + index + '.jpg' and prefix + index + '.xml'.
 
 This function has no recursive functionality.
@@ -64,16 +64,21 @@ def rename_in_directory(read_dir: Path, startIndex=0, prefix = ''):
         if filename.is_dir():
             continue
         name = filename.stem
+        oldTXT = Path(read_dir, name + '.txt')
         oldJPG = Path(read_dir, filename.name)
         oldXML = Path(read_dir, name + '.xml')
         newJPG = Path(read_dir, prefix + str(count) + '.jpg')
         newXML = Path(read_dir, prefix + str(count) + '.xml')
-        print(f'{oldJPG} -> {newJPG}')
-        print(f'{oldXML} -> {newXML}')
+        newTXT = Path(read_dir, prefix + str(count) + '.txt')
         if oldJPG.is_file():
             oldJPG.rename(newJPG)
+            print(f'{oldJPG} -> {newJPG}')
         if oldXML.is_file():
             oldXML.rename(newXML)
+            print(f'{oldXML} -> {newXML}')
+        if oldTXT.is_file():
+            print(f'{oldTXT} -> {newTXT}')
+            oldTXT.rename(newTXT)
 
 '''
 Delete all files in the directory.
