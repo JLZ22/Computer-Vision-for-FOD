@@ -610,14 +610,14 @@ def delete_all_xml_without_jpg(read_dir: Path):
 '''
 Count the number of files in the directory.
 '''
-def count_files_in_directory(read_dir: Path, ext=[]):
+def count_files_in_directory(read_dir: Path, extensions=[]):
     read_dir = Path(read_dir)
     if not read_dir.exists() or not read_dir.is_dir():
         print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
     count = 0
     for f in read_dir.iterdir():
-        if ext and f.suffix not in ext:
+        if extensions and f.suffix not in extensions:
             continue
         elif f.is_file():
             count += 1
