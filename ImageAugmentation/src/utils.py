@@ -75,7 +75,7 @@ def rename_in_directory(read_dir: Path, startIndex=0, prefix = ''):
             print(f'{oldJPG} -> {newJPG}')
         else:
             print_red(f"File: '{oldJPG}' does not exist. Skipping...")
-            
+
         if oldXML.is_file():
             oldXML.rename(newXML)
             print(f'{oldXML} -> {newXML}')
@@ -610,14 +610,16 @@ def delete_all_xml_without_jpg(read_dir: Path):
 '''
 Count the number of files in the directory.
 '''
-def count_files_in_directory(read_dir: Path):
+def count_files_in_directory(read_dir: Path, ext=[]):
     read_dir = Path(read_dir)
     if not read_dir.exists() or not read_dir.is_dir():
         print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
     count = 0
     for f in read_dir.iterdir():
-        if f.is_file():
+        if ext and f.suffix not in ext:
+            continue
+        elif f.is_file():
             count += 1
     return count
 
