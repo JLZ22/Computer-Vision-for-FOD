@@ -73,12 +73,20 @@ def rename_in_directory(read_dir: Path, startIndex=0, prefix = ''):
         if oldJPG.is_file():
             oldJPG.rename(newJPG)
             print(f'{oldJPG} -> {newJPG}')
+        else:
+            print_red(f"File: '{oldJPG}' does not exist. Skipping...")
+            
         if oldXML.is_file():
             oldXML.rename(newXML)
             print(f'{oldXML} -> {newXML}')
+        else:
+            print_red(f"File: '{oldXML}' does not exist. Skipping...")
+
         if oldTXT.is_file():
             print(f'{oldTXT} -> {newTXT}')
             oldTXT.rename(newTXT)
+        else:
+            print_red(f"File: '{oldTXT}' does not exist. Skipping...")
 
 '''
 Delete all files in the directory.
