@@ -57,7 +57,7 @@ format prefix + index + '.jpg' and prefix + index + '.xml'.
 
 This function has no recursive functionality.
 '''
-def rename_in_directory(read_dir: Path, startIndex=0, prefix = ''):
+def rename_in_directory(read_dir: Path, startIndex=0, prefix = '', extensions=[]):
     read_dir = Path(read_dir)
     files = get_jpg_paths(read_dir)
     for count, filename in enumerate(files, start=startIndex):
@@ -70,23 +70,27 @@ def rename_in_directory(read_dir: Path, startIndex=0, prefix = ''):
         newJPG = Path(read_dir, prefix + str(count) + '.jpg')
         newXML = Path(read_dir, prefix + str(count) + '.xml')
         newTXT = Path(read_dir, prefix + str(count) + '.txt')
-        if oldJPG.is_file():
-            oldJPG.rename(newJPG)
-            print(f'{oldJPG} -> {newJPG}')
-        else:
-            print_red(f"File: '{oldJPG}' does not exist. Skipping...")
+        # check if .jpg or .jpeg is in the extensions
+        if (not extensions or '.jpg' in extensions or '.jpeg' in extensions):
+            if oldJPG.is_file():
+                oldJPG.rename(newJPG)
+                print(f'{oldJPG} -> {newJPG}')
+            else:
+                print_red(f"File: '{oldJPG}' does not exist. Skipping...")
 
-        if oldXML.is_file():
-            oldXML.rename(newXML)
-            print(f'{oldXML} -> {newXML}')
-        else:
-            print_red(f"File: '{oldXML}' does not exist. Skipping...")
+        if (not extensions or '.xml' in extensions):
+            if oldXML.is_file():
+                oldXML.rename(newXML)
+                print(f'{oldXML} -> {newXML}')
+            else:
+                print_red(f"File: '{oldXML}' does not exist. Skipping...")
 
-        if oldTXT.is_file():
-            print(f'{oldTXT} -> {newTXT}')
-            oldTXT.rename(newTXT)
-        else:
-            print_red(f"File: '{oldTXT}' does not exist. Skipping...")
+        if (not extensions or '.txt' in extensions):
+            if oldTXT.is_file():
+                oldTXT.rename(newTXT)
+                print(f'{oldTXT} -> {newTXT}')
+            else:
+                print_red(f"File: '{oldTXT}' does not exist. Skipping...")
 
 '''
 Delete all files in the directory.
