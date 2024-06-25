@@ -59,7 +59,7 @@ After augmentation, for each image in the dataset, the mean pixel value per chan
 - [x] resize images and corresponding bounding boxes<br>
 - [x] transform labels from PascalVOC to YOLO <br>
 - [x] rename labels for consistency<br>
-- [ ] subtract mean pixel value from all images 
+- [x] subtract mean pixel value from all images 
 - [ ] partition data into training and validation<br>
 - [ ] separate txt and jpg<br>
 - [ ] train<br>
