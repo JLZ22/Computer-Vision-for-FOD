@@ -28,6 +28,8 @@ To install using `pip`, run `pip install -r requirements.txt`.
 
 ## Augmentation Notes<br>
 
+[imgaug](https://github.com/aleju/imgaug?tab=readme-ov-file) is an open source software that aids in image augmentation. We will be using that to augment our training and test images.
+
 Images were subject to the following augmentations in random order for training. 
 - vertical/horizontal flips
 - random crops between 0% and 10% of the image
@@ -41,6 +43,8 @@ After augmentation, for each image in the dataset, the mean pixel value per chan
 
 ## Status
 
+Images are augmented and converted to YOLO.
+
 ### Current Functionality
 
 - Capable of performing image augmentation on jpg/xml pairs
@@ -52,12 +56,14 @@ After augmentation, for each image in the dataset, the mean pixel value per chan
 
 ### Todo
 
-- find solution to memory issue
-- finish augmenting rest of the classes
-- resize images and corresponding bounding boxes
-- transform labels from PascalVOC to YOLO 
-- rename data points for final dataset
-- train
+* [x] find solution to memory issue<br>
+* [x] finish augmenting rest of the classes<br>
+* [x] resize images and corresponding bounding boxes<br>
+* [x] transform labels from PascalVOC to YOLO <br>
+* [x] rename labels for consistency<br>
+* [ ] partition data into training and validation
+* [ ] separate txt and jpg
+* [ ] train<br>
 
 ## Literature Review<br>
 
