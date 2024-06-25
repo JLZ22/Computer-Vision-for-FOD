@@ -13,6 +13,7 @@ import traceback
 import math
 import json
 import shutil
+from tqdm import tqdm
 
 def print_red(text):
     print("\033[91m{}\033[0m".format(text))
@@ -133,7 +134,7 @@ def subtract_mean_in_directory(read_path: Path, save_path=None):
         save_created = True
     try:
         jpgs = get_jpg_paths(read_path)
-        for jpg in jpgs:
+        for jpg in tqdm(jpgs, desc="Processing"):
             img = cv2.imread(str(jpg))
             if img is None:
                 print_red(f"Failed to read image: {jpg}")
@@ -204,7 +205,7 @@ def visualize_pascalvoc_annotations(read_dir: Path, save_path: Path):
         # assert they are the same length
         assert(len(images) == len(xml))
         
-        for file in images:
+        for file in tqdm(images, desc="Processing"):
             filename = file.stem
             img_path = file
             xml_path = read_dir / (filename + '.xml')
@@ -287,7 +288,7 @@ def visualize_yolo_annotations(read_dir: Path, save_path: Path, json_path: Path)
         image_paths = get_jpg_paths(read_dir)
         txt = list(read_dir.glob('*.txt'))
         assert(len(image_paths) == len(txt))
-        for img_path in image_paths:
+        for img_path in tqdm(image_paths, desc="Processing"):
             txt = Path(read_dir / (img_path.stem + '.txt'))
             img = cv2.imread(str(img_path))
             if not txt.exists() or img is None:
@@ -394,7 +395,7 @@ def lowercase_labels_in_directory(read_dir: Path, save_path=None):
         print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
     jpgPaths = get_jpg_paths(read_dir)
-    for img in jpgPaths:
+    for img in tqdm(jpgPaths, desc="Processing"):
         xml = read_dir / (img.stem + '.xml')
         if not xml.exists():
             print_red(f"XML file: '{xml}' does not exist.")
@@ -430,7 +431,7 @@ def update_jpg_path_in_xml(read_dir, save_path=None, new_path=None):
         print_red(f"Directory: '{new_path}' does not exist or is not a directory.")
         return
     jpgPaths = get_jpg_paths(read_dir)
-    for i, img in enumerate(jpgPaths):
+    for img in tqdm(jpgPaths, desc="Processing"):
         xml = read_dir / (img.stem + '.xml')
         if not xml.exists():
             print_red(f"XML file: '{xml}' does not exist.")
@@ -467,7 +468,7 @@ def aug_in_directory(read_dir, save_path, aug, includeXML=True):
 
     try:
         # augment images
-        for img in jpgPaths:
+        for img in tqdm(jpgPaths, desc="Processing"):
             # read image and check if it is valid
             image = cv2.imread(str(img))
             if image is None:
@@ -578,7 +579,7 @@ def copy_files_in_directory(read_dir: Path, save_path: Path):
     files = list(read_dir.iterdir())
     
     # copy data to save_path
-    for f in files:
+    for f in tqdm(files, desc="Processing"):
         if f.is_file():
             shutil.copy2(f, save_path)
 
@@ -610,7 +611,10 @@ Rotate all the images in the directory by the given rotate code
 and save them in the save_path directory if range is (-1, -1).
 If range is not (-1, -1), only rotate the images in the range.
 '''
-def rotate_images_and_save(read_dir: Path, save_path=None, rotateCode=cv2.ROTATE_90_CLOCKWISE, range=(-1, -1)):
+def rotate_image_and_save_in_directory(read_dir: Path, 
+                                       save_path=None, 
+                                       rotateCode=cv2.ROTATE_90_CLOCKWISE, 
+                                       range=(-1, -1)):
     read_dir = Path(read_dir)
     if save_path == None:
         save_path = read_dir
@@ -622,7 +626,7 @@ def rotate_images_and_save(read_dir: Path, save_path=None, rotateCode=cv2.ROTATE
     if not save_path.exists():
         os.mkdir(str(save_path))
     jpgPaths = get_jpg_paths(read_dir, range)
-    for img in jpgPaths:
+    for img in tqdm(jpgPaths, desc="Processing"):
         rotate_image_and_save(img, save_path, rotateCode)
 
 '''
@@ -635,7 +639,7 @@ def delete_all_xml_without_jpg(read_dir: Path):
         return
     jpgPaths = get_jpg_paths(read_dir)
     xmlPaths = list(read_dir.glob('*.xml'))
-    for xml in xmlPaths:
+    for xml in tqdm(xmlPaths, desc="Processing"):
         name = xml.stem
         if not any([jpg.stem == name for jpg in jpgPaths]):
             xml.unlink()
@@ -665,7 +669,7 @@ def jpeg_to_jpg(read_dir: Path):
         print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
     jpeg = list(read_dir.glob('*.jpeg'))
-    for img in jpeg:
+    for img in tqdm(jpeg, desc="Processing"):
         img.rename(read_dir / (str(img.stem) + '.jpg'))
 
 '''
@@ -681,7 +685,7 @@ def cut_off_bbox(xml_pth: Path):
     root = tree.getroot()
     width = int(root.find("size").find("width").text)
     height = int(root.find("size").find("height").text)
-    for member in root.findall('object'):
+    for member in tqdm(root.findall('object'), desc="Processing"):
         # get bounding box
         bbox = member.find('bndbox')
         xmin = int(float(bbox.find('xmin').text))
@@ -727,7 +731,7 @@ def cut_off_bboxes_in_directory(read_dir: Path):
         print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
     xmlPaths = list(read_dir.glob('*.xml'))
-    for p in xmlPaths:
+    for p in tqdm(xmlPaths, desc="Processing"):
         try: 
             cut_off_bbox(p)
         except:
@@ -781,7 +785,7 @@ def pascalvoc_to_yolo_in_directory(read_dir: Path, save_dir: Path, json: Path):
         os.mkdir(str(save_dir))
         
     xmlPaths = list(read_dir.glob('*.xml'))
-    for xml in xmlPaths:
+    for xml in tqdm(xmlPaths, desc="Processing"):
         try:
             pascalvoc_to_yolo(xml, save_dir / (xml.stem + '.txt'), json)
         except:
