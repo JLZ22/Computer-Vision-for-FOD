@@ -57,13 +57,13 @@ Images are augmented and converted to YOLO.
 ### Todo
 
 - [x] find solution to memory issue<br>
-* [x] finish augmenting rest of the classes<br>
-* [x] resize images and corresponding bounding boxes<br>
-* [x] transform labels from PascalVOC to YOLO <br>
-* [x] rename labels for consistency<br>
-- [ ] partition data into training and validation
-* [ ] separate txt and jpg
-* [ ] train<br>
+- [x] finish augmenting rest of the classes<br>
+- [x] resize images and corresponding bounding boxes<br>
+- [x] transform labels from PascalVOC to YOLO <br>
+- [x] rename labels for consistency<br>
+- [ ] partition data into training and validation<br>
+- [ ] separate txt and jpg<br>
+- [ ] train<br>
 
 ## Literature Review<br>
 
