@@ -41,13 +41,11 @@ Images were subject to the following augmentations in random order for training.
 
 After augmentation, for each image in the dataset, the mean pixel value per channel is subtracted from it according to the 7th source in the literature review section.
 
-## Status
-
-Images are augmented and converted to YOLO.
-
 ### Current Functionality
 
 - Capable of performing image augmentation on jpg/xml pairs
+- Equipped with various utility functions to help with large quantity of file operations
+- Can perform a benchmark on your machine to determine the optimal number of proceses to use for multiprocessing for image augmentation
 - Can run the default YOLOv8 model which was trained on the COCO dataset. 
 
 ### Issues
@@ -61,6 +59,7 @@ Images are augmented and converted to YOLO.
 - [x] resize images and corresponding bounding boxes<br>
 - [x] transform labels from PascalVOC to YOLO <br>
 - [x] rename labels for consistency<br>
+- [ ] subtract mean pixel value from all images 
 - [ ] partition data into training and validation<br>
 - [ ] separate txt and jpg<br>
 - [ ] train<br>
