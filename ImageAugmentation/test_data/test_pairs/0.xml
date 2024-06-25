@@ -1,7 +1,7 @@
 <annotation>
 	<folder>Pencil + Tool Bits</folder>
 	<filename>3277.jpg</filename>
-	<path>Z:\Restricted\Research\Project Folders\Active\ADT - Assembly Digital Thread\FOD\Images\Multi Class\Pencil + Tool Bits\3277.jpg</path>
+	<path>../test_data/test_pairs/0.jpg</path>
 	<source>
 		<database>Unknown</database>
 	</source>
@@ -12,7 +12,7 @@
 	</size>
 	<segmented>0</segmented>
 	<object>
-		<name>Tool Bit</name>
+		<name>tool bit</name>
 		<pose>Unspecified</pose>
 		<truncated>0</truncated>
 		<difficult>0</difficult>
@@ -24,7 +24,7 @@
 		</bndbox>
 	</object>
 	<object>
-		<name>Tool Bit</name>
+		<name>tool bit</name>
 		<pose>Unspecified</pose>
 		<truncated>0</truncated>
 		<difficult>0</difficult>
@@ -36,7 +36,7 @@
 		</bndbox>
 	</object>
 	<object>
-		<name>Tool Bit</name>
+		<name>tool bit</name>
 		<pose>Unspecified</pose>
 		<truncated>0</truncated>
 		<difficult>0</difficult>

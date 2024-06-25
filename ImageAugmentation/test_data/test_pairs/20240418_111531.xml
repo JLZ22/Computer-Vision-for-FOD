@@ -1,7 +1,7 @@
 <annotation>
-	<folder>Pencil + Tool Bits</folder>
-	<filename>3278.jpg</filename>
-	<path>../test_data/raw_pairs/3278.jpg</path>
+	<folder>Wrench</folder>
+	<filename>20240418_111531.jpg</filename>
+	<path>../test_data/test_pairs/20240418_111531.jpg</path>
 	<source>
 		<database>Unknown</database>
 	</source>
@@ -12,39 +12,39 @@
 	</size>
 	<segmented>0</segmented>
 	<object>
-		<name>pencil</name>
+		<name>wrench</name>
 		<pose>Unspecified</pose>
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>2179</xmin>
-			<ymin>814</ymin>
-			<xmax>2418</xmax>
-			<ymax>1193</ymax>
+			<xmin>473</xmin>
+			<ymin>1065</ymin>
+			<xmax>815</xmax>
+			<ymax>2141</ymax>
 		</bndbox>
 	</object>
 	<object>
-		<name>Tool Bit</name>
+		<name>wrench</name>
 		<pose>Unspecified</pose>
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>2063</xmin>
-			<ymin>991</ymin>
-			<xmax>2347</xmax>
-			<ymax>1376</ymax>
+			<xmin>718</xmin>
+			<ymin>897</ymin>
+			<xmax>1109</xmax>
+			<ymax>2429</ymax>
 		</bndbox>
 	</object>
 	<object>
-		<name>Tool Bit</name>
+		<name>wrench</name>
 		<pose>Unspecified</pose>
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<xmin>1527</xmin>
-			<ymin>1787</ymin>
-			<xmax>1877</xmax>
-			<ymax>2211</ymax>
+			<xmin>1024</xmin>
+			<ymin>856</ymin>
+			<xmax>1406</xmax>
+			<ymax>2496</ymax>
 		</bndbox>
 	</object>
 </annotation>
