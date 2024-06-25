@@ -117,6 +117,35 @@ def subtract_mean(image):
     return image
 
 '''
+Subtract the mean pixel values from all the jpg files in the directory.
+'''
+def subtract_mean_in_directory(read_path: Path, save_path=None):
+    read_path = Path(read_path)
+    if save_path is None:
+        save_path = read_path
+    save_path = Path(save_path)
+    save_created = False
+    if not read_path.exists() or not read_path.is_dir():
+        print_red(f"Directory: '{read_path}' does not exist or is not a directory.")
+        return
+    if not save_path.exists():
+        os.mkdir(str(save_path))
+        save_created = True
+    try:
+        jpgs = get_jpg_paths(read_path)
+        for jpg in jpgs:
+            img = cv2.imread(str(jpg))
+            if img is None:
+                print_red(f"Failed to read image: {jpg}")
+                continue
+            img = subtract_mean(img)
+            cv2.imwrite(str(save_path / jpg.name), img)
+    except:
+        traceback.print_exc()
+        if save_created:
+            save_path.rmdir()
+                
+'''
 Get the bounding boxes from the xml file in the read_dir
 that corresponds to the jpg file. If the xml file does not 
 exist, return None.
@@ -707,19 +736,19 @@ def cut_off_bboxes_in_directory(read_dir: Path):
 '''
 Convert pascal voc xml file to yolo txt file.
 '''
-def pascalvoc_to_yolo(xml_path: Path, save_path: Path, json_path: Path):
+def pascalvoc_to_yolo(xml_path: Path, save_file_path: Path, json_path: Path):
     xml_path = Path(xml_path)
-    save_path = Path(save_path)
+    save_file_path = Path(save_file_path)
     json_path = Path(json_path)
     save_created = False
     if not xml_path.exists() or not xml_path.is_file() or xml_path.suffix != '.xml':
         print_red(f"File: '{xml_path}' does not exist or is not an xml file.")
         return
-    if not save_path.suffix == '.txt':
-        print_red(f"File: '{save_path}' is not a txt file.")
+    if not save_file_path.suffix == '.txt':
+        print_red(f"File: '{save_file_path}' is not a txt file.")
         return
-    elif not save_path.is_file():
-        save_path.touch()
+    elif not save_file_path.is_file():
+        save_file_path.touch()
         save_created = True
     
     try:
@@ -727,17 +756,17 @@ def pascalvoc_to_yolo(xml_path: Path, save_path: Path, json_path: Path):
         # get the bounding boxes from the xml file
         ann = annotation_from_xml(xml_path)
         # write the bounding boxes to the yolo txt file
-        with open((save_path), 'w') as f:
+        with open((save_file_path), 'w') as f:
             f.write(ann.to_yolo(label_map, 5))
 
         # move the corresponding image
         img_path = xml_path.with_suffix('.jpg')
         if img_path.exists():
-            shutil.copy2(img_path, save_path.with_suffix('.jpg'))
+            shutil.copy2(img_path, save_file_path.with_suffix('.jpg'))
     except Exception as e:
         traceback.print_exc()
         if save_created:
-            save_path.unlink()
+            save_file_path.unlink()
 
 '''
 Convert all pascal voc xml files in the directory to yolo txt files.
