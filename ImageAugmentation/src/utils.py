@@ -791,3 +791,36 @@ def pascalvoc_to_yolo_in_directory(read_dir: Path, save_dir: Path, json: Path):
         except:
             print_red(f"Failed to convert xml file: {xml}")
             continue
+
+'''
+Move a percentage of the data points in the read directory 
+to the save directory. One data point consists of a jpg file and 
+a corresponding xml or txt file. 
+'''
+def move_percent_of_datapoints_in_directory(read_dir: Path, save_dir: Path, percent=0.1):
+    read_dir = Path(read_dir)
+    save_dir = Path(save_dir)
+    save_created = False
+    if not read_dir.exists() or not read_dir.is_dir():
+        print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
+        return
+    if not save_dir.exists():
+        os.mkdir(str(save_dir))
+        save_created = True
+    try:
+        jpgPaths = get_jpg_paths(read_dir)
+        num_files = len(jpgPaths)
+        num_files_to_copy = int(num_files * percent)
+        for img in tqdm(jpgPaths[:num_files_to_copy], desc="Processing"):
+            xml = read_dir / (img.stem + '.xml')
+            txt = read_dir / (img.stem + '.txt')
+            if xml.exists():
+                shutil.move(xml, save_dir)
+            if txt.exists():
+                shutil.move(txt, save_dir)
+            if img.exists():
+                shutil.move(img, save_dir)
+    except:
+        traceback.print_exc()
+        if save_created:
+            os.rmdir(str(save_dir))
