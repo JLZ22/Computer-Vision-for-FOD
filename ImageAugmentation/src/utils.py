@@ -120,31 +120,31 @@ def subtract_mean(image):
 '''
 Subtract the mean pixel values from all the jpg files in the directory.
 '''
-def subtract_mean_in_directory(read_path: Path, save_path=None):
-    read_path = Path(read_path)
-    if save_path is None:
-        save_path = read_path
-    save_path = Path(save_path)
+def subtract_mean_in_directory(read_dir: Path, save_dir=None):
+    read_dir = Path(read_dir)
+    if save_dir is None:
+        save_dir = read_dir
+    save_dir = Path(save_dir)
     save_created = False
-    if not read_path.exists() or not read_path.is_dir():
-        print_red(f"Directory: '{read_path}' does not exist or is not a directory.")
+    if not read_dir.exists() or not read_dir.is_dir():
+        print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
-    if not save_path.exists():
-        os.mkdir(str(save_path))
+    if not save_dir.exists():
+        save_dir.mkdir()
         save_created = True
     try:
-        jpgs = get_jpg_paths(read_path)
+        jpgs = get_jpg_paths(read_dir)
         for jpg in tqdm(jpgs, desc="Processing"):
             img = cv2.imread(str(jpg))
             if img is None:
                 print_red(f"Failed to read image: {jpg}")
                 continue
             img = subtract_mean(img)
-            cv2.imwrite(str(save_path / jpg.name), img)
+            cv2.imwrite(str(save_dir / jpg.name), img)
     except:
         traceback.print_exc()
         if save_created:
-            save_path.rmdir()
+            save_dir.rmdir()
                 
 '''
 Get the bounding boxes from the xml file in the read_dir
@@ -184,19 +184,19 @@ def get_label_map(json_path: Path, key_is_id=True):
 '''
 https://piyush-kulkarni.medium.com/visualize-the-xml-annotations-in-python-c9696ba9c188
 '''
-def visualize_pascalvoc_annotations(read_dir: Path, save_path: Path):
+def visualize_pascalvoc_annotations_in_directory(read_dir: Path, save_dir: Path):
     read_dir = Path(read_dir)
-    save_path = Path(save_path)
+    save_dir = Path(save_dir)
     save_created = False
     # check read and write paths
     if not read_dir.exists() or not read_dir.is_dir():
         print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
-    if save_path.exists() and not save_path.is_dir():
-        print_red(f"Directory: '{save_path}' exists but is not a directory.")
+    if save_dir.exists() and not save_dir.is_dir():
+        print_red(f"Directory: '{save_dir}' exists but is not a directory.")
         return
-    if not save_path.exists():
-        os.mkdir(str(save_path))
+    if not save_dir.exists():
+        save_dir.mkdir()
         save_created = True
     try:
         # get images and xml files
@@ -256,29 +256,29 @@ def visualize_pascalvoc_annotations(read_dir: Path, save_path: Path):
                             math.ceil(fontThickness))
                 
             # save image with bounding boxes drawn
-            cv2.imwrite(str(save_path / (filename + '.jpg')),img)
+            cv2.imwrite(str(save_dir / (filename + '.jpg')),img)
     except:
         traceback.print_exc()
         if save_created:
-            os.rmdir(str(save_path))
+            save_dir.rmdir()
 
 '''
 Visualize bounding boxes from YOLO txt file on the image.
 '''
-def visualize_yolo_annotations(read_dir: Path, save_path: Path, json_path: Path):
+def visualize_yolo_annotations_in_directory(read_dir: Path, save_dir: Path, json_path: Path):
     read_dir = Path(read_dir)
-    save_path = Path(save_path)
+    save_dir = Path(save_dir)
     json_path = Path(json_path)
     save_created = False
     # check read and write paths
     if not read_dir.exists() or not read_dir.is_dir():
         print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
-    if save_path.exists() and not save_path.is_dir():
-        print_red(f"Directory: '{save_path}' exists but is not a directory.")
+    if save_dir.exists() and not save_dir.is_dir():
+        print_red(f"Directory: '{save_dir}' exists but is not a directory.")
         return
-    if not save_path.exists():
-        os.mkdir(str(save_path))
+    if not save_dir.exists():
+        save_dir.mkdir()
         save_created = True
 
     
@@ -333,12 +333,12 @@ def visualize_yolo_annotations(read_dir: Path, save_path: Path, json_path: Path)
                             fontThickness)
                 
             # save image with bounding boxes drawn
-            cv2.imwrite(str(save_path / (img_path.name)), img)
+            cv2.imwrite(str(save_dir / (img_path.name)), img)
 
     except Exception as e:
         traceback.print_exc()
         if save_created:
-            os.rmdir(str(save_path))
+            save_dir.rmdir()
 
 '''
 Make num_copies number of the bbs object and return it 
@@ -384,13 +384,13 @@ def get_children_mem_consumption():
 
 '''
 Lowercase the labels in the xml files in the directory.
-If save_path is None, the xml files will be saved in the same directory.
+If save_dir is None, the xml files will be saved in the same directory.
 '''
-def lowercase_labels_in_directory(read_dir: Path, save_path=None):
+def lowercase_labels_in_directory(read_dir: Path, save_dir=None):
     read_dir = Path(read_dir)
-    if save_path == None:
-        save_path = read_dir
-    save_path = Path(save_path)
+    if save_dir == None:
+        save_dir = read_dir
+    save_dir = Path(save_dir)
     if not read_dir.exists() or not read_dir.is_dir():
         print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
@@ -404,28 +404,28 @@ def lowercase_labels_in_directory(read_dir: Path, save_path=None):
         root = tree.getroot()
         for member in root.findall('object'):
             member.find('name').text = member.find('name').text.lower()
-        tree.write(str(save_path / (img.stem + '.xml')))
-        # save corresponding jpg in save_path
-        cv2.imwrite(str(save_path / img.name), cv2.imread(str(img)))
+        tree.write(str(save_dir / (img.stem + '.xml')))
+        # save corresponding jpg in save_dir
+        cv2.imwrite(str(save_dir / img.name), cv2.imread(str(img)))
 
 '''
 Update the path in the xml files to the new path.
-If save_path is None, the xml files will be saved in the same directory.
+If save_dir is None, the xml files will be saved in the same directory.
 If new_path is None, the path in the xml files will be updated to the read path.
 '''
-def update_jpg_path_in_xml(read_dir, save_path=None, new_path=None):
+def update_jpg_path_in_xml(read_dir, save_dir=None, new_path=None):
     read_dir = Path(read_dir)
-    if save_path == None:
-        save_path = read_dir
+    if save_dir == None:
+        save_dir = read_dir
     if new_path == None:
         new_path = read_dir
-    save_path = Path(save_path)
+    save_dir = Path(save_dir)
     new_path = Path(new_path)
     if not read_dir.exists() or not read_dir.is_dir():
         print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
-    if not save_path.exists() or not save_path.is_dir():
-        print_red(f"Directory: '{save_path}' does not exist or is not a directory.")
+    if not save_dir.exists() or not save_dir.is_dir():
+        print_red(f"Directory: '{save_dir}' does not exist or is not a directory.")
         return
     if not new_path.exists() or not new_path.is_dir():
         print_red(f"Directory: '{new_path}' does not exist or is not a directory.")
@@ -440,27 +440,27 @@ def update_jpg_path_in_xml(read_dir, save_path=None, new_path=None):
         root = tree.getroot()
         for member in root.findall('path'):
             member.text = str(new_path / img.name)
-        tree.write(str(save_path / (img.stem + '.xml')))
-        # save corresponding jpg in save_path
-        cv2.imwrite(str(save_path / img.name), cv2.imread(str(img)))
+        tree.write(str(save_dir / (img.stem + '.xml')))
+        # save corresponding jpg in save_dir
+        cv2.imwrite(str(save_dir / img.name), cv2.imread(str(img)))
 
 '''
 Perform the augmentation on the images in the directory
-and save the augmented images in the save_path directory.
+and save the augmented images in the save_dir directory.
 If includeXML is True, the bounding boxes will be augmented.
 '''
-def aug_in_directory(read_dir, save_path, aug, includeXML=True):
+def aug_in_directory(read_dir, save_dir, aug, includeXML=True):
     # check read and write paths
     read_dir = Path(read_dir)
-    save_path = Path(save_path)
+    save_dir = Path(save_dir)
     if not read_dir.exists() or not read_dir.is_dir():
         print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
     
     # create save directory if it does not exist
     save_exists = True
-    if not save_path.exists():
-        os.mkdir(str(save_path))
+    if not save_dir.exists():
+        save_dir.mkdir()
         save_exists = False
 
     # get image paths
@@ -488,100 +488,100 @@ def aug_in_directory(read_dir, save_path, aug, includeXML=True):
                 image, bbs = aug.augment(image=image, bounding_boxes=bbs)
                 # save augmented bboxes
                 height, width, _ = image.shape
-                writer = Writer(str(save_path / img.name), width=width, height=height)
+                writer = Writer(str(save_dir / img.name), width=width, height=height)
                 for box in bbs.bounding_boxes:
                     writer.addObject(box.label, box.x1, box.y1, box.x2, box.y2)
-                writer.save(str(save_path / (img.stem + '.xml')))
+                writer.save(str(save_dir / (img.stem + '.xml')))
             else:
                 image = aug.augment(image=image)
 
             # save augmented image
-            cv2.imwrite(str(save_path / img.name), image)
+            cv2.imwrite(str(save_dir / img.name), image)
     except Exception as e:
         traceback.print_exc()
         # if we created the save directory, delete it
         if not save_exists:
-            os.rmdir(str(save_path))
+            save_dir.rmdir()
 
 '''
 Flip the images in the directory horizontally and save them. 
 If includeXML is True, the bounding boxes will be flipped as well.
 '''
-def flip_horizontal_in_directory(read_dir, save_path, includeXML=True):
+def flip_horizontal_in_directory(read_dir, save_dir, includeXML=True):
     aug = iaa.Fliplr(1.0)
-    aug_in_directory(read_dir, save_path, aug, includeXML)
+    aug_in_directory(read_dir, save_dir, aug, includeXML)
 
 '''
 Flip the images in the directory vertically and save them.
 If includeXML is True, the bounding boxes will be flipped as well.
 '''
-def flip_vertical_in_directory(read_dir, save_path, includeXML=True):
+def flip_vertical_in_directory(read_dir, save_dir, includeXML=True):
     aug = iaa.Flipud(1.0)
-    aug_in_directory(read_dir, save_path, aug, includeXML)
+    aug_in_directory(read_dir, save_dir, aug, includeXML)
 
 '''
 Rotate the images in the directory by the given angle and save them
 without altering the aspect ratio.
 If includeXML is True, the bounding boxes will be rotated as well.
 '''
-def rotate_in_directory(read_dir, save_path, angle, includeXML=True):
+def rotate_in_directory(read_dir, save_dir, angle, includeXML=True):
     if angle % 90 != 0:
         aug = iaa.Affine(rotate=angle)
-        aug_in_directory(read_dir, save_path, aug, includeXML)
+        aug_in_directory(read_dir, save_dir, aug, includeXML)
     else:
-        rotate_90_in_directory(read_dir, save_path, angle // 90)
+        rotate_90_in_directory(read_dir, save_dir, angle // 90)
 
 '''
 Rotate the images in the directory by 90 degrees and save them and save 
 them without altering the aspect ratio.
 If includeXML is True, the bounding boxes will be rotated as well.
 '''
-def rotate_90_in_directory(read_dir, save_path, repetitions=1, includeXML=True):
+def rotate_90_in_directory(read_dir, save_dir, repetitions=1, includeXML=True):
     aug = iaa.Rot90(repetitions)
-    aug_in_directory(read_dir, save_path, aug, includeXML)
+    aug_in_directory(read_dir, save_dir, aug, includeXML)
 
 '''
 Resize the images in the directory to the given width and height and save them.
 This does not guarantee that the aspect ratio will remain the same.
 If includeXML is True, the bounding boxes will be resized as well.
 '''
-def resize_in_directory(read_dir: Path, save_path: Path, width=512, height=512, includeXML=True):
+def resize_in_directory(read_dir: Path, save_dir: Path, width=512, height=512, includeXML=True):
     # augmenters
     aug = iaa.Resize({"height": height, "width": width})
-    aug_in_directory(read_dir, save_path, aug, includeXML)
+    aug_in_directory(read_dir, save_dir, aug, includeXML)
 
 '''
 Pad the images in the directory to make them square and 
 resize them to the given dimension while maintaining aspect ratio.
 If includeXML is True, the bounding boxes will be resized as well.
 '''
-def pad_and_resize_square_in_directory(read_dir: Path, save_path: Path, dim=512, includeXML=True):
+def pad_and_resize_square_in_directory(read_dir: Path, save_dir: Path, dim=512, includeXML=True):
     # augmenters
     aug = iaa.Sequential([
         iaa.PadToSquare(pad_mode="edge"),
         iaa.Resize(dim)
     ])
-    aug_in_directory(read_dir, save_path, aug, includeXML)
+    aug_in_directory(read_dir, save_dir, aug, includeXML)
 
 '''
-Copy the files in the read_dir directory to the save_path directory.
+Copy the files in the read_dir directory to the save_dir directory.
 '''
-def copy_files_in_directory(read_dir: Path, save_path: Path):
+def copy_files_in_directory(read_dir: Path, save_dir: Path):
     read_dir = Path(read_dir)
-    save_path = Path(save_path)
+    save_dir = Path(save_dir)
     if not read_dir.exists() or not read_dir.is_dir():
         print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
-    if not save_path.exists():
-        os.mkdir(str(save_path))
+    if not save_dir.exists():
+        save_dir.mkdir()
 
     # get all files in the directory
     files = list(read_dir.iterdir())
     
-    # copy data to save_path
+    # copy data to save_dir
     for f in tqdm(files, desc="Processing"):
         if f.is_file():
-            shutil.copy2(f, save_path)
+            shutil.copy2(f, save_dir)
 
 '''
 Rotate the image at img_read_dir by the given angle and save it in img_save_dir.
@@ -608,26 +608,26 @@ def rotate_image_and_save(img_read_path: Path, img_save_dir=None, rotateCode=cv2
 
 '''
 Rotate all the images in the directory by the given rotate code 
-and save them in the save_path directory if range is (-1, -1).
+and save them in the save_dir directory if range is (-1, -1).
 If range is not (-1, -1), only rotate the images in the range.
 '''
 def rotate_image_and_save_in_directory(read_dir: Path, 
-                                       save_path=None, 
+                                       save_dir=None, 
                                        rotateCode=cv2.ROTATE_90_CLOCKWISE, 
                                        range=(-1, -1)):
     read_dir = Path(read_dir)
-    if save_path == None:
-        save_path = read_dir
-    save_path = Path(save_path)
+    if save_dir == None:
+        save_dir = read_dir
+    save_dir = Path(save_dir)
 
     if not read_dir.exists() or not read_dir.is_dir():
         print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
-    if not save_path.exists():
-        os.mkdir(str(save_path))
+    if not save_dir.exists():
+        save_dir.mkdir()
     jpgPaths = get_jpg_paths(read_dir, range)
     for img in tqdm(jpgPaths, desc="Processing"):
-        rotate_image_and_save(img, save_path, rotateCode)
+        rotate_image_and_save(img, save_dir, rotateCode)
 
 '''
 Delete all xml files in the directory that do not have a corresponding jpg file
@@ -782,7 +782,7 @@ def pascalvoc_to_yolo_in_directory(read_dir: Path, save_dir: Path, json: Path):
         print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
     if not save_dir.exists():
-        os.mkdir(str(save_dir))
+        save_dir.mkdir()
         
     xmlPaths = list(read_dir.glob('*.xml'))
     for xml in tqdm(xmlPaths, desc="Processing"):
@@ -805,7 +805,7 @@ def move_percent_of_datapoints_in_directory(read_dir: Path, save_dir: Path, perc
         print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
     if not save_dir.exists():
-        os.mkdir(str(save_dir))
+        save_dir.mkdir()
         save_created = True
     try:
         jpgPaths = get_jpg_paths(read_dir)
@@ -823,4 +823,41 @@ def move_percent_of_datapoints_in_directory(read_dir: Path, save_dir: Path, perc
     except:
         traceback.print_exc()
         if save_created:
-            os.rmdir(str(save_dir))
+            save_dir.rmdir()
+
+'''
+Split the images and annotations in the read directory into two separate directories.
+'''
+def split_image_and_annotation(read_dir: Path, img_dir: Path, ann_dir: Path):
+    read_dir = Path(read_dir)
+    img_dir = Path(img_dir)
+    ann_dir = Path(ann_dir)
+    img_created = False
+    ann_created = False
+
+    if not read_dir.exists() or not read_dir.is_dir():
+        print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
+        return
+    if not img_dir.exists():
+        img_dir.mkdir()
+        img_created = True
+    if not ann_dir.exists():
+        ann_dir.mkdir()
+        ann_created = True
+    try:
+        jpgPaths = get_jpg_paths(read_dir)
+        for img in tqdm(jpgPaths, desc="Processing"):
+            xml = read_dir / (img.stem + '.xml')
+            txt = read_dir / (img.stem + '.txt')
+            if xml.exists():
+                shutil.move(xml, ann_dir)
+            if txt.exists():
+                shutil.move(txt, ann_dir)
+            if img.exists():
+                shutil.move(img, img_dir)
+    except:
+        traceback.print_exc()
+        if img_created:
+            img_dir.rmdir()
+        if ann_created:
+            ann_dir.rmdir()
