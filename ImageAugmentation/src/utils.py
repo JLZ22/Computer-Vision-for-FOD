@@ -390,6 +390,7 @@ def lowercase_labels_in_directory(read_dir: Path, save_dir=None):
     read_dir = Path(read_dir)
     if save_dir == None:
         save_dir = read_dir
+        save_diff = False
     save_dir = Path(save_dir)
     if not read_dir.exists() or not read_dir.is_dir():
         print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
@@ -406,7 +407,8 @@ def lowercase_labels_in_directory(read_dir: Path, save_dir=None):
             member.find('name').text = member.find('name').text.lower()
         tree.write(str(save_dir / (img.stem + '.xml')))
         # save corresponding jpg in save_dir
-        cv2.imwrite(str(save_dir / img.name), cv2.imread(str(img)))
+        if save_diff:
+            img.copy2(save_dir / img.name)
 
 '''
 Update the path in the xml files to the new path.
