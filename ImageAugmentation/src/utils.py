@@ -14,6 +14,7 @@ import math
 import json
 import shutil
 from tqdm import tqdm
+import random
 
 def print_red(text):
     print("\033[91m{}\033[0m".format(text))
@@ -799,14 +800,20 @@ Move a percentage of the data points in the read directory
 to the save directory. One data point consists of a jpg file and 
 a corresponding xml or txt file. 
 '''
-def move_percent_of_datapoints_in_directory(read_dir: Path, save_dir: Path, percent=0.1):
-    num = count_files_in_directory(read_dir, ['.jpg'])
-    move_number_of_datapoints_in_directory(read_dir, save_dir, num)
+def move_percent_of_datapoints_in_directory(read_dir: Path,
+                                            save_dir: Path, 
+                                            percent=0.1,
+                                            random_sample=False):
+    num = int(count_files_in_directory(read_dir, ['.jpg']) * percent)
+    move_number_of_datapoints_in_directory(read_dir, save_dir, num, random_sample)
 
 '''
 Move a number of data points in the read directory to the save directory.
 '''
-def move_number_of_datapoints_in_directory(read_dir: Path, save_dir: Path, num_files=10):
+def move_number_of_datapoints_in_directory(read_dir: Path, 
+                                           save_dir: Path, 
+                                           num_files=10,
+                                           random_sample=False):
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
     save_created = False
@@ -818,6 +825,9 @@ def move_number_of_datapoints_in_directory(read_dir: Path, save_dir: Path, num_f
         save_created = True
     try:
         jpgPaths = get_jpg_paths(read_dir)
+        assert(num_files <= len(jpgPaths))
+        if random_sample:
+            jpgPaths = random.sample(jpgPaths, num_files)
         for img in tqdm(jpgPaths[:num_files], desc="Processing"):
             xml = read_dir / (img.stem + '.xml')
             txt = read_dir / (img.stem + '.txt')
@@ -835,14 +845,20 @@ def move_number_of_datapoints_in_directory(read_dir: Path, save_dir: Path, num_f
 '''
 Copy a percentage of the data points in the read directory
 '''
-def copy_percent_of_datapoints_in_directory(read_dir: Path, save_dir: Path, percent=0.1):
+def copy_percent_of_datapoints_in_directory(read_dir: Path, 
+                                            save_dir: Path, 
+                                            percent=0.1,
+                                            random_sample=False):
     num = count_files_in_directory(read_dir, ['.jpg'])
-    copy_number_of_datapoints_in_directory(read_dir, save_dir, num)
+    copy_number_of_datapoints_in_directory(read_dir, save_dir, num, random_sample)
 
 '''
 Copy a number of data points in the read directory to the save directory.
 '''
-def copy_number_of_datapoints_in_directory(read_dir: Path, save_dir: Path, num_files=10):
+def copy_number_of_datapoints_in_directory(read_dir: Path, 
+                                           save_dir: Path, 
+                                           num_files=10,
+                                           random_sample=False):
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
     save_created = False
@@ -852,9 +868,13 @@ def copy_number_of_datapoints_in_directory(read_dir: Path, save_dir: Path, num_f
     if not save_dir.exists():
         save_dir.mkdir()
         save_created = True
+
     try:
         jpgPaths = get_jpg_paths(read_dir)
-        for img in tqdm(jpgPaths[:num_files], desc="Processing"):
+        assert(num_files <= len(jpgPaths))
+        if random_sample:
+            jpgPaths = random.sample(jpgPaths, num_files)
+        for img in tqdm(jpgPaths, desc="Processing"):
             xml = read_dir / (img.stem + '.xml')
             txt = read_dir / (img.stem + '.txt')
             if xml.exists():
