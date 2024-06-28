@@ -587,6 +587,26 @@ def copy_files_in_directory(read_dir: Path, save_dir: Path):
             shutil.copy2(f, save_dir)
 
 '''
+Move the files in the read_dir directory to the save_dir directory.
+'''
+def move_files_in_directory(read_dir: Path, save_dir: Path):
+    read_dir = Path(read_dir)
+    save_dir = Path(save_dir)
+    if not read_dir.exists() or not read_dir.is_dir():
+        print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
+        return
+    if not save_dir.exists():
+        save_dir.mkdir()
+
+    # get all files in the directory
+    files = list(read_dir.iterdir())
+    
+    # copy data to save_dir
+    for f in tqdm(files, desc="Processing"):
+        if f.is_file():
+            shutil.move(f, save_dir)
+
+'''
 Rotate the image at img_read_dir by the given angle and save it in img_save_dir.
 The rotateCode is the cv2 rotate code.
 '''
