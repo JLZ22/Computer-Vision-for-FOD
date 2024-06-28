@@ -891,7 +891,7 @@ def copy_number_of_datapoints_in_directory(read_dir: Path,
 '''
 Split the images and annotations in the read directory into two separate directories.
 '''
-def split_image_and_annotation(read_dir: Path, img_dir: Path, ann_dir: Path):
+def split_image_and_annotations_in_directory(read_dir: Path, img_dir: Path, ann_dir: Path):
     read_dir = Path(read_dir)
     img_dir = Path(img_dir)
     ann_dir = Path(ann_dir)
