@@ -24,18 +24,21 @@ def check_second_arg(arg):
     return int(arg)
 
 if __name__ == '__main__':
+    out0 = Path('../test_data/out0')
+    out1 = Path('../test_data/out1')
+    pascalvoc_pairs = Path('../test_data/pascalvoc_pairs')
+    utils.delete_files(out0)
+    utils.delete_files(out1)
+    utils.pad_and_resize_square_in_directory(pascalvoc_pairs, out0)
     max_processes = os.cpu_count()
-    copies = 8
+    max_processes = 16
+    copies = 64
     if len(sys.argv) > 3:
         exit('Too many arguments.')
     if len(sys.argv) >= 2:
         max_processes = check_first_arg(sys.argv[1])
-    if len(sys.argv) == 3:
-        copies = check_second_arg(sys.argv[2])
-    path = Path('..', 'test_data', 'raw_pairs')
-    save_path = Path('..', 'test_data', 'out0')
-    sass = [SimpleAugSeq(path=path, 
-                                save_path=save_path, 
+    sass = [SimpleAugSeq(read_path=out0, 
+                                save_path=out1, 
                                 seed=1, 
                                 num_copies=copies, 
                                 names=[],
@@ -43,12 +46,12 @@ if __name__ == '__main__':
                                 check=False) for i in range(1, max_processes+1)
                                 ]
     times = [0 for i in range(1, max_processes+1)]
-    print(f'This benchmark will test SimpleAugSeq with # processes in the range 1 to {max_processes} inclusive.')
+    print(f'This benchmark will test SimpleAugSeq with 1 to {max_processes} processes inclusive.')
     print(f'The number of copies per image is {copies}.')
     input('Press Enter to continue...')
     for i in range(len(sass)):
         sa = sass[i]
-        utils.deleteFiles(save_path)
+        utils.delete_files(out1)
         start = time.time()
         sa.augment()
         end = time.time()
