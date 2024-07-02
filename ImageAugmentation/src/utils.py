@@ -944,3 +944,13 @@ def split_image_and_annotations_in_directory(read_dir: Path, img_dir: Path, ann_
             img_dir.rmdir()
         if ann_created:
             ann_dir.rmdir()
+
+'''
+Count the number of data points in the directory.
+'''
+def count_data_points_in_directory(read_dir: Path):
+    read_dir = Path(read_dir)
+    if not read_dir.exists() or not read_dir.is_dir():
+        print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
+        return
+    return count_files_in_directory(read_dir, ['.jpg'])
