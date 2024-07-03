@@ -558,7 +558,10 @@ Pad the images in the directory to make them square and
 resize them to the given dimension while maintaining aspect ratio.
 If includeXML is True, the bounding boxes will be resized as well.
 '''
-def pad_and_resize_square_in_directory(read_dir: Path, save_dir: Path, dim=512, includeXML=True):
+def pad_and_resize_square_in_directory(read_dir: Path, 
+                                       save_dir: Path, 
+                                       dim=512, 
+                                       includeXML=True):
     # augmenters
     aug = iaa.Sequential([
         iaa.PadToSquare(pad_mode="edge"),
@@ -569,7 +572,7 @@ def pad_and_resize_square_in_directory(read_dir: Path, save_dir: Path, dim=512, 
 '''
 Copy the files in the read_dir directory to the save_dir directory.
 '''
-def copy_files_in_directory(read_dir: Path, save_dir: Path):
+def copy_files_in_directory(read_dir: Path, save_dir: Path, extensions=[]):
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
     if not read_dir.exists() or not read_dir.is_dir():
@@ -579,7 +582,10 @@ def copy_files_in_directory(read_dir: Path, save_dir: Path):
         save_dir.mkdir()
 
     # get all files in the directory
-    files = list(read_dir.iterdir())
+    if extensions:
+        files = [f for f in read_dir.iterdir() if f.suffix in extensions]
+    else:
+        files = list(read_dir.iterdir())
     
     # copy data to save_dir
     for f in tqdm(files, desc="Processing"):
@@ -589,7 +595,7 @@ def copy_files_in_directory(read_dir: Path, save_dir: Path):
 '''
 Move the files in the read_dir directory to the save_dir directory.
 '''
-def move_files_in_directory(read_dir: Path, save_dir: Path):
+def move_files_in_directory(read_dir: Path, save_dir: Path, extensions=[]):
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
     if not read_dir.exists() or not read_dir.is_dir():
@@ -599,7 +605,10 @@ def move_files_in_directory(read_dir: Path, save_dir: Path):
         save_dir.mkdir()
 
     # get all files in the directory
-    files = list(read_dir.iterdir())
+    if extensions:
+        files = [f for f in read_dir.iterdir() if f.suffix in extensions]
+    else:
+        files = list(read_dir.iterdir())
     
     # copy data to save_dir
     for f in tqdm(files, desc="Processing"):
@@ -825,7 +834,10 @@ def move_percent_of_datapoints_in_directory(read_dir: Path,
                                             percent=0.1,
                                             random_sample=False):
     num = int(count_files_in_directory(read_dir, ['.jpg']) * percent)
-    move_number_of_datapoints_in_directory(read_dir, save_dir, num, random_sample)
+    move_number_of_datapoints_in_directory(read_dir, 
+                                           save_dir, 
+                                           num, 
+                                           random_sample)
 
 '''
 Move a number of data points in the read directory to the save directory.
@@ -845,17 +857,16 @@ def move_number_of_datapoints_in_directory(read_dir: Path,
         save_created = True
     try:
         jpgPaths = get_jpg_paths(read_dir)
-        assert(num_files <= len(jpgPaths))
         if random_sample:
             jpgPaths = random.sample(jpgPaths, num_files)
         for img in tqdm(jpgPaths[:num_files], desc="Processing"):
             xml = read_dir / (img.stem + '.xml')
             txt = read_dir / (img.stem + '.txt')
-            if xml.exists():
+            if xml.exists() and xml.suffix:
                 shutil.move(xml, save_dir)
-            if txt.exists():
+            if txt.exists() and txt.suffix:
                 shutil.move(txt, save_dir)
-            if img.exists():
+            if img.exists() and img.suffix:
                 shutil.move(img, save_dir)
     except:
         traceback.print_exc()
@@ -870,7 +881,11 @@ def copy_percent_of_datapoints_in_directory(read_dir: Path,
                                             percent=0.1,
                                             random_sample=False):
     num = count_files_in_directory(read_dir, ['.jpg'])
-    copy_number_of_datapoints_in_directory(read_dir, save_dir, num, random_sample)
+    copy_number_of_datapoints_in_directory(read_dir, 
+                                           save_dir, 
+                                           num, 
+                                           random_sample, 
+                                           )
 
 '''
 Copy a number of data points in the read directory to the save directory.
@@ -897,11 +912,11 @@ def copy_number_of_datapoints_in_directory(read_dir: Path,
         for img in tqdm(jpgPaths, desc="Processing"):
             xml = read_dir / (img.stem + '.xml')
             txt = read_dir / (img.stem + '.txt')
-            if xml.exists():
+            if xml.exists() and xml.suffix:
                 shutil.copy2(xml, save_dir)
-            if txt.exists():
+            if txt.exists() and txt.suffix:
                 shutil.copy2(txt, save_dir)
-            if img.exists():
+            if img.exists() and img.suffix:
                 shutil.copy2(img, save_dir)
     except:
         traceback.print_exc()
@@ -911,7 +926,12 @@ def copy_number_of_datapoints_in_directory(read_dir: Path,
 '''
 Split the images and annotations in the read directory into two separate directories.
 '''
-def split_image_and_annotations_in_directory(read_dir: Path, img_dir: Path, ann_dir: Path):
+def split_number_datapoints_in_directory(read_dir: Path, 
+                                         img_dir: Path, 
+                                         ann_dir: Path,
+                                         num: int):
+    num = int(num)
+    assert(num > 0)
     read_dir = Path(read_dir)
     img_dir = Path(img_dir)
     ann_dir = Path(ann_dir)
@@ -929,6 +949,8 @@ def split_image_and_annotations_in_directory(read_dir: Path, img_dir: Path, ann_
         ann_created = True
     try:
         jpgPaths = get_jpg_paths(read_dir)
+        assert(num <= len(jpgPaths))
+        jpgPaths = random.sample(jpgPaths, num)
         for img in tqdm(jpgPaths, desc="Processing"):
             xml = read_dir / (img.stem + '.xml')
             txt = read_dir / (img.stem + '.txt')
@@ -954,3 +976,46 @@ def count_data_points_in_directory(read_dir: Path):
         print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
     return count_files_in_directory(read_dir, ['.jpg'])
+
+'''
+Partition the data in the read directory into training, validation, and test sets.
+'''
+def partition_yolo_data_for_training(read_dir: Path, 
+                                save_dir: Path, 
+                                train_percent=0.8,
+                                test_percent=0.1):
+    read_dir = Path(read_dir)
+    save_dir = Path(save_dir)
+    save_created = False
+    if not read_dir.exists() or not read_dir.is_dir():
+        print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
+        return
+    if not save_dir.exists():
+        save_dir.mkdir()
+        save_created = True
+    try:
+        num_files = count_data_points_in_directory(read_dir)
+        train_num = int(num_files * train_percent)
+        test_num = int(num_files * test_percent)
+        val_num = num_files - train_num - test_num
+        print(num_files, train_num, val_num, test_num)
+
+        split_number_datapoints_in_directory(read_dir,
+                                             save_dir / 'images/val',
+                                             save_dir / 'labels/val',
+                                             val_num)
+        
+        split_number_datapoints_in_directory(read_dir,
+                                             save_dir / 'images/test',
+                                             save_dir / 'labels/test',
+                                             test_num)
+        
+        split_number_datapoints_in_directory(read_dir,
+                                             save_dir / 'images/train',
+                                             save_dir / 'labels/train',
+                                             val_num)
+        
+    except:
+        traceback.print_exc()
+        if save_created:
+            save_dir.rmdir()
