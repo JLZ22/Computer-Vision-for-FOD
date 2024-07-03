@@ -1019,3 +1019,94 @@ def partition_yolo_data_for_training(read_dir: Path,
         traceback.print_exc()
         if save_created:
             save_dir.rmdir()
+
+'''
+Check if the yolo file structure is correct and checks if 
+the names of the images and labels in the train, val, and test
+are the same.
+'''
+def verify_yolo_file_structure(read_dir: Path, 
+                               test=True,
+                               verbose=True):
+    read_dir = Path(read_dir)
+    if not read_dir.exists() or not read_dir.is_dir():
+        if verbose:
+            print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
+        return False, None
+    
+    images = read_dir / 'images'
+    labels = read_dir / 'labels'
+    if not images.is_dir():
+        if verbose:
+            print_red(f"Directory: '{images}' does not exist or is not a directory.")
+        return False, None
+    if not labels.is_dir():
+        if verbose:
+            print_red(f"Directory: '{labels}' does not exist or is not a directory.")
+        return False, None
+    
+    img_test = images / 'test'
+    img_train = images / 'train'
+    img_val = images / 'val'
+
+    lab_test = labels / 'test'
+    lab_train = labels / 'train'
+    lab_val = labels / 'val'
+
+    if not img_train.is_dir():
+        if verbose:
+            print_red(f"Directory: '{img_train}' does not exist or is not a directory.")
+        return False, None
+    if not img_val.is_dir():
+        if verbose:
+            print_red(f"Directory: '{img_val}' does not exist or is not a directory.")
+        return False, None
+    
+    train_diff = diff_names_between_directories(img_train, lab_train)
+    val_diff = diff_names_between_directories(img_val, lab_val)
+    if len(train_diff) > 0:
+        if verbose:
+            print_red(f"Images and labels in train directory do not match. Below are the differences.")
+            print(train_diff)
+        return False
+    if len(val_diff) > 0:
+        if verbose:
+            print_red(f"Images and labels in val directory do not match. Below are the differences.")
+            print(val_diff)
+        return False
+
+    if test:
+        if not img_test.is_dir():
+            if verbose:
+                print_red(f"Directory: '{img_test}' does not exist or is not a directory.")
+            return False
+        if not lab_test.is_dir():
+            if verbose:
+                print_red(f"Directory: '{lab_test}' does not exist or is not a directory.")
+            return False
+        
+        test_diff = diff_names_between_directories(img_test, lab_test)
+        if len(test_diff) > 0:
+            if verbose:
+                print_red(f"Images and labels in test directory do not match. Below are the differences.")
+                print(test_diff)
+            return False
+    
+    return True
+        
+    
+'''
+Returns the names of the files in dir1 that are not in dir2 or vice versa.
+'''
+def diff_names_between_directories(dir1: Path, dir2: Path):
+    dir1 = Path(dir1)
+    dir2 = Path(dir2)
+    if not dir1.exists() or not dir1.is_dir():
+        print_red(f"Directory: '{dir1}' does not exist or is not a directory.")
+        return
+    if not dir2.exists() or not dir2.is_dir():
+        print_red(f"Directory: '{dir2}' does not exist or is not a directory.")
+        return
+    files1 = set([f.stem for f in dir1.iterdir()])
+    files2 = set([f.stem for f in dir2.iterdir()])
+    return files1 - files2 if len(files1) > len(files2) else files2 - files1
