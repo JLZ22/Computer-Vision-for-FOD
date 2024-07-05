@@ -1091,7 +1091,8 @@ def verify_yolo_file_structure(read_dir: Path,
                 print_red(f"Images and labels in test directory do not match. Below are the differences.")
                 print(test_diff)
             return False
-    
+    if verbose:
+        print_green("The yolo file structure is correct.")
     return True
         
     
