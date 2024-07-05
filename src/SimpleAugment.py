@@ -113,10 +113,11 @@ class SimpleAugSeq:
     # each in charge of augmenting one image
     def augment(self):
         # Prints conformation of read and write path
-        print(f"Read Location: \"{self.read_path}\"")
-        print(f"Save Location: \"{self.save_path}\"")
-        print(f"Num Copies:   {self.num_copies}")
-        print(f"Num Processes:   {self.processes}")
+        print(f"Starting Augmentation...")
+        print(f"\tRead Location: \"{self.read_path}\"")
+        print(f"\tSave Location: \"{self.save_path}\"")
+        print(f"\tNum Copies:   {self.num_copies}")
+        print(f"\tNum Processes:   {self.processes}")
         
         #Requires user approval to start work
         if self.check:
@@ -142,7 +143,7 @@ class SimpleAugSeq:
                 async_results.append(pol.apply_async(self.augstart, (name,)))
 
             # Display progress bar
-            for async_result in tqdm(async_results, desc="Processing", total=len(async_results)):
+            for async_result in tqdm(async_results, desc="Augmenting", total=len(async_results)):
                 if self.checkMem: 
                     tempPoolMem = utils.get_children_mem_consumption()
                     tempMaxUsed = psutil.virtual_memory().used
@@ -154,7 +155,8 @@ class SimpleAugSeq:
                 time.sleep(0.1)
         
         end = time.time()
-        utils.cut_off_bboxes_in_directory(self.save_path)
+        utils.cut_off_bboxes_in_directory(self.save_path, progress=False)
+        utils.subtract_mean_in_directory(self.save_path, progress=False)
         self.duration = end - start
         if self.checkMem:
             print(f"Max Memory Consumption of Pool: {mem / 1024**2} MB")

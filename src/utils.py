@@ -97,18 +97,25 @@ def rename_in_directory(read_dir: Path, startIndex=0, prefix = '', extensions=[]
 '''
 Delete all files in the directory.
 '''
-def delete_files(read_dir: Path, recursive=False):
+def delete_files(read_dir: Path, 
+                 recursive=False,
+                 verbose=True):
     read_dir = Path(read_dir)
     if not read_dir.exists() or not read_dir.is_dir():
-        print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
+        if verbose:
+            print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
     for f in read_dir.iterdir():
         if f.is_file():
             f.unlink()
         if recursive:
             if f.is_dir():
-                delete_files(f, recursive)
-    print_green(f"Deleted all files in the directory: '{read_dir}'")
+                delete_files(f, recursive, False)
+    if verbose:
+        if recursive:
+            print_green(f"Recursively deleted all files in the directory: '{read_dir}'")
+        else:
+            print_green(f"Deleted all files in the directory: '{read_dir}'")
 
 '''
 Subtract the mean pixel values from the image.
@@ -124,7 +131,9 @@ def subtract_mean(image):
 '''
 Subtract the mean pixel values from all the jpg files in the directory.
 '''
-def subtract_mean_in_directory(read_dir: Path, save_dir=None):
+def subtract_mean_in_directory(read_dir: Path, 
+                               save_dir=None,
+                               progress=True):
     read_dir = Path(read_dir)
     if save_dir is None:
         save_dir = read_dir
@@ -138,7 +147,8 @@ def subtract_mean_in_directory(read_dir: Path, save_dir=None):
         save_created = True
     try:
         jpgs = get_jpg_paths(read_dir)
-        for jpg in tqdm(jpgs, desc="Processing"):
+        iter = tqdm(jpgs, desc="Subtracting Mean Pixel Value") if progress else jpgs
+        for jpg in iter:
             img = cv2.imread(str(jpg))
             if img is None:
                 print_red(f"Failed to read image: {jpg}")
@@ -188,7 +198,9 @@ def get_label_map(json_path: Path, key_is_id=True):
 '''
 https://piyush-kulkarni.medium.com/visualize-the-xml-annotations-in-python-c9696ba9c188
 '''
-def visualize_pascalvoc_annotations_in_directory(read_dir: Path, save_dir: Path):
+def visualize_pascalvoc_annotations_in_directory(read_dir: Path, 
+                                                 save_dir: Path,
+                                                 progress=True):
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
     save_created = False
@@ -208,8 +220,9 @@ def visualize_pascalvoc_annotations_in_directory(read_dir: Path, save_dir: Path)
         xml = list(read_dir.glob('*.xml'))
         # assert they are the same length
         assert(len(images) == len(xml))
-        
-        for file in tqdm(images, desc="Processing"):
+        iter = tqdm(images, desc="Visualizing PascalVOC Annotations") if progress else images
+
+        for file in iter:
             filename = file.stem
             img_path = file
             xml_path = read_dir / (filename + '.xml')
@@ -269,7 +282,10 @@ def visualize_pascalvoc_annotations_in_directory(read_dir: Path, save_dir: Path)
 '''
 Visualize bounding boxes from YOLO txt file on the image.
 '''
-def visualize_yolo_annotations_in_directory(read_dir: Path, save_dir: Path, json_path: Path):
+def visualize_yolo_annotations_in_directory(read_dir: Path, 
+                                            save_dir: Path, 
+                                            json_path: Path,
+                                            progress=True):
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
     json_path = Path(json_path)
@@ -292,7 +308,8 @@ def visualize_yolo_annotations_in_directory(read_dir: Path, save_dir: Path, json
         image_paths = get_jpg_paths(read_dir)
         txt = list(read_dir.glob('*.txt'))
         assert(len(image_paths) == len(txt))
-        for img_path in tqdm(image_paths, desc="Processing"):
+        iter = tqdm(image_paths, desc="Visualizing YOLO Annotations") if progress else image_paths
+        for img_path in iter:
             txt = Path(read_dir / (img_path.stem + '.txt'))
             img = cv2.imread(str(img_path))
             if not txt.exists() or img is None:
@@ -390,7 +407,9 @@ def get_children_mem_consumption():
 Lowercase the labels in the xml files in the directory.
 If save_dir is None, the xml files will be saved in the same directory.
 '''
-def lowercase_labels_in_directory(read_dir: Path, save_dir=None):
+def lowercase_labels_in_directory(read_dir: Path, 
+                                  save_dir=None,
+                                  progress=True):
     read_dir = Path(read_dir)
     if save_dir == None:
         save_dir = read_dir
@@ -399,8 +418,11 @@ def lowercase_labels_in_directory(read_dir: Path, save_dir=None):
     if not read_dir.exists() or not read_dir.is_dir():
         print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
+    
+    # get all jpg files in the directory
     jpgPaths = get_jpg_paths(read_dir)
-    for img in tqdm(jpgPaths, desc="Processing"):
+    iter = tqdm(jpgPaths, desc="Lower Casing Labels") if progress else jpgPaths
+    for img in iter:
         xml = read_dir / (img.stem + '.xml')
         if not xml.exists():
             print_red(f"XML file: '{xml}' does not exist.")
@@ -419,7 +441,10 @@ Update the path in the xml files to the new path.
 If save_dir is None, the xml files will be saved in the same directory.
 If new_path is None, the path in the xml files will be updated to the read path.
 '''
-def update_jpg_path_in_xml(read_dir, save_dir=None, new_path=None):
+def update_jpg_path_in_xml(read_dir: Path, 
+                           save_dir=None, 
+                           new_path=None,
+                           progress=True):
     read_dir = Path(read_dir)
     if save_dir == None:
         save_dir = read_dir
@@ -427,6 +452,7 @@ def update_jpg_path_in_xml(read_dir, save_dir=None, new_path=None):
         new_path = read_dir
     save_dir = Path(save_dir)
     new_path = Path(new_path)
+    # check read and write paths
     if not read_dir.exists() or not read_dir.is_dir():
         print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
@@ -436,8 +462,13 @@ def update_jpg_path_in_xml(read_dir, save_dir=None, new_path=None):
     if not new_path.exists() or not new_path.is_dir():
         print_red(f"Directory: '{new_path}' does not exist or is not a directory.")
         return
+    
+    # get all jpg files in the directory
     jpgPaths = get_jpg_paths(read_dir)
-    for img in tqdm(jpgPaths, desc="Processing"):
+    iter = tqdm(jpgPaths, desc="Updating JPG Path in XML") if progress else jpgPaths
+
+    # update the path in the xml files
+    for img in iter:
         xml = read_dir / (img.stem + '.xml')
         if not xml.exists():
             print_red(f"XML file: '{xml}' does not exist.")
@@ -455,7 +486,11 @@ Perform the augmentation on the images in the directory
 and save the augmented images in the save_dir directory.
 If includeXML is True, the bounding boxes will be augmented.
 '''
-def aug_in_directory(read_dir, save_dir, aug, includeXML=True):
+def aug_in_directory(read_dir: Path,
+                    save_dir: Path, 
+                    aug: iaa.Augmenter, 
+                    includeXML=True,
+                    progress=True):
     # check read and write paths
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
@@ -474,7 +509,8 @@ def aug_in_directory(read_dir, save_dir, aug, includeXML=True):
 
     try:
         # augment images
-        for img in tqdm(jpgPaths, desc="Processing"):
+        iter = tqdm(jpgPaths, desc="Performing Given Augmentation") if progress else jpgPaths
+        for img in iter:
             # read image and check if it is valid
             image = cv2.imread(str(img))
             if image is None:
@@ -575,7 +611,10 @@ def pad_and_resize_square_in_directory(read_dir: Path,
 '''
 Copy the files in the read_dir directory to the save_dir directory.
 '''
-def copy_files_in_directory(read_dir: Path, save_dir: Path, extensions=[]):
+def copy_files_in_directory(read_dir: Path, 
+                            save_dir: Path, 
+                            extensions=[],
+                            progress=True):
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
     if not read_dir.exists() or not read_dir.is_dir():
@@ -591,14 +630,18 @@ def copy_files_in_directory(read_dir: Path, save_dir: Path, extensions=[]):
         files = list(read_dir.iterdir())
     
     # copy data to save_dir
-    for f in tqdm(files, desc="Processing"):
+    iter = tqdm(files, desc="Copying Files") if progress else files
+    for f in iter:
         if f.is_file():
             shutil.copy2(f, save_dir)
 
 '''
 Move the files in the read_dir directory to the save_dir directory.
 '''
-def move_files_in_directory(read_dir: Path, save_dir: Path, extensions=[]):
+def move_files_in_directory(read_dir: Path, 
+                            save_dir: Path, 
+                            extensions=[],
+                            progress=True):
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
     if not read_dir.exists() or not read_dir.is_dir():
@@ -614,7 +657,8 @@ def move_files_in_directory(read_dir: Path, save_dir: Path, extensions=[]):
         files = list(read_dir.iterdir())
     
     # copy data to save_dir
-    for f in tqdm(files, desc="Processing"):
+    iter = tqdm(files, desc="Moving Files") if progress else files
+    for f in iter:
         if f.is_file():
             shutil.move(f, save_dir)
 
@@ -649,7 +693,8 @@ If range is not (-1, -1), only rotate the images in the range.
 def rotate_image_and_save_in_directory(read_dir: Path, 
                                        save_dir=None, 
                                        rotateCode=cv2.ROTATE_90_CLOCKWISE, 
-                                       range=(-1, -1)):
+                                       range=(-1, -1),
+                                       progress=True):
     read_dir = Path(read_dir)
     if save_dir == None:
         save_dir = read_dir
@@ -660,21 +705,24 @@ def rotate_image_and_save_in_directory(read_dir: Path,
         return
     if not save_dir.exists():
         save_dir.mkdir()
+
     jpgPaths = get_jpg_paths(read_dir, range)
-    for img in tqdm(jpgPaths, desc="Processing"):
+    iter = tqdm(jpgPaths, desc="Rotating Images") if progress else jpgPaths
+    for img in iter:
         rotate_image_and_save(img, save_dir, rotateCode)
 
 '''
 Delete all xml files in the directory that do not have a corresponding jpg file
 '''
-def delete_all_xml_without_jpg(read_dir: Path):
+def delete_all_xml_without_jpg(read_dir: Path, progress=True):
     read_dir = Path(read_dir)
     if not read_dir.exists() or not read_dir.is_dir():
         print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
     jpgPaths = get_jpg_paths(read_dir)
     xmlPaths = list(read_dir.glob('*.xml'))
-    for xml in tqdm(xmlPaths, desc="Processing"):
+    iter = tqdm(xmlPaths, desc="Deleting Lone XMLs") if progress else xmlPaths
+    for xml in iter:
         name = xml.stem
         if not any([jpg.stem == name for jpg in jpgPaths]):
             xml.unlink()
@@ -698,13 +746,14 @@ def count_files_in_directory(read_dir: Path, extensions=[]):
 '''
 Convert all jpeg files in the directory to jpg files.
 '''
-def jpeg_to_jpg(read_dir: Path):
+def jpeg_to_jpg(read_dir: Path, progress=True):
     read_dir = Path(read_dir)
     if not read_dir.exists() or not read_dir.is_dir():
         print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
     jpeg = list(read_dir.glob('*.jpeg'))
-    for img in tqdm(jpeg, desc="Processing"):
+    iter = tqdm(jpeg, desc="Converting JPEG to JPG") if progress else jpeg
+    for img in iter:
         img.rename(read_dir / (str(img.stem) + '.jpg'))
 
 '''
@@ -720,7 +769,7 @@ def cut_off_bbox(xml_pth: Path):
     root = tree.getroot()
     width = int(root.find("size").find("width").text)
     height = int(root.find("size").find("height").text)
-    for member in tqdm(root.findall('object'), desc="Processing"):
+    for member in root.findall('object'):
         # get bounding box
         bbox = member.find('bndbox')
         xmin = int(float(bbox.find('xmin').text))
@@ -760,13 +809,14 @@ def cut_off_bbox(xml_pth: Path):
 '''
 Cut off the bounding boxes in the xml files that are outside the image.
 '''
-def cut_off_bboxes_in_directory(read_dir: Path):
+def cut_off_bboxes_in_directory(read_dir: Path, progress=True):
     read_dir = Path(read_dir)
     if not read_dir.exists() or not read_dir.is_dir():
         print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
     xmlPaths = list(read_dir.glob('*.xml'))
-    for p in tqdm(xmlPaths, desc="Processing"):
+    iter = tqdm(xmlPaths, desc="Cutting Off BBoxes") if progress else xmlPaths
+    for p in iter:
         try: 
             cut_off_bbox(p)
         except:
@@ -813,23 +863,28 @@ Convert all pascal voc xml files in the directory to yolo txt files.
 def pascalvoc_to_yolo_in_directory(read_dir: Path, 
                                    save_dir: Path, 
                                    json: Path,
-                                   verbose=False):
+                                   verbose=False,
+                                   progress=True):
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
     if not read_dir.exists() or not read_dir.is_dir():
-        print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
+        if verbose:
+            print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
     if not save_dir.exists():
         save_dir.mkdir()
         
     xmlPaths = list(read_dir.glob('*.xml'))
-    for xml in tqdm(xmlPaths, desc="Processing"):
+    iter = tqdm(xmlPaths, desc="Converting PascalVOC to YOLO") if progress else xmlPaths
+    for xml in iter:
         try:
             pascalvoc_to_yolo(xml, save_dir / (xml.stem + '.txt'), json)
         except:
-            print_red(f"Failed to convert xml file: {xml}")
+            if verbose:
+                print_red(f"Failed to convert xml file: {xml}")
             continue
-    print_green(f"Successfully converted all xml files in the directory: '{read_dir}' to yolo txt files.")
+    if verbose:
+        print_green(f"Successfully converted all xml files in the directory: '{read_dir}' to yolo txt files.")
 
 '''
 Move a percentage of the data points in the read directory 
@@ -852,7 +907,8 @@ Move a number of data points in the read directory to the save directory.
 def move_number_of_datapoints_in_directory(read_dir: Path, 
                                            save_dir: Path, 
                                            num_files=10,
-                                           random_sample=False):
+                                           random_sample=False,
+                                           progress=True):
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
     save_created = False
@@ -866,7 +922,10 @@ def move_number_of_datapoints_in_directory(read_dir: Path,
         jpgPaths = get_jpg_paths(read_dir)
         if random_sample:
             jpgPaths = random.sample(jpgPaths, num_files)
-        for img in tqdm(jpgPaths[:num_files], desc="Processing"):
+        else:
+            jpgPaths = jpgPaths[:num_files]
+        iter = tqdm(jpgPaths, desc="Moving Datapoints") if progress else jpgPaths
+        for img in iter:
             xml = read_dir / (img.stem + '.xml')
             txt = read_dir / (img.stem + '.txt')
             if xml.exists() and xml.suffix:
@@ -900,7 +959,8 @@ Copy a number of data points in the read directory to the save directory.
 def copy_number_of_datapoints_in_directory(read_dir: Path, 
                                            save_dir: Path, 
                                            num_files=10,
-                                           random_sample=False):
+                                           random_sample=False,
+                                           progress=True):
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
     save_created = False
@@ -916,7 +976,10 @@ def copy_number_of_datapoints_in_directory(read_dir: Path,
         assert(num_files <= len(jpgPaths))
         if random_sample:
             jpgPaths = random.sample(jpgPaths, num_files)
-        for img in tqdm(jpgPaths, desc="Processing"):
+        else:
+            jpgPaths = jpgPaths[:num_files]
+        iter = tqdm(jpgPaths, desc="Copying Datapoints") if progress else jpgPaths
+        for img in iter:
             xml = read_dir / (img.stem + '.xml')
             txt = read_dir / (img.stem + '.txt')
             if xml.exists() and xml.suffix:
@@ -936,7 +999,8 @@ Split the images and annotations in the read directory into two separate directo
 def split_number_datapoints_in_directory(read_dir: Path, 
                                          img_dir: Path, 
                                          ann_dir: Path,
-                                         num: int):
+                                         num: int,
+                                         progress=True):
     num = int(num)
     assert(num > 0)
     read_dir = Path(read_dir)
@@ -958,7 +1022,8 @@ def split_number_datapoints_in_directory(read_dir: Path,
         jpgPaths = get_jpg_paths(read_dir)
         assert(num <= len(jpgPaths))
         jpgPaths = random.sample(jpgPaths, num)
-        for img in tqdm(jpgPaths, desc="Processing"):
+        iter = tqdm(jpgPaths, desc="Splitting Datapoints") if progress else jpgPaths
+        for img in iter:
             xml = read_dir / (img.stem + '.xml')
             txt = read_dir / (img.stem + '.txt')
             if xml.exists():
@@ -1005,16 +1070,13 @@ def partition_yolo_data_for_training(read_dir: Path,
         save_created = True
     elif not append:
         delete_files(save_dir, True)
-        
+
     try:
+        # calculate the number of files in each set
         num_files = count_data_points_in_directory(read_dir)
         train_num = int(num_files * train_percent)
         test_num = int(num_files * test_percent)
         val_num = num_files - train_num - test_num
-        if verbose:
-            print("Expected number of datapoints in each set:")
-            print(f"Total: {num_files}")
-            print(f"Train: {train_num}, Val: {val_num}, Test: {test_num}")
 
         split_number_datapoints_in_directory(read_dir,
                                              save_dir / 'images/val',
@@ -1031,15 +1093,18 @@ def partition_yolo_data_for_training(read_dir: Path,
                                              save_dir / 'labels/train',
                                              train_num)
         
-        if verbose:
-            if verify_yolo_file_structure(save_dir, 
-                                        test_num > 0, 
-                                        True):
-                print_green("Successfully partitioned the data")
-            print("Number of files in each set:")
-            print(f"Train: {count_data_points_in_directory(save_dir / 'images/train')}")
-            print(f"Val: {count_data_points_in_directory(save_dir / 'images/val')}")
-            print(f"Test: {count_data_points_in_directory(save_dir / 'images/test')}")
+        # verify the yolo file structure
+        train_after = count_data_points_in_directory(save_dir / 'images/train')
+        val_after = count_data_points_in_directory(save_dir / 'images/val')
+        test_after = count_data_points_in_directory(save_dir / 'images/test')
+        if ((verify_yolo_file_structure(save_dir, 
+                                    test_num > 0, 
+                                    True)) and 
+            (train_num == train_after) and
+            (val_num == val_after) and
+            (test_num == test_after)):
+            if verbose:
+                print_green(f"Successfully partitioned the data. {num_files} data points in total.")
             return True
     except:
         traceback.print_exc()
