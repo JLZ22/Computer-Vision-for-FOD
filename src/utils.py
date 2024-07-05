@@ -810,7 +810,10 @@ def pascalvoc_to_yolo(xml_path: Path, save_file_path: Path, json_path: Path):
 '''
 Convert all pascal voc xml files in the directory to yolo txt files.
 '''
-def pascalvoc_to_yolo_in_directory(read_dir: Path, save_dir: Path, json: Path):
+def pascalvoc_to_yolo_in_directory(read_dir: Path, 
+                                   save_dir: Path, 
+                                   json: Path,
+                                   verbose=False):
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
     if not read_dir.exists() or not read_dir.is_dir():
@@ -826,6 +829,7 @@ def pascalvoc_to_yolo_in_directory(read_dir: Path, save_dir: Path, json: Path):
         except:
             print_red(f"Failed to convert xml file: {xml}")
             continue
+    print_green(f"Successfully converted all xml files in the directory: '{read_dir}' to yolo txt files.")
 
 '''
 Move a percentage of the data points in the read directory 
@@ -986,22 +990,31 @@ Partition the data in the read directory into training, validation, and test set
 def partition_yolo_data_for_training(read_dir: Path, 
                                 save_dir: Path, 
                                 train_percent=0.8,
-                                test_percent=0.1):
+                                test_percent=0.1,
+                                verbose=False,
+                                append=False):
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
     save_created = False
     if not read_dir.exists() or not read_dir.is_dir():
-        print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
-        return
+        if verbose:
+            print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
+        return False
     if not save_dir.exists():
         save_dir.mkdir()
         save_created = True
+    elif not append:
+        delete_files(save_dir, True)
+        
     try:
         num_files = count_data_points_in_directory(read_dir)
         train_num = int(num_files * train_percent)
         test_num = int(num_files * test_percent)
         val_num = num_files - train_num - test_num
-        print(num_files, train_num, val_num, test_num)
+        if verbose:
+            print("Expected number of datapoints in each set:")
+            print(f"Total: {num_files}")
+            print(f"Train: {train_num}, Val: {val_num}, Test: {test_num}")
 
         split_number_datapoints_in_directory(read_dir,
                                              save_dir / 'images/val',
@@ -1016,12 +1029,23 @@ def partition_yolo_data_for_training(read_dir: Path,
         split_number_datapoints_in_directory(read_dir,
                                              save_dir / 'images/train',
                                              save_dir / 'labels/train',
-                                             val_num)
+                                             train_num)
         
+        if verbose:
+            if verify_yolo_file_structure(save_dir, 
+                                        test_num > 0, 
+                                        True):
+                print_green("Successfully partitioned the data")
+            print("Number of files in each set:")
+            print(f"Train: {count_data_points_in_directory(save_dir / 'images/train')}")
+            print(f"Val: {count_data_points_in_directory(save_dir / 'images/val')}")
+            print(f"Test: {count_data_points_in_directory(save_dir / 'images/test')}")
+            return True
     except:
         traceback.print_exc()
         if save_created:
             save_dir.rmdir()
+        return False
 
 '''
 Check if the yolo file structure is correct and checks if 
@@ -1030,7 +1054,7 @@ are the same.
 '''
 def verify_yolo_file_structure(read_dir: Path, 
                                test=True,
-                               verbose=True):
+                               verbose=False):
     read_dir = Path(read_dir)
     if not read_dir.exists() or not read_dir.is_dir():
         if verbose:
