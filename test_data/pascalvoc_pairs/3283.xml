@@ -1,0 +1,38 @@
+<annotation>
+	<folder>Pencil + Tool Bits</folder>
+	<filename>3283.jpg</filename>
+	<path>../test_data/raw_pairs/3283.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>4000</width>
+		<height>3000</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>tool bit</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>1304</xmin>
+			<ymin>1232</ymin>
+			<xmax>1662</xmax>
+			<ymax>1615</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>pencil</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>1179</xmin>
+			<ymin>947</ymin>
+			<xmax>1662</xmax>
+			<ymax>1911</ymax>
+		</bndbox>
+	</object>
+</annotation>

@@ -4,5 +4,10 @@ config.json
 *.pt
 __pycache__/
 models/
-aug/
-benchmark_results/
+out*/
+benchmark_results*/
+.vs
+test.py
+temp.*
+dataset/
+temp*/
