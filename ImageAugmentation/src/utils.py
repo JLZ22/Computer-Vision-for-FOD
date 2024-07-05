@@ -97,7 +97,7 @@ def rename_in_directory(read_dir: Path, startIndex=0, prefix = '', extensions=[]
 '''
 Delete all files in the directory.
 '''
-def delete_files(read_dir: Path):
+def delete_files(read_dir: Path, recursive=False):
     read_dir = Path(read_dir)
     if not read_dir.exists() or not read_dir.is_dir():
         print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
@@ -105,6 +105,9 @@ def delete_files(read_dir: Path):
     for f in read_dir.iterdir():
         if f.is_file():
             f.unlink()
+        if recursive:
+            if f.is_dir():
+                delete_files(f, recursive)
     print_green(f"Deleted all files in the directory: '{read_dir}'")
 
 '''
