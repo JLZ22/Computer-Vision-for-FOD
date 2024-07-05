@@ -76,7 +76,7 @@ if __name__ == '__main__':
     plt.xlim(0, max_processes+1)
     plt.ylim(0, max(times) + 10)
     plt.legend()
-    benchmark_dir = Path('..', f'benchmark_results/{copies}_copies')
+    benchmark_dir = Path('..', f'benchmark_results_simple_aug/{copies}_copies')
     if not benchmark_dir.exists() or not benchmark_dir.is_dir():
         os.makedirs(benchmark_dir)
     save_name = f'Copies{copies}_Processes{max_processes}_TimeVsProcesses'
