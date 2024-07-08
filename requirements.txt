@@ -6,3 +6,4 @@ pascal_voc_writer
 pascal-voc-tools
 tqdm
 matplotlib
+clearml
