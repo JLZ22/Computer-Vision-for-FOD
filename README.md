@@ -22,9 +22,10 @@ pascal-voc-tools
 pascal-voc
 tqdm
 matplotlib
+clearml
 ```
 
-To install using `pip`, run `pip install -r requirements.txt`. 
+To install using `pip`, run `pip install -r requirements.txt`. For proper functionality of `clearml`, make an [account](https://app.clear.ml/login) and follow setup instructions.  
 
 ## Augmentation Notes<br>
 
