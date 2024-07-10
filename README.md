@@ -23,6 +23,7 @@ pascal-voc
 tqdm
 matplotlib
 clearml
+optuna
 ```
 
 To install using `pip`, run `pip install -r requirements.txt`. For proper functionality of `clearml`, make an [account](https://app.clear.ml/login) and follow setup instructions.  
