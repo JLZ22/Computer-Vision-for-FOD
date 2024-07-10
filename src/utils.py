@@ -15,6 +15,7 @@ import json
 import shutil
 from tqdm import tqdm
 import random
+import torch
 
 def print_red(text):
     print("\033[91m{}\033[0m".format(text))
@@ -1203,3 +1204,16 @@ def diff_names_between_directories(dir1: Path, dir2: Path):
     files1 = set([f.stem for f in dir1.iterdir()])
     files2 = set([f.stem for f in dir2.iterdir()])
     return files1 - files2 if len(files1) > len(files2) else files2 - files1
+
+'''
+Determine the device to use for training.
+'''
+def get_device(use_gpu=True, use_mps=True):
+    if torch.cuda.is_available() and use_gpu:
+        device = 'cuda'
+    elif torch.backends.mps.is_available() and use_mps:
+        device = 'mps'
+    else:
+        device = 'cpu'
+
+    return device
