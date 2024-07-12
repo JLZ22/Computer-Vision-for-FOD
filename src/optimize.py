@@ -1,6 +1,6 @@
 from ultralytics import YOLO
 import utils
-import pathlib as Path
+from pathlib import Path
 import yaml
 
 if __name__ == '__main__':
