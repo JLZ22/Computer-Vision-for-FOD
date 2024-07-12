@@ -13,3 +13,4 @@ dataset/
 temp/
 env*
 *config*
+runs/

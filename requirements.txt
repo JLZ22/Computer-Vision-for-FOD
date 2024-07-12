@@ -7,4 +7,3 @@ pascal-voc-tools
 tqdm
 matplotlib
 clearml
-optuna
