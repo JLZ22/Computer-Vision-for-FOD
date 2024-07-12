@@ -9,11 +9,12 @@ if __name__ == '__main__':
         config = f.safe_load(f)
     if config:
         data_path = config['path']
+
     model = YOLO('../models/yolov8n.pt')
     best = model.tune(data=data_path, 
-                        epochs=1, 
-                        iterations=10, 
-                        imgsz=512,
+                        epochs=config['epochs'], 
+                        iterations=config['iterations'], 
+                        imgsz=config['imgsz'],
                         optimizer="AdamW", 
                         plots=False, 
                         save=False, 
