@@ -1,6 +1,7 @@
 from ultralytics import YOLO
 from clearml import Task
 import argparse
+import pathlib as Path
 
 def init_parser():
     parser = argparse.ArgumentParser()
@@ -12,6 +13,7 @@ def init_parser():
     parser.add_argument('--momentum', type=float, default=0.937)
     parser.add_argument('--weight-decay', type=float, default=0.0005)
     parser.add_argument('--data-path', type=str, default="../test_data/dataset/dataset.yaml")
+    parser.add_argument('--hyp', type=str, default="../models/hyp.yaml")
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -36,16 +38,26 @@ if __name__ == '__main__':
         'data_path': opt.data_path,
         'project': opt.project
     }
-    
+
     task.connect(hyperparameters)
     model = YOLO("../models/yolov8n.pt")
-    results = model.train(data=opt.data_path, 
-                        epochs=opt.epochs,
-                        imgsz=opt.img_size,
-                        project=opt.project,
-                        batch=opt.batch_size,
-                        lr0=opt.lr,
-                        momentum=opt.momentum,
-                        weight_decay=opt.weight_decay,
-                        verbose=True)
+
+    hyp_path = Path(opt.hyp)
+    if hyp_path.exists():
+        results = model.train(data=opt.data_path, 
+                            epochs=opt.epochs,
+                            batch=opt.batch_size,
+                            imgsz=opt.img_size,
+                            hyp=opt.hyp,
+                            verbose=True)
+    else:
+        results = model.train(data=opt.data_path, 
+                            epochs=opt.epochs,
+                            imgsz=opt.img_size,
+                            project=opt.project,
+                            batch=opt.batch_size,
+                            lr0=opt.lr,
+                            momentum=opt.momentum,
+                            weight_decay=opt.weight_decay,
+                            verbose=True)
     task.close()
