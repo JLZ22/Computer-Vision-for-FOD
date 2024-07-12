@@ -11,3 +11,4 @@ test.py
 temp.*
 dataset/
 temp/
+env*
