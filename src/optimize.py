@@ -6,7 +6,7 @@ import yaml
 if __name__ == '__main__':
     data_path = Path("../test_data/dataset/dataset.yaml")
     with open("../env.yaml") as f:
-        config = f.safe_load(f)
+        config = yaml.safe_load(f)
     if config:
         data_path = config['path']
 
