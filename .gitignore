@@ -12,4 +12,4 @@ temp.*
 dataset/
 temp/
 env*
-config*
+*config*
