@@ -63,8 +63,8 @@ In a random sample of 128 data points, we found that 4 data points were faulty. 
 - [x] transform labels from PascalVOC to YOLO <br>
 - [x] rename labels for consistency<br>
 - [x] subtract mean pixel value from all images 
-- [ ] partition data into training and validation<br>
-- [ ] separate txt and jpg<br>
+- [x] partition data into training and validation<br>
+- [x] separate txt and jpg<br>
 - [ ] train<br>
 
 ## Literature Review<br>
