@@ -2,6 +2,7 @@ from ultralytics import YOLO
 from clearml import Task
 import argparse
 import yaml
+import Utils
 
 def init_parser():
     parser = argparse.ArgumentParser()
@@ -28,7 +29,7 @@ if __name__ == '__main__':
             hyp_exists=False
 
     model = YOLO("../models/yolov8n.pt")
-
+    device = Utils.get_device()
     if hyp_exists:
         model.train(
             data=config['data_path'],
@@ -37,7 +38,8 @@ if __name__ == '__main__':
             imgsz=config['imgsz'],
             cfg=config['train']['hyp'],
             verbose=True,
-            patience=config['patience']
+            patience=config['patience'],
+            device=device
         )
     else:
         model.train(
@@ -46,7 +48,8 @@ if __name__ == '__main__':
             batch=config['batch_size'],
             imgsz=config['imgsz'],
             verbose=True,
-            patience=config['patience']
+            patience=config['patience'],
+            device=device
         )
 
     task.close()
