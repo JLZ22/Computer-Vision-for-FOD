@@ -37,7 +37,8 @@ if __name__ == '__main__':
             imgsz=config['img_size'],
             cfg=config['hyp'],
             verbose=True,
-            logger=task.get_logger()
+            logger=task.get_logger(),
+            patience=config['patience']
         )
     else:
         model.train(
@@ -46,7 +47,8 @@ if __name__ == '__main__':
             batch=config['batch_size'],
             imgsz=config['img_size'],
             verbose=True,
-            logger=task.get_logger()
+            logger=task.get_logger(),
+            patience=config['patience']
         )
 
     task.close()
