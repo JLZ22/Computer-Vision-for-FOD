@@ -4,38 +4,38 @@ from pathlib import Path
 import yaml
 
 if __name__ == '__main__':
-    data_path = Path("../test_data/dataset/dataset.yaml")
-    with open("../config.yaml") as f:
+    data_path = Path('../test_data/dataset/dataset.yaml')
+    with open('../config.yaml') as f:
         config = yaml.safe_load(f)
 
-    model = YOLO('../models/yolov8n.pt')
+    model = YOLO(f'../models/{config['model_variant']}.pt')
     results = model.tune(
+        # tune parameters
         use_ray=True,
+        grace_period=config['tune']['grace_period'],
+
+        # train parameters
         data=config['data_path'], 
-        epochs=config['epochs'], 
-        iterations=config['iterations'], 
+        epochs=config['epochs'],
+        batch=config['batch_size'],
         imgsz=config['imgsz'],
-        patience=config['patience'],
-        deterministic=False,
-        optimizer="AdamW", 
-        name="tune",
         plots=True,    # Generate and display training plots
-        save=True,     # Save model checkpoints and final weights
         val=True,      # Evaluate the model on the validation set
         device=Utils.get_device()  # Specify device for training based on availability
     )
 
     import matplotlib.pyplot as plt
 
-    for i, result in enumerate(results):
+    for i, result in enumerate(results, start=1):
         plt.plot(
-            result.metrics_dataframe["training_iteration"],
-            result.metrics_dataframe["mean_accuracy"],
-            label=f"Trial {i+1}",
+            result.metrics_dataframe['training_iteration'],
+            result.metrics_dataframe['mean_accuracy'],
+            label=f'Trial {i}'
         )
 
-    plt.xlabel("Training Iterations")
-    plt.ylabel("Mean Accuracy")
+
+    plt.xlabel('Training Iterations')
+    plt.ylabel('Mean Accuracy')
     plt.legend()
     plt.show()
-    plt.savefig("../tune/tune_results.png")
+    plt.savefig('../tune/tune_results.png')
