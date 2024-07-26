@@ -9,7 +9,7 @@ if __name__ == '__main__':
         config = yaml.safe_load(f)
 
     model = YOLO('../models/yolov8n.pt')
-    best = model.tune(
+    results = model.tune(
         data=config['data_path'], 
         epochs=config['epochs'], 
         iterations=config['iterations'], 
@@ -23,3 +23,17 @@ if __name__ == '__main__':
         val=True,      # Evaluate the model on the validation set
         device=Utils.get_device()  # Specify device for training based on availability
     )
+
+    import matplotlib.pyplot as plt
+
+    for i, result in enumerate(results):
+        plt.plot(
+            result.metrics_dataframe["training_iteration"],
+            result.metrics_dataframe["mean_accuracy"],
+            label=f"Trial {i+1}",
+        )
+
+    plt.xlabel("Training Iterations")
+    plt.ylabel("Mean Accuracy")
+    plt.legend()
+    plt.show()
