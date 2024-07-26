@@ -11,7 +11,7 @@ import psutil
 from tqdm import tqdm
 import gc
 from pathlib import Path
-import utils
+import Utils
 
 class SimpleAugSeq:
     def __init__(self, read_path: Path, 
@@ -38,7 +38,7 @@ class SimpleAugSeq:
         ia.seed(self.seed)
         #Checks if the array that was passed in has a length of 0. If so it populates names array with every image name from read path
         if len(self.names) == 0:
-            self.names = [i.stem for i in utils.get_jpg_paths(self.read_path)]
+            self.names = [i.stem for i in Utils.get_jpg_paths(self.read_path)]
         if not self.save_path.exists() or not self.save_path.is_dir():
             os.makedirs(self.save_path)
     
@@ -124,7 +124,7 @@ class SimpleAugSeq:
             try:
                 input("Press Enter to start augmenting images...")
             except SyntaxError or KeyboardInterrupt:
-                utils.print_red("Failed to augment images.")
+                Utils.print_red("Failed to augment images.")
                 exit()
 
         start = time.time()
@@ -145,7 +145,7 @@ class SimpleAugSeq:
             # Display progress bar
             for async_result in tqdm(async_results, desc="Augmenting", total=len(async_results)):
                 if self.checkMem: 
-                    tempPoolMem = utils.get_children_mem_consumption()
+                    tempPoolMem = Utils.get_children_mem_consumption()
                     tempMaxUsed = psutil.virtual_memory().used
                     tempMaxPercent = psutil.virtual_memory().percent
                     max_percent = tempMaxPercent if tempMaxPercent > max_percent else max_percent
@@ -155,8 +155,8 @@ class SimpleAugSeq:
                 time.sleep(0.1)
         
         end = time.time()
-        utils.cut_off_bboxes_in_directory(self.save_path, progress=False)
-        utils.subtract_mean_in_directory(self.save_path, progress=False)
+        Utils.cut_off_bboxes_in_directory(self.save_path, progress=False)
+        Utils.subtract_mean_in_directory(self.save_path, progress=False)
         self.duration = end - start
         if self.checkMem:
             print(f"Max Memory Consumption of Pool: {mem / 1024**2} MB")
@@ -171,11 +171,11 @@ class SimpleAugSeq:
         tree = ET.parse(str(Path(self.read_path, name + '.xml'))) 
         root = tree.getroot()
         # make num_copies number of copies of the current image 
-        images = utils.make_copies_images(str(self.read_path / (name + '.jpg')), self.num_copies) 
+        images = Utils.make_copies_images(str(self.read_path / (name + '.jpg')), self.num_copies) 
         # create the BoundingBoxesOnImage object for the current image
-        bbs = utils.create_bbs(root, images[0].shape) 
+        bbs = Utils.create_bbs(root, images[0].shape) 
         # make num_copies number of copies of the current image's corresponding xml file
-        allbbs = utils.make_copies_bboxes(bbs, self.num_copies) 
+        allbbs = Utils.make_copies_bboxes(bbs, self.num_copies) 
 
         seq = self.create_sequential() # create the sequential object in charge of the augmentation
 
