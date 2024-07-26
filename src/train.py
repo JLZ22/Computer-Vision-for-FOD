@@ -4,54 +4,70 @@ import argparse
 import yaml
 import Utils
 
-def init_parser():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--task-name', type=str, default='train')
-    return parser.parse_args()
-
-if __name__ == '__main__':
-    opt = init_parser()
-
-    # Initialize a new ClearML task
-    task = Task.init(project_name="dev", 
-                    task_name=opt.task_name, 
-                    task_type=Task.TaskTypes.training)
-
-
-    with open('../config.yaml') as f:
+def get_config_and_hyperparameters():
+   '''
+   Load the configuration and hyperparameters from the config.yaml file
+   '''
+   with open('../config.yaml') as f:
         config = yaml.safe_load(f)
         try:
             with open(config['train']['hyp']) as f:
                 hyperparameters = yaml.safe_load(f)
-            task.connect(hyperparameters)
-            hyp_exists=True
+            return config, hyperparameters
         except:
-            hyp_exists=False
+            return config, None
 
-    model = YOLO("../models/yolov8n.pt")
+def train(model, config, hyperparameters):
+    '''
+    Train the model using the configuration and hyperparameters if they exist.
+    Otherwise, train the model using the default YOLO hyperparameter configuration.
+    '''
     device = Utils.get_device()
-    if hyp_exists:
-        model.train(
+    if hyperparameters:
+        return model.train(
             data=config['data_path'],
             epochs=config['epochs'],
             batch=config['batch_size'],
             imgsz=config['imgsz'],
             cfg=config['train']['hyp'],
-            verbose=True,
-            patience=config['patience'],
+            name=config['name'],
             device=device,
+            verbose=True,
             determinisitic=False
         )
     else:
-        model.train(
+        return model.train(
             data=config['data_path'],
             epochs=config['epochs'],
             batch=config['batch_size'],
             imgsz=config['imgsz'],
-            verbose=True,
             patience=config['patience'],
             device=device,
+            verbose=True,
             deterministic=False
         )
+
+if __name__ == '__main__':
+    # Get the configuration and hyperparameters from the config.yaml file
+    config, hyperparameters = get_config_and_hyperparameters()
+
+    # Initialize a new ClearML task
+    task = Task.init(project_name=config['project'], 
+                    task_name=config['train']['name'], 
+                    task_type=Task.TaskTypes.training)
+
+
+    # Connect the hyperparameters to the task if they exist
+    if hyperparameters:
+        task.connect(hyperparameters)
+    
+    # Load the model
+    model = YOLO(f'../models/{config['model_variant']}.pt')
+
+    # Connect the model to the task
+    task.connect(model)
+
+    # Train the model
+    train(model, config, hyperparameters)
 
     task.close()
