@@ -8,7 +8,7 @@ if __name__ == '__main__':
     with open("../opt_config.yaml") as f:
         config = yaml.safe_load(f)
     if config:
-        data_path = config['path']
+        data_path = config['data_path']
 
     model = YOLO('../models/yolov8n.pt')
     best = model.tune(data=data_path, 
