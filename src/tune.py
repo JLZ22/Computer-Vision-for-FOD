@@ -17,6 +17,7 @@ if __name__ == '__main__':
         patience=config['patience'],
         deterministic=False,
         optimizer="AdamW", 
+        name="tune",
         plots=True,    # Generate and display training plots
         save=True,     # Save model checkpoints and final weights
         val=True,      # Evaluate the model on the validation set
