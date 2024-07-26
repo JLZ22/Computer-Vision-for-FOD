@@ -1,4 +1,5 @@
-ultralytics 
+ultralytics
+ray[tune]
 opencv-python
 imgaug 
 numpy 

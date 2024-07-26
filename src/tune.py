@@ -10,6 +10,7 @@ if __name__ == '__main__':
 
     model = YOLO('../models/yolov8n.pt')
     results = model.tune(
+        use_ray=True,
         data=config['data_path'], 
         epochs=config['epochs'], 
         iterations=config['iterations'], 
