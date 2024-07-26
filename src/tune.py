@@ -10,11 +10,6 @@ if __name__ == '__main__':
 
     model = YOLO(f'../models/{config['model_variant']}.pt')
     results = model.tune(
-        # tune parameters
-        use_ray=True,
-        grace_period=config['tune']['grace_period'],
-
-        # train parameters
         data=config['data_path'], 
         epochs=config['epochs'],
         batch=config['batch_size'],
