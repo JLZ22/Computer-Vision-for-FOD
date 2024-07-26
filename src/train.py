@@ -35,7 +35,7 @@ if __name__ == '__main__':
             epochs=config['epochs'],
             batch=config['batch_size'],
             imgsz=config['imgsz'],
-            cfg=config['hyp'],
+            cfg=config['train']['hyp'],
             verbose=True,
             logger=task.get_logger(),
             patience=config['patience']
