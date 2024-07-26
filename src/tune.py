@@ -23,19 +23,3 @@ if __name__ == '__main__':
         val=True,      # Evaluate the model on the validation set
         device=Utils.get_device()  # Specify device for training based on availability
     )
-
-    import matplotlib.pyplot as plt
-
-    for i, result in enumerate(results, start=1):
-        plt.plot(
-            result.metrics_dataframe['training_iteration'],
-            result.metrics_dataframe['mean_accuracy'],
-            label=f'Trial {i}'
-        )
-
-
-    plt.xlabel('Training Iterations')
-    plt.ylabel('Mean Accuracy')
-    plt.legend()
-    plt.show()
-    plt.savefig('../tune/tune_results.png')
