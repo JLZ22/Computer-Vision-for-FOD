@@ -39,7 +39,8 @@ if __name__ == '__main__':
             cfg=config['train']['hyp'],
             verbose=True,
             patience=config['patience'],
-            device=device
+            device=device,
+            determinisitic=False
         )
     else:
         model.train(
@@ -49,7 +50,8 @@ if __name__ == '__main__':
             imgsz=config['imgsz'],
             verbose=True,
             patience=config['patience'],
-            device=device
+            device=device,
+            deterministic=False
         )
 
     task.close()

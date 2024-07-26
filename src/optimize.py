@@ -15,6 +15,7 @@ if __name__ == '__main__':
         iterations=config['iterations'], 
         imgsz=config['imgsz'],
         patience=config['patience'],
+        deterministic=False,
         optimizer="AdamW", 
         plots=True,    # Generate and display training plots
         save=True,     # Save model checkpoints and final weights
