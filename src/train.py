@@ -37,7 +37,6 @@ if __name__ == '__main__':
             imgsz=config['imgsz'],
             cfg=config['train']['hyp'],
             verbose=True,
-            logger=task.get_logger(),
             patience=config['patience']
         )
     else:
@@ -47,7 +46,6 @@ if __name__ == '__main__':
             batch=config['batch_size'],
             imgsz=config['imgsz'],
             verbose=True,
-            logger=task.get_logger(),
             patience=config['patience']
         )
 
