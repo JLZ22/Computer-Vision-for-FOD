@@ -1,7 +1,7 @@
 from ultralytics import YOLO
 from clearml import Task
 import argparse
-import pathlib as Path
+from pathlib import Path
 
 def init_parser():
     parser = argparse.ArgumentParser()
@@ -14,18 +14,20 @@ def init_parser():
     parser.add_argument('--weight-decay', type=float, default=0.0005)
     parser.add_argument('--data-path', type=str, default="../test_data/dataset/dataset.yaml")
     parser.add_argument('--hyp', type=str, default="../models/hyp.yaml")
+    parser.add_argument('--task-name', type=str, default='train')
     return parser.parse_args()
 
 if __name__ == '__main__':
+    opt = init_parser()
+
     task = Task.init(project_name="dev", 
-                    task_name="first_task", 
+                    task_name=opt.task_name, 
                     task_type=Task.TaskTypes.training)
 
     logger = task.get_logger()
     logger.report_scalar("loss", "train", iteration=0, value=0.5)
     logger.report_scalar("accuracy", "train", iteration=0, value=0.8)
 
-    opt = init_parser()
 
     # Log hyperparameters to ClearML
     hyperparameters = {
