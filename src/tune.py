@@ -37,3 +37,4 @@ if __name__ == '__main__':
     plt.ylabel("Mean Accuracy")
     plt.legend()
     plt.show()
+    plt.savefig("../tune/tune_results.png")
