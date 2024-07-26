@@ -34,7 +34,7 @@ if __name__ == '__main__':
             data=config['data_path'],
             epochs=config['epochs'],
             batch=config['batch_size'],
-            imgsz=config['img_size'],
+            imgsz=config['imgsz'],
             cfg=config['hyp'],
             verbose=True,
             logger=task.get_logger(),
@@ -45,7 +45,7 @@ if __name__ == '__main__':
             data=config['data_path'],
             epochs=config['epochs'],
             batch=config['batch_size'],
-            imgsz=config['img_size'],
+            imgsz=config['imgsz'],
             verbose=True,
             logger=task.get_logger(),
             patience=config['patience']
