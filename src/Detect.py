@@ -22,7 +22,7 @@ class Detect:
     camera is the camera index if input is "camera"
     '''
     def __init__(self, 
-                 model = YOLO("models/yolov8n.pt"), 
+                 model = YOLO("../models/yolov8n.pt"), 
                  input = "image", 
                  paths=[""],
                  camera = -1):
