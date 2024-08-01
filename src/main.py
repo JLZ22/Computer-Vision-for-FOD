@@ -1,5 +1,6 @@
 from ultralytics import YOLO
 from Detect import Detect
+import yaml
 
 '''
 The different yolov8 models have varying levels of accuracy and speed.
@@ -14,6 +15,12 @@ yolov8l
 yolov8x (Slowest and Most accurate)
 '''
 if __name__ == "__main__":
-    model = YOLO("models/yolov8x.pt")
-    detecter = Detect(model, "camera", camera=0)
+    with open('../config.yaml') as f:
+        config = yaml.safe_load(f)
+    detect = config['detect']
+    model = YOLO(detect['model_path'])
+    detecter = Detect(model, 
+                      detect['input_type'],
+                      detect['media_paths'], 
+                      detect['camera'])
     detecter.detect()
