@@ -1,5 +1,5 @@
 from ultralytics import YOLO
-from Detect import Detector
+from Detector import Detector
 import yaml
 
 '''
