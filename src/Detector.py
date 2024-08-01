@@ -29,7 +29,7 @@ class Detector:
         self.model=model
         self.classNames=class_names
 
-    def show_results(self, results, frame):
+    def interpret_frame_result(self, results, frame, show):
         '''
         Show function to display the bounding boxes and class names
         along with other FOD details and custom functionalities. 
@@ -62,11 +62,13 @@ class Detector:
                 thickness = 2
 
                 cv2.putText(frame, self.classNames[cls] + ' ' + str(confidence), org, font, fontScale, color, thickness)
-            cv2.imshow("Image", frame)
+            if show:
+                cv2.imshow("Image", frame)
 
     def detect_camera(self, 
                      confidence=    0.7,
-                     camera=        0
+                     camera=        0,
+                     show=          True
                      ):
         '''
         Detect objects in a camera stream.
@@ -81,7 +83,7 @@ class Detector:
                                          conf=      confidence, 
                                          stream=    True)
             
-            self.showResults(results, frame)
+            self.interpret_frame_result(results, frame, show)
             if cv2.waitKey(1) == ord('q'):
                 break
         cap.release()
@@ -89,13 +91,14 @@ class Detector:
 
     def detect_media(self, 
                     confidence,
-                    media_paths):  
+                    media_paths,
+                    show):  
         '''
         Detect objects in images or videos.
         '''
         for vid in media_paths:
             self.model.predict(vid, 
-                               show=        True, 
+                               show=        show, 
                                conf=        confidence,)
     
     def detect(self,  
@@ -103,7 +106,8 @@ class Detector:
                confidence=  0.7,
                media_paths= [],
                camera=      0,
-               save_path=   None):
+               save_path=   None,
+               show=        True):
         '''
         Detect objects in images, videos, or camera streams. Saves the 
         results if a save path is provided.
