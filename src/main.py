@@ -1,5 +1,5 @@
 from ultralytics import YOLO
-from Detect import Detect
+from Detect import Detector
 import yaml
 
 '''
@@ -19,8 +19,5 @@ if __name__ == "__main__":
         config = yaml.safe_load(f)
     detect = config['detect']
     model = YOLO(detect['model_path'])
-    detecter = Detect(model, 
-                      detect['input_type'],
-                      detect['media_paths'], 
-                      detect['camera'])
-    detecter.detect()
+    detector = Detector(model, detect['media_paths'])
+    detector.detect('camera')
