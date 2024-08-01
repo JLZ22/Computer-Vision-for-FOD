@@ -22,28 +22,30 @@ def train(model, config, hyperparameters):
     Otherwise, train the model using the default YOLO hyperparameter configuration.
     '''
     device = Utils.get_device()
+    train = config['train']
     if hyperparameters:
         return model.train(
-            data=config['data_path'],
-            epochs=config['epochs'],
-            batch=config['batch_size'],
-            imgsz=config['imgsz'],
-            cfg=config['train']['hyp'],
-            name=config['name'],
-            device=device,
-            verbose=True,
-            determinisitic=False
+            data=           train['data_path'],
+            epochs=         train['epochs'],
+            batch=          train['batch_size'],
+            imgsz=          train['imgsz'],
+            cfg=            train['hyp'],
+            name=           train['name'],
+            patience=       train['patience'],
+            device=         device,
+            verbose=        True,
+            determinisitic= False
         )
     else:
         return model.train(
-            data=config['data_path'],
-            epochs=config['epochs'],
-            batch=config['batch_size'],
-            imgsz=config['imgsz'],
-            patience=config['patience'],
-            device=device,
-            verbose=True,
-            deterministic=False
+            data=           train['data_path'],
+            epochs=         train['epochs'],
+            batch=          train['batch_size'],
+            imgsz=          train['imgsz'],
+            patience=       train['patience'],
+            device=         device,
+            verbose=        True,
+            deterministic=  False
         )
 
 if __name__ == '__main__':
@@ -51,9 +53,9 @@ if __name__ == '__main__':
     config, hyperparameters = get_config_and_hyperparameters()
 
     # Initialize a new ClearML task
-    task = Task.init(project_name=config['project'], 
-                    task_name=config['train']['name'], 
-                    task_type=Task.TaskTypes.training)
+    task = Task.init(project_name=  config['project'], 
+                    task_name=      config['train']['name'], 
+                    task_type=      Task.TaskTypes.training)
 
 
     # Connect the hyperparameters to the task if they exist
