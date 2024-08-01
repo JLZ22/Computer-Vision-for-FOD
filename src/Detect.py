@@ -25,15 +25,18 @@ class Detect:
                  model = YOLO("../models/yolov8n.pt"), 
                  input = "image", 
                  paths=[""],
-                 camera = -1):
+                 camera = -1,
+                 confidence=0.7,
+                 class_names=allNames):
         self.model = model
         self.input_type = input
         self.paths = paths
         self.camera = camera
-        self.classNames = ["person", "phone", "bottle"]
+        self.classNames = class_names
+        self.confidence = confidence
 
     def detectImage(self):
-        results = self.model.predict(self.paths)
+        results = self.model.predict(self.paths, confidence=self.confidence)
         for result in results:
             result.show()
 
@@ -72,7 +75,7 @@ class Detect:
             ret, frame = cap.read()
             if not ret:
                 break
-            results = self.model.predict(frame, show=False, conf=0.7, stream=True)
+            results = self.model.predict(frame, show=False, conf=self.confidence, stream=True)
             
             self.showResults(results, frame)
             if cv2.waitKey(1) == ord('q'):
@@ -81,7 +84,7 @@ class Detect:
         cv2.destroyAllWindows()
 
     def detectVideo(self):
-        results = [self.model.predict(vid, show=True, conf=0.7) for vid in self.paths]
+        [self.model.predict(vid, show=True, conf=self.confidence) for vid in self.paths]
     
     def detect(self):
         if self.input_type == "image":
