@@ -1,6 +1,5 @@
 from ultralytics import YOLO
 from clearml import Task
-import argparse
 import yaml
 import Utils
 
