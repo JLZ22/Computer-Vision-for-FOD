@@ -34,7 +34,7 @@ def train(model, config, hyperparameters):
             patience=       train['patience'],
             device=         device,
             verbose=        True,
-            determinisitic= False
+            deterministic=  False
         )
     else:
         return model.train(
