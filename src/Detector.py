@@ -18,6 +18,7 @@ class Detector:
         '''
         Show function to display the bounding boxes and class names
         along with other FOD details and custom functionalities. 
+        TODO: interpret the frame in the context of the FOD problem
         '''
         r = next(results, None)
         if r:
@@ -48,6 +49,7 @@ class Detector:
                 thickness = 2
 
                 cv2.putText(frame, self.class_names[cls] + ' ' + str(confidence), org, font, fontScale, color, thickness)
+        
         if input_type == 'Image' and show:
             while True:
                 cv2.imshow(win_name, frame)
