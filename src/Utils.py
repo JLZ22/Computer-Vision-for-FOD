@@ -136,7 +136,6 @@ def rename_in_directory(read_dir: Path,
 def delete_files(read_dir: Path, 
                  recursive=False,
                  verbose=True):
-    read_dir = Path(read_dir)
     '''
     Delete all files in the directory. If it is recursive, removes all files 
     without affecting directory structure.
@@ -147,6 +146,7 @@ def delete_files(read_dir: Path,
     verbose:    A boolean that determines whether or not the function will print 
                 error/success messages.
     '''
+    read_dir = Path(read_dir)
     if not read_dir.exists() or not read_dir.is_dir():
         if verbose:
             print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
@@ -163,10 +163,12 @@ def delete_files(read_dir: Path,
         else:
             print_green(f"Deleted all files in the directory: '{read_dir}'")
 
-'''
-Subtract the mean pixel values from the image.
-'''
-def subtract_mean(image):
+def subtract_mean(image: cv2.typing.MatLike):
+    '''
+    Subtract the mean pixel values from the image and returns the image. 
+
+    image: A MatLike object that represents an image. 
+    '''
     image = np.array(image)
     # calculate per channel mean pixel values
     mean = np.mean(image, axis=(0, 1))
