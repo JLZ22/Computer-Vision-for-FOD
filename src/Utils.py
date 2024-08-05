@@ -1051,10 +1051,10 @@ def split_number_datapoints_in_directory(read_dir: Path,
         print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
     if not img_dir.exists():
-        img_dir.mkdir()
+        img_dir.mkdir(parents=True)
         img_created = True
     if not ann_dir.exists():
-        ann_dir.mkdir()
+        ann_dir.mkdir(parents=True)
         ann_created = True
     try:
         jpgPaths = get_jpg_paths(read_dir)
