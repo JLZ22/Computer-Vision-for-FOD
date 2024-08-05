@@ -80,7 +80,10 @@ def get_jpg_paths(dir, range=(-1, -1)):
             out.append(item)
     return out
 
-def rename_in_directory(read_dir: Path, startIndex=0, prefix = '', extensions=[]):
+def rename_in_directory(read_dir: Path, 
+                        startIndex=0,
+                        prefix = '', 
+                        extensions=[]):
     '''
     Rename all the jpg, xml, and txt files in the directory to the
     format prefix + index + '.jpg' and prefix + index + '.xml'. If 
@@ -130,13 +133,20 @@ def rename_in_directory(read_dir: Path, startIndex=0, prefix = '', extensions=[]
             else:
                 print_red(f"File: '{oldTXT}' does not exist. Skipping...")
 
-'''
-Delete all files in the directory.
-'''
 def delete_files(read_dir: Path, 
                  recursive=False,
                  verbose=True):
     read_dir = Path(read_dir)
+    '''
+    Delete all files in the directory. If it is recursive, removes all files 
+    without affecting directory structure.
+
+    read_dir:   The directory where all files will be deleted.
+    recursive:  A boolean that determines whether or not files will be 
+                removed recursively.
+    verbose:    A boolean that determines whether or not the function will print 
+                error/success messages.
+    '''
     if not read_dir.exists() or not read_dir.is_dir():
         if verbose:
             print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
