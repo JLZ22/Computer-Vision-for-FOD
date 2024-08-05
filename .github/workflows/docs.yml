@@ -23,10 +23,17 @@ jobs:
         with:
           python-version: '3.12'
 
-      # ADJUST THIS: install all dependencies (including pdoc)
+      - name: Cache Python packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      # install all dependencies (including pdoc)
       - run: pip install -r requirements.txt
-      # ADJUST THIS: build your documentation into docs/.
-      # We use a custom build script for pdoc itself, ideally you just run `pdoc -o docs/ ...` here.
+      # Generate docs
       - run: pdoc -o docs/ src/*.py
 
       - uses: actions/upload-pages-artifact@v3
