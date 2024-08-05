@@ -5,9 +5,8 @@ on:
   push:
     branches:
       - main
-    # Alternative: only build for tags.
-    # tags:
-    #   - '*'
+    paths:
+      - '**/*.py'
 
 # security: restrict permissions for CI jobs.
 permissions:
