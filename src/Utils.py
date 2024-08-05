@@ -87,12 +87,12 @@ def rename_in_directory(read_dir: Path, startIndex=0, prefix = '', extensions=[]
     extensions are specified, it will only rename files with those 
     extensions. This function has no recursive functionality.
 
-    read_dir:   The directory where we are renaming files.
+    read_dir:   The directory where we are renaming files.\n
     startIndex: The index that the first renamed file will be assigned.
                 all following files will be named by incrementing from the 
-                startIndex.
+                startIndex.\n
     prefix:     An optional prefix that will be prepended to the beginning of 
-                every renamed file. 
+                every renamed file. \n
     extensions: A list of strings that specifies the extension(s) of the files 
                 to be renamed.
     '''
