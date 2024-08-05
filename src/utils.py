@@ -23,6 +23,19 @@ def print_red(text):
 def print_green(text):
     print("\033[92m{}\033[0m".format(text))
 
+def is_json_valid(json_path: Path):
+    json_path = Path(json_path)
+    if not json_path.exists() or not json_path.is_file() or json_path.suffix != '.json':
+        print_red(f"File: '{json_path}' does not exist or is not a json file.")
+        return False
+    try:
+        with open(json_path) as f:
+            json.load(f)
+    except:
+        print_red(f"File: '{json_path}' is not a valid json file.")
+        return False
+    return True
+
 '''
 Get the paths to all jpg files in the directory.
 '''
@@ -183,8 +196,7 @@ Get the label map from the json file.
 '''
 def get_label_map(json_path: Path, key_is_id=True):
     json_path = Path(json_path)
-    if not json_path.exists() or not json_path.is_file() or json_path.suffix != '.json':
-        print_red(f"File: '{json_path}' does not exist or is not a json file.")
+    if not is_json_valid(json_path):
         return
     label_map = {}
     with open(json_path) as f:
@@ -301,7 +313,8 @@ def visualize_yolo_annotations_in_directory(read_dir: Path,
     if not save_dir.exists():
         save_dir.mkdir()
         save_created = True
-
+    if not is_json_valid(json_path):
+        return
     
     try:
         label_map = get_label_map(json_path)
@@ -840,6 +853,8 @@ def pascalvoc_to_yolo(xml_path: Path, save_file_path: Path, json_path: Path):
     elif not save_file_path.is_file():
         save_file_path.touch()
         save_created = True
+    if not is_json_valid(json_path):
+        return
     
     try:
         label_map = get_label_map(json_path, key_is_id=False)
