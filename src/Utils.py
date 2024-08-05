@@ -1147,7 +1147,7 @@ def partition_yolo_data_for_training(read_dir: Path,
     except:
         traceback.print_exc()
         if save_created:
-            save_dir.rmdir()
+            shutil.rmtree(save_dir)
         return False
 
 '''
