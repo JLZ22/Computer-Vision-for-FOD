@@ -176,12 +176,16 @@ def subtract_mean(image: cv2.typing.MatLike):
     image = image - mean
     return image
 
-'''
-Subtract the mean pixel values from all the jpg files in the directory.
-'''
 def subtract_mean_in_directory(read_dir: Path, 
                                save_dir=None,
                                progress=True):
+    '''
+    Subtract the mean pixel values from all the jpg files in the directory.
+
+    read_dir:   The directory where jpgs will be read from.
+    save_dir:   The directory where modified jpgs will be saved.
+    progress:   Boolean that determines whether or not a progress bar is shown.
+    '''
     read_dir = Path(read_dir)
     if save_dir is None:
         save_dir = read_dir
@@ -208,12 +212,14 @@ def subtract_mean_in_directory(read_dir: Path,
         if save_created:
             save_dir.rmdir()
                 
-'''
-Get the bounding boxes from the xml file in the read_dir
-that corresponds to the jpg file. If the xml file does not 
-exist, return None.
-'''
 def get_corresponding_bbox(read_dir: Path, jpg_path: Path):
+    '''
+    Creates the bounding boxes object from the xml file with the same name as the 
+    jpg path provided. Returns the bounding boxes object. 
+
+    read_dir: The directory where the xml and jpg files exist. 
+    jpg_path: The path of the jpg file for which we are finding an xml file. 
+    '''
     read_dir = Path(read_dir)
     jpg_path = Path(jpg_path)
     name = jpg_path.stem
