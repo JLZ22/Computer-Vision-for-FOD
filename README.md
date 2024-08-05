@@ -44,17 +44,6 @@ After augmentation, for each image in the dataset, the mean pixel value per chan
 
 In a random sample of 128 data points, we found that 4 data points were faulty. Using a one sample t-test, we concluded with 99% confidence that 0.084% and 7.09% of the dataset of 10,048 images is faulty.
 
-### Current Functionality
-
-- Capable of performing image augmentation on jpg/xml pairs
-- Equipped with various utility functions to help with large quantity of file operations
-- Can perform a benchmark on your machine to determine the optimal number of proceses to use for multiprocessing for image augmentation
-- Can run the default YOLOv8 model which was trained on the COCO dataset. 
-
-### Issues
-
-- img augmentation with multiprocessing runs into errors with excessive memory consumption
-
 ### Todo
 
 - [x] find solution to memory issue<br>
@@ -65,7 +54,11 @@ In a random sample of 128 data points, we found that 4 data points were faulty. 
 - [x] subtract mean pixel value from all images 
 - [x] partition data into training and validation<br>
 - [x] separate txt and jpg<br>
-- [ ] train<br>
+- [x] train on augmented data<br>
+- [ ] train on unaugmented data<br>
+- [ ] interpret model predictions in the context of FOD problem<br>
+- [ ] test in assembly space on 1 camera
+- [ ] test in assembly space on 3 cameras
 
 ## Literature Review<br>
 
