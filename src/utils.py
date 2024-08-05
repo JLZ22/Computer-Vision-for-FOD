@@ -45,11 +45,10 @@ def is_json_valid(json_path: Path):
 def get_jpg_paths(dir, range=(-1, -1)):
     '''
     Get the paths to jpg files in the directory. If a range is specifiied,
-    only gets the jpg paths that fall within the range inclusive. 
+    only gets the jpg paths that fall within the range inclusive. If a file's 
+    name is not an integer, this function will skip it. 
 
     range: A tuple that specifies the range of jpg paths to retrieve.
-
-    Precondition: The jpg paths have integer names.
     '''
     # check if range is valid
     if range[0] == -1 and range[1] != -1:
@@ -73,7 +72,10 @@ def get_jpg_paths(dir, range=(-1, -1)):
     # get all jpg files in the directory within the range
     out = []
     for item in jpgs:
-        index = int(item.stem)
+        try:
+            index = int(item.stem)
+        except ValueError:
+            continue
         if index >= range[0] and index <= range[1]:
             out.append(item)
     return out
