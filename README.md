@@ -17,7 +17,7 @@ ultralytics
 opencv-python
 imgaug 
 numpy 
-pascal
+pascal_voc
 pascal_voc_writer 
 pascal-voc-tools
 tqdm
