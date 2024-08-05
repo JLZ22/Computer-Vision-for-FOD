@@ -13,13 +13,13 @@ It is also **STRONGLY RECOMMENDED** that you work in a python virtual environmen
 ## Package List<br>
 
 ```
-ultralytics 
+ultralytics
 opencv-python
 imgaug 
 numpy 
+pascal
 pascal_voc_writer 
 pascal-voc-tools
-pascal-voc
 tqdm
 matplotlib
 clearml
