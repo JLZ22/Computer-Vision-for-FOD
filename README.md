@@ -8,7 +8,7 @@ This is a research project under Professor Nathaniel Hartman at Purdue Universit
 
 Before beginning to work on this project, it is important to be familiar with git. A brief git tutorial can be found [here](https://github.com/JLZ22/Git-Tutorial-for-New-Users).<br>
 
-It is also **STRONGLY RECOMMENDED** that you work in a python virtual environment. One option is to use python3's built in [venv](https://docs.python.org/3/library/venv.html) while another is to use [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) and its [virtual environment manager](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html). I (John Zeng, B.S. AI + Computer Science at Purdue, 2026) recommend using python3's built in venv because it is more lightweight than conda. **When using virtual environments, be sure to include those in the `.gitignore`. You can read more about them in the git tutorial above.**<br>
+It is also **STRONGLY RECOMMENDED** that you work in a python virtual environment. One option is to use python3's built in [venv](https://docs.python.org/3/library/venv.html) while another is to use [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) and its [virtual environment manager](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html). I (John Zeng, B.S. AI + Computer Science at Purdue, 2026) recommend using python3's built in venv because it is more lightweight than conda. **When using virtual environments, be sure to include those in the `.gitignore`. You can read more about them in the git tutorial above.**<br> This project was developed using `Python3.12`.
 
 ## Package List<br>
 
@@ -23,6 +23,7 @@ pascal-voc
 tqdm
 matplotlib
 clearml
+pdoc
 ```
 
 To install using `pip`, run `pip install -r requirements.txt`. For proper functionality of `clearml`, make an [account](https://app.clear.ml/login) and follow setup instructions.  
