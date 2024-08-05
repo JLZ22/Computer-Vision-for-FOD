@@ -24,6 +24,12 @@ def print_green(text):
     print("\033[92m{}\033[0m".format(text))
 
 def is_json_valid(json_path: Path):
+    '''
+    Checks if the given json path points to a valid json file.
+
+    json_path: A pathlib.Path object which represents the path to the 
+               json file in question 
+    '''
     json_path = Path(json_path)
     if not json_path.exists() or not json_path.is_file() or json_path.suffix != '.json':
         print_red(f"File: '{json_path}' does not exist or is not a json file.")
@@ -36,10 +42,15 @@ def is_json_valid(json_path: Path):
         return False
     return True
 
-'''
-Get the paths to all jpg files in the directory.
-'''
 def get_jpg_paths(dir, range=(-1, -1)):
+    '''
+    Get the paths to jpg files in the directory. If a range is specifiied,
+    only gets the jpg paths that fall within the range inclusive. 
+
+    range: A tuple that specifies the range of jpg paths to retrieve.
+
+    Precondition: The jpg paths have integer names.
+    '''
     # check if range is valid
     if range[0] == -1 and range[1] != -1:
         print_red("Invalid range.")
@@ -67,13 +78,22 @@ def get_jpg_paths(dir, range=(-1, -1)):
             out.append(item)
     return out
 
-'''
-Rename all the jpg, xml, and txt files in the directory to the
-format prefix + index + '.jpg' and prefix + index + '.xml'.
-
-This function has no recursive functionality.
-'''
 def rename_in_directory(read_dir: Path, startIndex=0, prefix = '', extensions=[]):
+    '''
+    Rename all the jpg, xml, and txt files in the directory to the
+    format prefix + index + '.jpg' and prefix + index + '.xml'. If 
+    extensions are specified, it will only rename files with those 
+    extensions. This function has no recursive functionality.
+
+    read_dir:   The directory where we are renaming files.
+    startIndex: The index that the first renamed file will be assigned.
+                all following files will be named by incrementing from the 
+                startIndex.
+    prefix:     An optional prefix that will be prepended to the beginning of 
+                every renamed file. 
+    extensions: A list of strings that specifies the extension(s) of the files 
+                to be renamed.
+    '''
     read_dir = Path(read_dir)
     files = get_jpg_paths(read_dir)
     for count, filename in enumerate(files, start=startIndex):
@@ -495,16 +515,16 @@ def update_jpg_path_in_xml(read_dir: Path,
         # save corresponding jpg in save_dir
         cv2.imwrite(str(save_dir / img.name), cv2.imread(str(img)))
 
-'''
-Perform the augmentation on the images in the directory
-and save the augmented images in the save_dir directory.
-If includeXML is True, the bounding boxes will be augmented.
-'''
 def aug_in_directory(read_dir: Path,
                     save_dir: Path, 
                     aug: iaa.Augmenter, 
                     includeXML=True,
                     progress=True):
+    '''
+    Perform the augmentation on the images in the directory
+    and save the augmented images in the save_dir directory.
+    If includeXML is True, the bounding boxes will be augmented.
+    '''
     # check read and write paths
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
