@@ -1424,10 +1424,13 @@ def diff_names_between_directories(dir1: Path, dir2: Path):
     files2 = set([f.stem for f in dir2.iterdir()])
     return files1 - files2 if len(files1) > len(files2) else files2 - files1
 
-'''
-Determine the device to use for training.
-'''
 def get_device(use_gpu=True, use_mps=True):
+    '''
+    Determine the device to use for training.
+
+    use_gpu:    A boolean that determines whether or not the gpu will be used.\n
+    use_mps:    A boolean that determines whether or not the mps will be used.\n
+    '''
     if torch.cuda.is_available() and use_gpu:
         device = 'cuda'
     elif torch.backends.mps.is_available() and use_mps:
