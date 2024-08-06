@@ -1,4 +1,4 @@
-from SimpleAugment import SimpleAugSeq
+from SimpleAugmenter import SimpleAugSeq
 import os
 import time
 import matplotlib.pyplot as plt
