@@ -58,7 +58,7 @@ In a random sample of 128 data points, we found that 4 data points were faulty. 
 - [x] partition data into training and validation
 - [x] separate txt and jpg
 - [x] train on augmented data
-- [ ] train on unaugmented data
+- [x] train on unaugmented data
 - [ ] interpret model predictions in the context of FOD problem
 - [ ] test in assembly space on 1 camera
 - [ ] test in assembly space on 3 cameras
