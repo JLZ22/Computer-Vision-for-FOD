@@ -1059,29 +1059,40 @@ def pascalvoc_to_yolo_in_directory(read_dir: Path,
     if verbose:
         print_green(f"Successfully converted all xml files in the directory: '{read_dir}' to yolo txt files.")
 
-'''
-Move a percentage of the data points in the read directory 
-to the save directory. One data point consists of a jpg file and 
-a corresponding xml or txt file. 
-'''
 def move_percent_of_datapoints_in_directory(read_dir: Path,
                                             save_dir: Path, 
                                             percent=0.1,
                                             random_sample=False):
+    '''
+    Move a percentage of the data points in the read directory 
+    to the save directory. One data point consists of a jpg file and 
+    a corresponding xml or txt file. 
+
+    read_dir:       The directory where the data points exist.\n
+    save_dir:       The directory where the moved data points will be saved.\n
+    percent:        The percentage of data points that will be moved.\n
+    random_sample:  A boolean that determines whether or not the data points will be randomly sampled.\n
+    '''
     num = int(count_files_in_directory(read_dir, ['.jpg']) * percent)
     move_number_of_datapoints_in_directory(read_dir, 
                                            save_dir, 
                                            num, 
                                            random_sample)
 
-'''
-Move a number of data points in the read directory to the save directory.
-'''
 def move_number_of_datapoints_in_directory(read_dir: Path, 
                                            save_dir: Path, 
                                            num_files=10,
                                            random_sample=False,
                                            progress=True):
+    '''
+    Move a number of data points in the read directory to the save directory.
+
+    read_dir:       The directory where the data points exist.\n
+    save_dir:       The directory where the moved data points will be saved.\n
+    num_files:      The number of data points that will be moved.\n
+    random_sample:  A boolean that determines whether or not the data points will be randomly sampled.\n
+    progress:       A boolean that determines whether or not a progress bar is shown.\n
+    '''
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
     save_created = False
@@ -1112,28 +1123,39 @@ def move_number_of_datapoints_in_directory(read_dir: Path,
         if save_created:
             save_dir.rmdir()
 
-'''
-Copy a percentage of the data points in the read directory
-'''
 def copy_percent_of_datapoints_in_directory(read_dir: Path, 
                                             save_dir: Path, 
                                             percent=0.1,
                                             random_sample=False):
-    num = count_files_in_directory(read_dir, ['.jpg'])
+    '''
+    Copy a percentage of the data points in the read directory.
+
+    read_dir:       The directory where the data points exist.\n
+    save_dir:       The directory where the copied data points will be saved.\n
+    percent:        The percentage of data points that will be copied.\n
+    random_sample:  A boolean that determines whether or not the data points will be randomly sampled.\n
+    '''
+    num = int(count_files_in_directory(read_dir, ['.jpg']) * percent)
     copy_number_of_datapoints_in_directory(read_dir, 
                                            save_dir, 
                                            num, 
                                            random_sample, 
                                            )
 
-'''
-Copy a number of data points in the read directory to the save directory.
-'''
 def copy_number_of_datapoints_in_directory(read_dir: Path, 
                                            save_dir: Path, 
                                            num_files=10,
                                            random_sample=False,
                                            progress=True):
+    '''
+    Copy a number of data points in the read directory to the save directory.
+
+    read_dir:       The directory where the data points exist.\n
+    save_dir:       The directory where the copied data points will be saved.\n
+    num_files:      The number of data points that will be copied.\n
+    random_sample:  A boolean that determines whether or not the data points will be randomly sampled.\n
+    progress:       A boolean that determines whether or not a progress bar is shown.\n
+    '''
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
     save_created = False
@@ -1166,14 +1188,20 @@ def copy_number_of_datapoints_in_directory(read_dir: Path,
         if save_created:
             save_dir.rmdir()
 
-'''
-Split the images and annotations in the read directory into two separate directories.
-'''
 def split_number_datapoints_in_directory(read_dir: Path, 
                                          img_dir: Path, 
                                          ann_dir: Path,
                                          num: int,
                                          progress=True):
+    '''
+    Split the images and annotations in the read directory into two separate directories.
+
+    read_dir:   The directory where the images and annotations exist.\n
+    img_dir:    The directory where the images will be saved.\n
+    ann_dir:    The directory where the annotations will be saved.\n
+    num:        The number of images and annotations that will be split.\n
+    progress:   A boolean that determines whether or not a progress bar is shown.\n
+    '''
     num = int(num)
     assert(num > 0)
     read_dir = Path(read_dir)
