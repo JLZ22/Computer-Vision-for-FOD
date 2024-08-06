@@ -520,15 +520,20 @@ def lowercase_labels_in_directory(read_dir: Path,
         if save_diff:
             img.copy2(save_dir / img.name)
 
-'''
-Update the path in the xml files to the new path.
-If save_dir is None, the xml files will be saved in the same directory.
-If new_path is None, the path in the xml files will be updated to the read path.
-'''
 def update_jpg_path_in_xml(read_dir: Path, 
                            save_dir=None, 
                            new_path=None,
                            progress=True):
+    '''
+    Update the path in the xml files to new_path.
+    If save_dir is None, the xml files will be saved in the same directory.
+    If new_path is None, the path in the xml files will be updated to the read path.
+
+    read_dir:   The directory where the xml files exist.\n
+    save_dir:   The directory where the modified xml files will be saved.\n
+    new_path:   The new path that will be updated in the xml files.\n
+    progress:   A boolean that determines whether or not a progress bar is shown.\n
+    '''
     read_dir = Path(read_dir)
     if save_dir == None:
         save_dir = read_dir
