@@ -10,6 +10,11 @@ class Detector:
     '''
 
     def __init__(self, model):
+        '''
+        Initialize the Detector with the YOLO model.
+        - - -
+        model: The YOLO model to use for object detection.
+        '''
         if model is None:
             self.model = YOLO('../models/yolov8n.pt')
         self.model = model
