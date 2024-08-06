@@ -8,9 +8,13 @@ import math
 from pathlib import Path
 import Utils
 
-# TODO: create main function for documentation purposes
+def check_first_arg(arg: str):
+    '''
+    Check if the first argument is a positive integer in the range 1 to the number of cpus.
+    If the argument is not a positive integer, the program will exit. 
 
-def check_first_arg(arg):
+    arg: The first argument from the command line.
+    '''
     if not arg.isdigit():
         exit(f'Please enter a integer in the range 1 to {os.cpu_count()} for the first argument.')
     max_processes = int(arg)
@@ -20,12 +24,23 @@ def check_first_arg(arg):
         exit(f'Please enter a integer of processes less than or equal to {os.cpu_count()} for the first argument.')
     return max_processes
 
-def check_second_arg(arg):
+def check_second_arg(arg: str):
+    '''
+    Check if the second argument is a positive integer. If the argument is not a positive integer, 
+    the program will exit.
+
+    arg: The second argument from the command line.
+    '''
     if not arg.isdigit() or int(arg) <= 0:
         exit(f'Please enter a positive integer for the second argument.')
     return int(arg)
 
-if __name__ == '__main__':
+def main():
+    '''
+    Perform a benchmark test on SimpleAugSeq with 1 to n processes inclusive. Save the 
+    benchmark graph and results to the directory `../benchmark_results_simple_aug`. 
+    The user can specify the max number of processes.
+    '''
     out0 = Path('../test_data/out0')
     out1 = Path('../test_data/out1')
     pascalvoc_pairs = Path('../test_data/pascalvoc_pairs')
@@ -90,3 +105,6 @@ if __name__ == '__main__':
             f.write(f"Time to Augment: {times[i]} seconds with {processes[i]} processes\n")
         f.write(f"Minimum Time: {times[min]} seconds with {processes[min]} processes\n")
     plt.show()
+
+if __name__ == '__main__':
+    main()
