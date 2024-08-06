@@ -1024,14 +1024,20 @@ def pascalvoc_to_yolo(xml_path: Path, save_file_path: Path, json_path: Path):
         if save_created:
             save_file_path.unlink()
 
-'''
-Convert all pascal voc xml files in the directory to yolo txt files.
-'''
 def pascalvoc_to_yolo_in_directory(read_dir: Path, 
                                    save_dir: Path, 
                                    json: Path,
                                    verbose=False,
                                    progress=True):
+    '''
+    Convert all pascal_voc xml files in the directory to yolo txt files.
+
+    read_dir:   The directory where the xml files exist.\n
+    save_dir:   The directory where the yolo txt files will be saved.\n
+    json:       The path to the json file that contains the label map.\n
+    verbose:    A boolean that determines whether or not the function prints messages.\n
+    progress:   A boolean that determines whether or not a progress bar is shown.\n
+    '''
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
     if not read_dir.exists() or not read_dir.is_dir():
