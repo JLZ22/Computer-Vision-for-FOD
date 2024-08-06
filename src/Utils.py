@@ -1405,10 +1405,13 @@ def verify_yolo_file_structure(read_dir: Path,
     return True
         
     
-'''
-Returns the names of the files in dir1 that are not in dir2 or vice versa.
-'''
 def diff_names_between_directories(dir1: Path, dir2: Path):
+    '''
+    Returns the names of the files in dir1 that are not in dir2 or vice versa.
+
+    dir1:   The first directory.\n
+    dir2:   The second directory.\n
+    '''
     dir1 = Path(dir1)
     dir2 = Path(dir2)
     if not dir1.exists() or not dir1.is_dir():
