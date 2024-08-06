@@ -1,6 +1,5 @@
 from SimpleAugmenter import SimpleAugSeq
 import os
-import time
 import matplotlib.pyplot as plt
 import gc
 import sys
@@ -41,19 +40,31 @@ def main():
     benchmark graph and results to the directory `../benchmark_results_simple_aug`. 
     The user can specify the max number of processes.
     '''
+
+    # temp directories to store copies of data
     out0 = Path('../test_data/out0')
     out1 = Path('../test_data/out1')
-    pascalvoc_pairs = Path('../test_data/pascalvoc_pairs')
     Utils.delete_files(out0)
     Utils.delete_files(out1)
+    
+    # read directory
+    pascalvoc_pairs = Path('../test_data/pascalvoc_pairs')
     Utils.pad_and_resize_square_in_directory(pascalvoc_pairs, out0)
+
+    # Initialize variables
     max_processes = os.cpu_count()
     max_processes = 16
     copies = 64
+
+    # Check command line arguments
     if len(sys.argv) > 3:
         exit('Too many arguments.')
     if len(sys.argv) >= 2:
         max_processes = check_first_arg(sys.argv[1])
+    if len(sys.argv) == 3:
+        copies = check_second_arg(sys.argv[2])
+
+    # Create array of augmenters with different number of processes
     sass = [SimpleAugSeq(read_path=out0, 
                                 save_path=out1, 
                                 seed=1, 
@@ -62,21 +73,27 @@ def main():
                                 processes=i,
                                 check=False) for i in range(1, max_processes+1)
                                 ]
-    times = [0 for i in range(1, max_processes+1)]
+    
+    # Initialize array representing the time to augment for each number of processes
+    times = [0 for _ in range(1, max_processes+1)]
+
     print(f'This benchmark will test SimpleAugSeq with 1 to {max_processes} processes inclusive.')
     print(f'The number of copies per image is {copies}.')
     input('Press Enter to continue...')
+
+    # Perform benchmark test
     for i in range(len(sass)):
         sa = sass[i]
         Utils.delete_files(out1)
-        start = time.time()
         sa.augment()
-        end = time.time()
         times[i] = sa.duration
         del sa
         gc.collect()
         
+    # Find the minimum time and plot the benchmark graph
     min = times.index(min(times))
+
+    # Plot the benchmark graph
     processes = [i for i in range(1, max_processes+1)]
     plt.plot(processes, 
              times, 
@@ -93,6 +110,8 @@ def main():
     plt.xlim(0, max_processes+1)
     plt.ylim(0, max(times) + 10)
     plt.legend()
+
+    # Save the benchmark graph
     benchmark_dir = Path('..', f'benchmark_results_simple_aug/{copies}_copies')
     if not benchmark_dir.exists() or not benchmark_dir.is_dir():
         os.makedirs(benchmark_dir)
@@ -100,6 +119,8 @@ def main():
     png = Path(benchmark_dir, f'{save_name}.png')
     txt = Path(benchmark_dir, f'{save_name}.txt')
     plt.savefig(png)
+
+    # Save the benchmark results in text file
     with txt.open(mode='w') as f:
         for i in range(len(times)):
             f.write(f"Time to Augment: {times[i]} seconds with {processes[i]} processes\n")
