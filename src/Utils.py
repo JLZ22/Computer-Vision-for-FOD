@@ -341,13 +341,19 @@ def visualize_pascalvoc_annotations_in_directory(read_dir: Path,
         if save_created:
             save_dir.rmdir()
 
-'''
-Visualize bounding boxes from YOLO txt file on the image.
-'''
 def visualize_yolo_annotations_in_directory(read_dir: Path, 
                                             save_dir: Path, 
                                             json_path: Path,
                                             progress=True):
+    '''
+    Overlay the bounding boxes from the txt files on the images in the directory and
+    save new images with the bounding boxes drawn in save_dir.
+
+    read_dir:   The directory where the txt and jpg files exist.
+    save_dir:   The directory where the new images with bounding boxes drawn will be saved.
+    json_path:  The path to the json file that contains the label map.
+    progress:   A boolean that determines whether or not a progress bar is shown.
+    '''
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
     json_path = Path(json_path)
@@ -366,7 +372,7 @@ def visualize_yolo_annotations_in_directory(read_dir: Path,
         return
     
     try:
-        label_map = get_label_map(json_path)
+        label_map = get_yolo_label_map(json_path)
         # get images and txt files
         image_paths = get_jpg_paths(read_dir)
         txt = list(read_dir.glob('*.txt'))
@@ -906,7 +912,7 @@ def pascalvoc_to_yolo(xml_path: Path, save_file_path: Path, json_path: Path):
         return
     
     try:
-        label_map = get_label_map(json_path, key_is_id=False)
+        label_map = get_yolo_label_map(json_path, key_is_id=False)
         # get the bounding boxes from the xml file
         ann = annotation_from_xml(xml_path)
         # write the bounding boxes to the yolo txt file
