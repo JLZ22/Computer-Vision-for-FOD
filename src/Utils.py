@@ -17,10 +17,10 @@ from tqdm import tqdm
 import random
 import torch
 
-def print_red(text):
+def print_red(text: str):
     print("\033[91m{}\033[0m".format(text))
 
-def print_green(text):
+def print_green(text: str):
     print("\033[92m{}\033[0m".format(text))
 
 def is_json_valid(json_path: Path):
@@ -42,13 +42,14 @@ def is_json_valid(json_path: Path):
         return False
     return True
 
-def get_jpg_paths(dir, range=(-1, -1)):
+def get_jpg_paths(dir: Path, range=(-1, -1)):
     '''
     Get the paths to jpg files in the directory. If a range is specifiied,
     only gets the jpg paths that fall within the range inclusive. If a file's 
     name is not an integer, this function will skip it. 
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-    range: A tuple that specifies the range of jpg paths to retrieve.
+    dir:    The directory where we are getting the jpg paths from.\n
+    range:  A tuple that specifies the range of jpg paths to retrieve.
     '''
     # check if range is valid
     if range[0] == -1 and range[1] != -1:
