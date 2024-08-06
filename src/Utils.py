@@ -858,10 +858,13 @@ def rotate_image_and_save_in_directory(read_dir: Path,
     for img in iter:
         rotate_image_and_save(img, save_dir, rotateCode)
 
-'''
-Delete all xml files in the directory that do not have a corresponding jpg file
-'''
 def delete_all_xml_without_jpg(read_dir: Path, progress=True):
+    '''
+    Delete all xml files in the directory that do not have a corresponding jpg file.
+
+    read_dir:   The directory where the xml and jpg files exist.\n
+    progress:   A boolean that determines whether or not a progress bar is shown.\n
+    '''
     read_dir = Path(read_dir)
     if not read_dir.exists() or not read_dir.is_dir():
         print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
@@ -874,10 +877,13 @@ def delete_all_xml_without_jpg(read_dir: Path, progress=True):
         if not any([jpg.stem == name for jpg in jpgPaths]):
             xml.unlink()
 
-'''
-Count the number of files in the directory.
-'''
 def count_files_in_directory(read_dir: Path, extensions=[]):
+    '''
+    Count the number of files in the directory.
+
+    read_dir:   The directory where the files exist.\n
+    extensions: A list of strings that specifies the extension(s) of the files
+    '''
     read_dir = Path(read_dir)
     if not read_dir.exists() or not read_dir.is_dir():
         print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
