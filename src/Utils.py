@@ -797,11 +797,17 @@ def move_files_in_directory(read_dir: Path,
         if f.is_file():
             shutil.move(f, save_dir)
 
-'''
-Rotate the image at img_read_dir by the given angle and save it in img_save_dir.
-The rotateCode is the cv2 rotate code.
-'''
-def rotate_image_and_save(img_read_path: Path, img_save_dir=None, rotateCode=cv2.ROTATE_90_CLOCKWISE):
+def rotate_image_and_save(img_read_path: Path, 
+                          img_save_dir=None, 
+                          rotateCode=cv2.ROTATE_90_CLOCKWISE):
+    '''
+    Rotate the image at img_read_dir by the given angle and save it in img_save_dir.
+    The rotateCode is the cv2 rotate code.
+
+    img_read_path:  The path to the image that will be rotated.\n
+    img_save_dir:   The directory where the rotated image will be saved.\n
+    rotateCode:     The cv2 rotate code that determines how the image will be rotated.\n
+    '''
     img_read_path = Path(img_read_path)
     if img_save_dir == None:
         img_save_dir = img_read_path.parent
