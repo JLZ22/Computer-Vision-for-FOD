@@ -731,13 +731,19 @@ def pad_and_resize_square_in_directory(read_dir: Path,
     ])
     aug_in_directory(read_dir, save_dir, aug, includeXML)
 
-'''
-Copy the files in the read_dir directory to the save_dir directory.
-'''
 def copy_files_in_directory(read_dir: Path, 
                             save_dir: Path, 
                             extensions=[],
                             progress=True):
+    '''
+    Copy the files in the read_dir directory to the save_dir directory.
+
+    read_dir:   The directory where the files will be copied from.\n
+    save_dir:   The directory where the copied files will be saved.\n
+    extensions: A list of strings that specifies the extension(s) of the files
+                to be copied.\n
+    progress:   A boolean that determines whether or not a progress bar is shown.\n
+    '''
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
     if not read_dir.exists() or not read_dir.is_dir():
