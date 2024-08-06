@@ -709,15 +709,21 @@ def resize_in_directory(read_dir: Path, save_dir: Path, width=512, height=512, i
     aug = iaa.Resize({"height": height, "width": width})
     aug_in_directory(read_dir, save_dir, aug, includeXML)
 
-'''
-Pad the images in the directory to make them square and 
-resize them to the given dimension while maintaining aspect ratio.
-If includeXML is True, the bounding boxes will be resized as well.
-'''
 def pad_and_resize_square_in_directory(read_dir: Path, 
                                        save_dir: Path, 
                                        dim=512, 
                                        includeXML=True):
+    '''
+    Pad the images in the directory to make them square and 
+    resize them to the given dimension while maintaining aspect ratio.
+    If includeXML is True, the bounding boxes will be resized as well.
+
+    read_dir:   The directory where the images and xml files exist.\n
+    save_dir:   The directory where the padded and resized images and 
+                xml files will be saved.\n
+    dim:        The dimension to which the images will be resized.\n
+    includeXML: A boolean that determines whether or not the xml files will be resized.\n
+    '''
     # augmenters
     aug = iaa.Sequential([
         iaa.PadToSquare(pad_mode="edge"),
