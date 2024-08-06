@@ -1325,14 +1325,18 @@ def partition_yolo_data_for_training(read_dir: Path,
             shutil.rmtree(save_dir)
         return False
 
-'''
-Check if the yolo file structure is correct and checks if 
-the names of the images and labels in the train, val, and test
-are the same.
-'''
 def verify_yolo_file_structure(read_dir: Path, 
                                test=True,
                                verbose=False):
+    '''
+    Check if the yolo file structure is correct and checks if 
+    the names of the images and labels in the train, val, and test
+    are the same.
+
+    read_dir:   The directory where the images and labels exist.\n
+    test:       A boolean that determines whether or not the test set will be checked.\n
+    verbose:    A boolean that determines whether or not the function prints messages.\n
+    '''
     read_dir = Path(read_dir)
     if not read_dir.exists() or not read_dir.is_dir():
         if verbose:
