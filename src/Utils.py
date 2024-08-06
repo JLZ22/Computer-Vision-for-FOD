@@ -579,6 +579,11 @@ def aug_in_directory(read_dir: Path,
     Perform the augmentation on the images in the directory
     and save the augmented images in the save_dir directory.
     If includeXML is True, the bounding boxes will be augmented.
+
+    read_dir:   The directory where the images and xml files exist.\n
+    save_dir:   The directory where the augmented images and xml files will be saved.\n
+    aug:        The imgaug augmenter that will be used to augment the images.\n
+    includeXML: A boolean that determines whether or not the xml files will be augmented.\n
     '''
     # check read and write paths
     read_dir = Path(read_dir)
