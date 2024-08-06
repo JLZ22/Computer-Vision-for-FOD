@@ -1240,25 +1240,37 @@ def split_number_datapoints_in_directory(read_dir: Path,
         if ann_created:
             ann_dir.rmdir()
 
-'''
-Count the number of data points in the directory.
-'''
 def count_data_points_in_directory(read_dir: Path):
+    '''
+    Count the number of data points in the directory.
+
+    read_dir:   The directory where the data points exist.\n
+    '''
     read_dir = Path(read_dir)
     if not read_dir.exists() or not read_dir.is_dir():
         print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
         return
     return count_files_in_directory(read_dir, ['.jpg'])
 
-'''
-Partition the data in the read directory into training, validation, and test sets.
-'''
 def partition_yolo_data_for_training(read_dir: Path, 
                                 save_dir: Path, 
                                 train_percent=0.8,
                                 test_percent=0.1,
                                 verbose=False,
                                 append=False):
+    '''
+    Partition the data in the read directory into training, validation, 
+    and test sets according to the YOLO file structure and given percentages.
+    Typically, allocating test is optional. If you would not like to partition
+    a test set, set test_percent to 0.
+
+    read_dir:       The directory where the images and labels exist.\n
+    save_dir:       The directory where the partitioned data will be saved.\n
+    train_percent:  The percentage of data that will be used for training.\n
+    test_percent:   The percentage of data that will be used for testing.\n
+    verbose:        A boolean that determines whether or not the function prints messages.\n
+    append:         A boolean that determines whether or not the data will be appended to the save directory.\n
+    '''
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
     save_created = False
