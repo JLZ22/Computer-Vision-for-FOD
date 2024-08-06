@@ -15,6 +15,11 @@ import Utils
 
 # TODO: use generators to save memory
 class SimpleAugSeq:
+    '''
+    A class that uses the imgaug library to augment images and 
+    their corresponding xml files.
+    '''
+    
     def __init__(self, read_path: Path, 
                  save_path: Path, 
                  num_copies: int, 
@@ -24,6 +29,19 @@ class SimpleAugSeq:
                  check=True,
                  printSteps=False,
                  checkMem=False) -> None:
+        '''
+        Initialize the SimpleAugSeq object with the necessary parameters.
+        - - -
+        read_path:      The path to the directory containing the images and xml files to augment.\n
+        save_path:      The path to the directory to save the augmented images and xml files.\n
+        num_copies:     The number of augmented copies per original image.\n
+        seed:           The seed for random augmentation generation.\n
+        names:          An array of the names of the images to augment excluding the file extension.\n
+        processes:      The number of processes to use for multiprocessing.\n
+        check:          True if user confirmation is required to start augmenting.\n
+        printSteps:     True if the steps of the augmentation process should be printed.\n
+        checkMem:       True if memory consumption should be checked.\n
+        '''
         self.read_path = Path(read_path) # read path
         self.save_path = Path(save_path) # save path
         self.seed = seed # seed for random augmentation generation
@@ -43,50 +61,56 @@ class SimpleAugSeq:
         if not self.save_path.exists() or not self.save_path.is_dir():
             os.makedirs(self.save_path)
     
-    # Return a Sequential object that is in charge of
-    # augmenting the image
-    def create_sequential(self) -> iaa.Sequential:
-        return iaa.Sequential([  #randomly transforms the image
-            iaa.Fliplr(0.5), # mirror image horizontally 50% of the time 
+    def create_sequential(self, children=None, random_order=True) -> iaa.Sequential:
+        '''
+        Return a simple imgaug Sequential object that can augment image/xml pairs.
+        - - -
+        children:       A list of augmenters to apply to the image.\n
+        random_order:   True if the augmenters should be applied in random order
+        '''
+        if children is None:
+            children = [  #randomly transforms the image
+                iaa.Fliplr(0.5), # mirror image horizontally 50% of the time 
 
-            iaa.Flipud(0.5), # mirror image vertically 50% of the time
+                iaa.Flipud(0.5), # mirror image vertically 50% of the time
 
-            iaa.Crop(percent=(0, 0.1)), # random crops
+                iaa.Crop(percent=(0, 0.1)), # random crops
 
-            # Small gaussian blur with random sigma between 0 and 0.5.
-            # But we only blur about 50% of all images.
-            iaa.Sometimes(
-                0.5,
-                iaa.GaussianBlur(sigma=(0, 0.5))
-            ),
+                # Small gaussian blur with random sigma between 0 and 0.5.
+                # But we only blur about 50% of all images.
+                iaa.Sometimes(
+                    0.5,
+                    iaa.GaussianBlur(sigma=(0, 0.5))
+                ),
 
-            # Strengthen or weaken the contrast in each image.
-            iaa.LinearContrast((0.75, 1.5)),
+                # Strengthen or weaken the contrast in each image.
+                iaa.LinearContrast((0.75, 1.5)),
 
-            # Add gaussian noise.
-            # For 50% of all images, we sample the noise once per pixel.
-            # For the other 50% of all images, we sample the noise per pixel AND
-            # channel. This can change the color (not only brightness) of the
-            # pixels.
-            iaa.AdditiveGaussianNoise(loc=0, scale=(0.0, 0.05*255), per_channel=0.5),
+                # Add gaussian noise.
+                # For 50% of all images, we sample the noise once per pixel.
+                # For the other 50% of all images, we sample the noise per pixel AND
+                # channel. This can change the color (not only brightness) of the
+                # pixels.
+                iaa.AdditiveGaussianNoise(loc=0, scale=(0.0, 0.05*255), per_channel=0.5),
 
-            # Make some images brighter and some darker.
-            # In 20% of all cases, we sample the multiplier once per channel,
-            # which can end up changing the color of the images.
-            iaa.Multiply((0.8, 1.2), per_channel=0.2),
+                # Make some images brighter and some darker.
+                # In 20% of all cases, we sample the multiplier once per channel,
+                # which can end up changing the color of the images.
+                iaa.Multiply((0.8, 1.2), per_channel=0.2),
 
-            # Apply affine transformations to each image.
-            # Scale/zoom them, translate/move them.
-            iaa.Affine(
+                # Apply affine transformations to each image.
+                # Scale/zoom them, translate/move them.
+                iaa.Affine(
 
-                # zoom in or out
-                scale={"x": (0.8, 1.2), "y": (0.8, 1.2)}, 
-                
-                # horizontal and vertical shifts
-                translate_percent={"x": (-0.2, 0.2), "y": (-0.2, 0.2)},
-            )
-            ], 
-            random_order=True) # apply augmenters in random order
+                    # zoom in or out
+                    scale={"x": (0.8, 1.2), "y": (0.8, 1.2)}, 
+                    
+                    # horizontal and vertical shifts
+                    translate_percent={"x": (-0.2, 0.2), "y": (-0.2, 0.2)},
+                )
+            ]
+
+        return iaa.Sequential(children, random_order=random_order) # apply augmenters in random order
     
     # Save the images and corresponding xml files 
     # 
@@ -97,9 +121,23 @@ class SimpleAugSeq:
                        imgs: np.array, 
                        bbss: np.array, 
                        original_name: str, 
-                       height, 
-                       width) -> None:
+                       height: int, 
+                       width: int) -> None:
+        '''
+        Save augmented pairs in the object's save_path. 
+
+        Naming convention: name + '_aug_' + i + '.file_extension'
+        e.g. The third synthetic image of 18.jpg will be called
+             `18_aug_2.jpg`. Its xml file will have the same name.
+        - - -
+        imgs:           The augmented images to save.\n
+        bbss:           The bounding boxes of the augmented images.\n
+        original_name:  The name of the original image.\n
+        height:         The height of the original image.\n
+        width:          The width of the original image.\n
+        '''
         print('Saving images and xml files for ' + original_name) if self.printSteps else None
+
         for i in range(imgs.shape[0]):
             img_path = str(self.save_path / (original_name + '_aug_' + str(i+1) + '.jpg'))
             xml_path = str(self.save_path / (original_name + '_aug_' + str(i+1) + '.xml'))
@@ -113,6 +151,11 @@ class SimpleAugSeq:
     # This function creates the processes that are 
     # each in charge of augmenting one image
     def augment(self):
+        '''
+        The primary function in charge of augmenting the images and 
+        their corresponding xml files. Creates the processes that are
+        each in charge of augmenting one image.
+        '''
         # Prints conformation of read and write path
         print(f"Starting Augmentation...")
         print(f"\tRead Location: \"{self.read_path}\"")
@@ -169,6 +212,12 @@ class SimpleAugSeq:
     # augments the image of name: "name" at 
     # save path and the coresponding xml file
     def augstart(self, name: str):
+        '''
+        Worker function that augments the image of name: "name" at
+        save path and the corresponding xml file.
+        - - -
+        name:   The name of the image to augment.
+        '''
         tree = ET.parse(str(Path(self.read_path, name + '.xml'))) 
         root = tree.getroot()
         # make num_copies number of copies of the current image 
