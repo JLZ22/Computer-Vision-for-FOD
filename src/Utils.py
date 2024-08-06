@@ -826,16 +826,22 @@ def rotate_image_and_save(img_read_path: Path,
     img = cv2.rotate(img, rotateCode=rotateCode)
     cv2.imwrite(str(img_save_dir / img_read_path.name), img)
 
-'''
-Rotate all the images in the directory by the given rotate code 
-and save them in the save_dir directory if range is (-1, -1).
-If range is not (-1, -1), only rotate the images in the range.
-'''
 def rotate_image_and_save_in_directory(read_dir: Path, 
                                        save_dir=None, 
                                        rotateCode=cv2.ROTATE_90_CLOCKWISE, 
                                        range=(-1, -1),
                                        progress=True):
+    '''
+    Rotate all the images in the directory by the given rotate code 
+    and save them in the save_dir directory if range is (-1, -1).
+    If range is not (-1, -1), only rotate the images in the range.
+
+    read_dir:       The directory where the images exist.\n
+    save_dir:       The directory where the rotated images will be saved.\n
+    rotateCode:     The cv2 rotate code that determines how the images will be rotated.\n
+    range:          The range of images that will be rotated. If (-1, -1), all images will be rotated.\n
+    progress:       A boolean that determines whether or not a progress bar is shown.\n
+    '''
     read_dir = Path(read_dir)
     if save_dir == None:
         save_dir = read_dir
