@@ -7,6 +7,7 @@ on:
       - main
     paths:
       - '**/*.py'
+      - 'docs.yml'
 
 # security: restrict permissions for CI jobs.
 permissions:
@@ -33,7 +34,7 @@ jobs:
       # install all dependencies (including pdoc)
       - run: pip install -r requirements.txt
       # Generate docs
-      - run: pdoc -o docs/ src/*.py
+      - run: pdoc -o docs/ src/*.py --no-show-source
 
       - uses: actions/upload-pages-artifact@v3
         with:
