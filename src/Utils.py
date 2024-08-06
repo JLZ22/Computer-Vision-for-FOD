@@ -912,10 +912,12 @@ def jpeg_to_jpg(read_dir: Path, progress=True):
     for img in iter:
         img.rename(read_dir / (str(img.stem) + '.jpg'))
 
-'''
-Cut off the bounding box in the xml file that is outside the image.
-'''
 def cut_off_bbox(xml_pth: Path):
+    '''
+    Cut off the bounding box in the xml file that is outside the image.
+
+    xml_pth:    The path to the xml file.\n
+    '''
     xml_pth = Path(xml_pth)
     if not xml_pth.exists() or not xml_pth.is_file() or xml_pth.suffix != '.xml':
         print_red(f"File: '{xml_pth}' does not exist or is not an xml file.")
