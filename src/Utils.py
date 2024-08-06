@@ -896,10 +896,13 @@ def count_files_in_directory(read_dir: Path, extensions=[]):
             count += 1
     return count
 
-'''
-Convert all jpeg files in the directory to jpg files.
-'''
 def jpeg_to_jpg(read_dir: Path, progress=True):
+    '''
+    Rename all jpeg files in the directory to jpg.
+
+    read_dir:   The directory where the jpeg files exist.\n
+    progress:   A boolean that determines whether or not a progress bar is shown.\n
+    '''
     read_dir = Path(read_dir)
     if not read_dir.exists() or not read_dir.is_dir():
         print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
