@@ -435,7 +435,7 @@ def make_copies_bboxes(bbs: BoundingBoxesOnImage, num_copies: int) -> np.array:
     '''
     Make num_copies number of the bbs object and return it 
     in an array.
-        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     bbs:        The BoundingBoxesOnImage object that will be copied.\n
     num_copies: The number of copies that will be made.\n
     TODO: change to use generator
@@ -446,7 +446,7 @@ def make_copies_images(name, num_copies: int) -> np.array:
     '''
     Return an array of copies of the image stored at 
     path/img. The array has num_copies number of copies.
-        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     name:       The path to the image.\n
     num_copies: The number of copies that will be made.\n
     TODO: change to use generator
@@ -461,7 +461,7 @@ def create_bbs(root, shape: int) -> BoundingBoxesOnImage:
     Return a BoundingBoxesOnImage object with the
     given root and shape by automatically creating a
     new BoundingBox object for every object in the root.
-        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     root:   The root of the xml file.\n
     shape:  The shape of the image.\n
     '''
