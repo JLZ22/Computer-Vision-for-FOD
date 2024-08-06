@@ -231,10 +231,13 @@ def get_corresponding_bbox(read_dir: Path, jpg_path: Path):
     bbs = create_bbs(root, cv2.imread(str(jpg_path)).shape)
     return bbs
 
-'''
-Get the label map from the json file.
-'''
-def get_label_map(json_path: Path, key_is_id=True):
+def get_yolo_label_map(json_path: Path, key_is_id=True):
+    '''
+    Get the yolo label map from the json file.
+
+    json_path:  The path to the json file that contains the label map.
+    key_is_id:  A boolean that determines whether or not the key in the label map
+    '''
     json_path = Path(json_path)
     if not is_json_valid(json_path):
         return
@@ -248,12 +251,18 @@ def get_label_map(json_path: Path, key_is_id=True):
                 label_map[category['name']] = category['id']
     return label_map
 
-'''
-https://piyush-kulkarni.medium.com/visualize-the-xml-annotations-in-python-c9696ba9c188
-'''
 def visualize_pascalvoc_annotations_in_directory(read_dir: Path, 
                                                  save_dir: Path,
                                                  progress=True):
+    '''
+    Overlays the bounding boxes from the xml files on the images in the directory and 
+    saves new images with the bounding boxes drawn in save_dir. The function is a modified 
+    version of code found at https://piyush-kulkarni.medium.com/visualize-the-xml-annotations-in-python-c9696ba9c188. 
+
+    read_dir:   The directory where the xml and jpg files exist.
+    save_dir:   The directory where the new images with bounding boxes drawn will be saved.
+    progress:   A boolean that determines whether or not a progress bar is shown.
+    '''
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
     save_created = False
