@@ -764,13 +764,19 @@ def copy_files_in_directory(read_dir: Path,
         if f.is_file():
             shutil.copy2(f, save_dir)
 
-'''
-Move the files in the read_dir directory to the save_dir directory.
-'''
 def move_files_in_directory(read_dir: Path, 
                             save_dir: Path, 
                             extensions=[],
                             progress=True):
+    '''
+    Move the files in the read_dir directory to the save_dir directory.
+
+    read_dir:   The directory where the files will be moved from.\n
+    save_dir:   The directory where the moved files will be saved.\n
+    extensions: A list of strings that specifies the extension(s) of the files
+                to be moved.\n
+    progress:   A boolean that determines whether or not a progress bar is shown.\n
+    '''
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
     if not read_dir.exists() or not read_dir.is_dir():
