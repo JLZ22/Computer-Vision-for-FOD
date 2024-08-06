@@ -639,49 +639,72 @@ def aug_in_directory(read_dir: Path,
         if not save_exists:
             save_dir.rmdir()
 
-'''
-Flip the images in the directory horizontally and save them. 
-If includeXML is True, the bounding boxes will be flipped as well.
-'''
 def flip_horizontal_in_directory(read_dir, save_dir, includeXML=True):
+    '''
+    Flip the images in the directory horizontally and save them. 
+    If includeXML is True, the bounding boxes will be flipped as well.
+
+    read_dir:   The directory where the images and xml files exist.\n
+    save_dir:   The directory where the flipped images and xml files will be saved.\n
+    includeXML: A boolean that determines whether or not the xml files will be flipped.\n
+    '''
     aug = iaa.Fliplr(1.0)
     aug_in_directory(read_dir, save_dir, aug, includeXML)
 
-'''
-Flip the images in the directory vertically and save them.
-If includeXML is True, the bounding boxes will be flipped as well.
-'''
 def flip_vertical_in_directory(read_dir, save_dir, includeXML=True):
+    '''
+    Flip the images in the directory vertically and save them.
+    If includeXML is True, the bounding boxes will be flipped as well.
+
+    read_dir:   The directory where the images and xml files exist.\n
+    save_dir:   The directory where the flipped images and xml files will be saved.\n
+    includeXML: A boolean that determines whether or not the xml files will be flipped.\n
+    '''
     aug = iaa.Flipud(1.0)
     aug_in_directory(read_dir, save_dir, aug, includeXML)
 
-'''
-Rotate the images in the directory by the given angle and save them
-without altering the aspect ratio.
-If includeXML is True, the bounding boxes will be rotated as well.
-'''
 def rotate_in_directory(read_dir, save_dir, angle, includeXML=True):
+    '''
+    Rotate the images in the directory by the given angle and save them
+    without altering the aspect ratio.
+    If includeXML is True, the bounding boxes will be rotated as well.
+
+    read_dir:   The directory where the images and xml files exist.\n
+    save_dir:   The directory where the rotated images and xml files will be saved.\n
+    angle:      The angle by which the images will be rotated.\n
+    '''
     if angle % 90 != 0:
         aug = iaa.Affine(rotate=angle)
         aug_in_directory(read_dir, save_dir, aug, includeXML)
     else:
         rotate_90_in_directory(read_dir, save_dir, angle // 90)
 
-'''
-Rotate the images in the directory by 90 degrees and save them and save 
-them without altering the aspect ratio.
-If includeXML is True, the bounding boxes will be rotated as well.
-'''
 def rotate_90_in_directory(read_dir, save_dir, repetitions=1, includeXML=True):
+    '''
+    Rotate the images in the directory by 90 degrees and save them and save 
+    them without altering the aspect ratio.
+    If includeXML is True, the bounding boxes will be rotated as well.
+
+    read_dir:       The directory where the images and xml files exist.\n
+    save_dir:       The directory where the rotated images and xml files will be saved.\n
+    repetitions:    The number of times the images will be rotated by 90 degrees.\n
+    includeXML:     A boolean that determines whether or not the xml files will be rotated.\n
+    '''
     aug = iaa.Rot90(repetitions)
     aug_in_directory(read_dir, save_dir, aug, includeXML)
 
-'''
-Resize the images in the directory to the given width and height and save them.
-This does not guarantee that the aspect ratio will remain the same.
-If includeXML is True, the bounding boxes will be resized as well.
-'''
 def resize_in_directory(read_dir: Path, save_dir: Path, width=512, height=512, includeXML=True):
+    '''
+    Resize the images in the directory to the given width and height and save them.
+    This does not guarantee that the aspect ratio will remain the same.
+    If includeXML is True, the bounding boxes will be resized as well.
+
+    read_dir:   The directory where the images and xml files exist.\n
+    save_dir:   The directory where the resized images and xml files will be saved.\n
+    width:      The width to which the images will be resized.\n
+    height:     The height to which the images will be resized.\n
+    includeXML: A boolean that determines whether or not the xml files will be resized.\n
+    '''
     # augmenters
     aug = iaa.Resize({"height": height, "width": width})
     aug_in_directory(read_dir, save_dir, aug, includeXML)
