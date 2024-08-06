@@ -964,10 +964,13 @@ def cut_off_bbox(xml_pth: Path):
         
     tree.write(str(xml_pth))
     
-'''
-Cut off the bounding boxes in the xml files that are outside the image.
-'''
 def cut_off_bboxes_in_directory(read_dir: Path, progress=True):
+    '''
+    Cut off the bounding boxes in the xml files that are outside the image.
+
+    read_dir:   The directory where the xml files exist.\n
+    progress:   A boolean that determines whether or not a progress bar is shown.\n
+    '''
     read_dir = Path(read_dir)
     if not read_dir.exists() or not read_dir.is_dir():
         print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
