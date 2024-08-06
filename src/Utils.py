@@ -483,13 +483,17 @@ def get_children_mem_consumption():
     children = psutil.Process(pid).children(recursive=True)
     return sum([child.memory_info().rss for child in children])
 
-'''
-Lowercase the labels in the xml files in the directory.
-If save_dir is None, the xml files will be saved in the same directory.
-'''
 def lowercase_labels_in_directory(read_dir: Path, 
                                   save_dir=None,
                                   progress=True):
+    '''
+    Lowercase all labels in the xml files in the directory.
+    If save_dir is None, the xml files will be saved in the same directory.
+
+    read_dir:   The directory where the xml files exist.
+    save_dir:   The directory where the modified xml files will be saved.
+    progress:   A boolean that determines whether or not a progress bar is shown.
+    '''
     read_dir = Path(read_dir)
     if save_dir == None:
         save_dir = read_dir
