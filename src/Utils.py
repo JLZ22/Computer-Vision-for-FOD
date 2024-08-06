@@ -983,10 +983,14 @@ def cut_off_bboxes_in_directory(read_dir: Path, progress=True):
         except:
             print_red(f"Failed to cut off bbox in file: {p}")
 
-'''
-Convert pascal voc xml file to yolo txt file.
-'''
 def pascalvoc_to_yolo(xml_path: Path, save_file_path: Path, json_path: Path):
+    '''
+    Convert pascal voc xml file to yolo txt file.
+
+    xml_path:           The path to the xml file.\n
+    save_file_path:     The path to the txt file where the bounding boxes will be saved.\n
+    json_path:          The path to the json file that contains the label map.\n
+    '''
     xml_path = Path(xml_path)
     save_file_path = Path(save_file_path)
     json_path = Path(json_path)
