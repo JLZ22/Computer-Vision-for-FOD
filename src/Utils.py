@@ -437,14 +437,19 @@ def make_copies_bboxes(bbs: BoundingBoxesOnImage, num_copies: int) -> np.array:
 
     bbs:        The BoundingBoxesOnImage object that will be copied.
     num_copies: The number of copies that will be made.
+    TODO: change to use generator
     '''
     return [bbs for _ in range(num_copies)]
 
-'''
-Return an array of copies of the image stored at 
-path/img. The array has num_copies number of copies.
-'''
 def make_copies_images(name, num_copies: int) -> np.array:
+    '''
+    Return an array of copies of the image stored at 
+    path/img. The array has num_copies number of copies.
+
+    name:       The path to the image.
+    num_copies: The number of copies that will be made.
+    TODO: change to use generator
+    '''
     return np.array(
         [cv2.imread(name) for _ in range(num_copies)],
         dtype=np.uint8
