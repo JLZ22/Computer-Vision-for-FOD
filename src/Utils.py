@@ -214,8 +214,8 @@ def subtract_mean_in_directory(read_dir: Path,
                 
 def get_corresponding_bbox(read_dir: Path, jpg_path: Path):
     '''
-    Creates the bounding boxes object from the xml file with the same name as the 
-    jpg path provided. Returns the bounding boxes object. 
+    Creates the BoundingBoxesOnImage object from the xml file with the same name as the 
+    jpg path provided. Returns the BoundingBoxesOnImage object. 
 
     read_dir: The directory where the xml and jpg files exist. 
     jpg_path: The path of the jpg file for which we are finding an xml file. 
@@ -430,11 +430,14 @@ def visualize_yolo_annotations_in_directory(read_dir: Path,
         if save_created:
             save_dir.rmdir()
 
-'''
-Make num_copies number of the bbs object and return it 
-in an array
-'''
 def make_copies_bboxes(bbs: BoundingBoxesOnImage, num_copies: int) -> np.array:
+    '''
+    Make num_copies number of the bbs object and return it 
+    in an array.
+
+    bbs:        The BoundingBoxesOnImage object that will be copied.
+    num_copies: The number of copies that will be made.
+    '''
     return [bbs for _ in range(num_copies)]
 
 '''
