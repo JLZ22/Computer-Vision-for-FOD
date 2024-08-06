@@ -474,11 +474,11 @@ def create_bbs(root, shape: int) -> BoundingBoxesOnImage:
         bboxes.append(BoundingBox(x1=xmin, y1=ymin, x2=xmax, y2=ymax, label=member.find('name').text))
     return BoundingBoxesOnImage(bboxes, shape)
 
-'''
-Get the memory consumption of all children processes
-If no children processes are found, return 0
-'''
 def get_children_mem_consumption():
+    '''
+    Return the memory consumption in bytes of all children processes.
+    If no children processes are found, return 0.
+    '''
     pid = os.getpid()
     children = psutil.Process(pid).children(recursive=True)
     return sum([child.memory_info().rss for child in children])
