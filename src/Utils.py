@@ -455,12 +455,15 @@ def make_copies_images(name, num_copies: int) -> np.array:
         dtype=np.uint8
     )
 
-'''
-Return a BoundingBoxesOnImage object with the
-given root and shape by automatically creating a
-new BoundingBox object for every object in the root.
-'''
 def create_bbs(root, shape: int) -> BoundingBoxesOnImage:
+    '''
+    Return a BoundingBoxesOnImage object with the
+    given root and shape by automatically creating a
+    new BoundingBox object for every object in the root.
+
+    root:   The root of the xml file.
+    shape:  The shape of the image.
+    '''
     bboxes = []
     for member in root.findall('object'):
         bbox = member.find('bndbox')
