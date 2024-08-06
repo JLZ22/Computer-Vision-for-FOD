@@ -13,6 +13,7 @@ import gc
 from pathlib import Path
 import Utils
 
+# TODO: use generators to save memory
 class SimpleAugSeq:
     def __init__(self, read_path: Path, 
                  save_path: Path, 

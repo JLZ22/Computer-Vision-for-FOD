@@ -8,6 +8,8 @@ import math
 from pathlib import Path
 import Utils
 
+# TODO: create main function for documentation purposes
+
 def check_first_arg(arg):
     if not arg.isdigit():
         exit(f'Please enter a integer in the range 1 to {os.cpu_count()} for the first argument.')
