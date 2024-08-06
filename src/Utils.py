@@ -97,7 +97,7 @@ def rename_in_directory(read_dir: Path,
     prefix:     An optional prefix that will be prepended to the beginning of 
                 every renamed file. \n
     extensions: A list of strings that specifies the extension(s) of the files 
-                to be renamed.
+                to be renamed.\n
     '''
     read_dir = Path(read_dir)
     files = get_jpg_paths(read_dir)
@@ -140,11 +140,11 @@ def delete_files(read_dir: Path,
     Delete all files in the directory. If it is recursive, removes all files 
     without affecting directory structure.
 
-    read_dir:   The directory where all files will be deleted.
+    read_dir:   The directory where all files will be deleted.\n
     recursive:  A boolean that determines whether or not files will be 
-                removed recursively.
+                removed recursively.\n
     verbose:    A boolean that determines whether or not the function will print 
-                error/success messages.
+                error/success messages.\n
     '''
     read_dir = Path(read_dir)
     if not read_dir.exists() or not read_dir.is_dir():
@@ -167,7 +167,7 @@ def subtract_mean(image: cv2.typing.MatLike):
     '''
     Subtract the mean pixel values from the image and returns the image. 
 
-    image: A MatLike object that represents an image. 
+    image: A MatLike object that represents an image.\n
     '''
     image = np.array(image)
     # calculate per channel mean pixel values
@@ -182,9 +182,9 @@ def subtract_mean_in_directory(read_dir: Path,
     '''
     Subtract the mean pixel values from all the jpg files in the directory.
 
-    read_dir:   The directory where jpgs will be read from.
-    save_dir:   The directory where modified jpgs will be saved.
-    progress:   Boolean that determines whether or not a progress bar is shown.
+    read_dir:   The directory where jpgs will be read from.\n
+    save_dir:   The directory where modified jpgs will be saved.\n
+    progress:   Boolean that determines whether or not a progress bar is shown.\n
     '''
     read_dir = Path(read_dir)
     if save_dir is None:
@@ -217,8 +217,8 @@ def get_corresponding_bbox(read_dir: Path, jpg_path: Path):
     Creates the BoundingBoxesOnImage object from the xml file with the same name as the 
     jpg path provided. Returns the BoundingBoxesOnImage object. 
 
-    read_dir: The directory where the xml and jpg files exist. 
-    jpg_path: The path of the jpg file for which we are finding an xml file. 
+    read_dir: The directory where the xml and jpg files exist.\n
+    jpg_path: The path of the jpg file for which we are finding an xml file.\n
     '''
     read_dir = Path(read_dir)
     jpg_path = Path(jpg_path)
@@ -235,8 +235,8 @@ def get_yolo_label_map(json_path: Path, key_is_id=True):
     '''
     Get the yolo label map from the json file.
 
-    json_path:  The path to the json file that contains the label map.
-    key_is_id:  A boolean that determines whether or not the key in the label map
+    json_path:  The path to the json file that contains the label map.\n
+    key_is_id:  A boolean that determines whether or not the key in the label map\n
     '''
     json_path = Path(json_path)
     if not is_json_valid(json_path):
@@ -259,9 +259,9 @@ def visualize_pascalvoc_annotations_in_directory(read_dir: Path,
     saves new images with the bounding boxes drawn in save_dir. The function is a modified 
     version of code found at https://piyush-kulkarni.medium.com/visualize-the-xml-annotations-in-python-c9696ba9c188. 
 
-    read_dir:   The directory where the xml and jpg files exist.
-    save_dir:   The directory where the new images with bounding boxes drawn will be saved.
-    progress:   A boolean that determines whether or not a progress bar is shown.
+    read_dir:   The directory where the xml and jpg files exist.\n
+    save_dir:   The directory where the new images with bounding boxes drawn will be saved.\n
+    progress:   A boolean that determines whether or not a progress bar is shown.\n
     '''
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
@@ -349,10 +349,10 @@ def visualize_yolo_annotations_in_directory(read_dir: Path,
     Overlay the bounding boxes from the txt files on the images in the directory and
     save new images with the bounding boxes drawn in save_dir.
 
-    read_dir:   The directory where the txt and jpg files exist.
-    save_dir:   The directory where the new images with bounding boxes drawn will be saved.
-    json_path:  The path to the json file that contains the label map.
-    progress:   A boolean that determines whether or not a progress bar is shown.
+    read_dir:   The directory where the txt and jpg files exist.\n
+    save_dir:   The directory where the new images with bounding boxes drawn will be saved.\n
+    json_path:  The path to the json file that contains the label map.\n
+    progress:   A boolean that determines whether or not a progress bar is shown.\n
     '''
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
@@ -435,8 +435,8 @@ def make_copies_bboxes(bbs: BoundingBoxesOnImage, num_copies: int) -> np.array:
     Make num_copies number of the bbs object and return it 
     in an array.
 
-    bbs:        The BoundingBoxesOnImage object that will be copied.
-    num_copies: The number of copies that will be made.
+    bbs:        The BoundingBoxesOnImage object that will be copied.\n
+    num_copies: The number of copies that will be made.\n
     TODO: change to use generator
     '''
     return [bbs for _ in range(num_copies)]
@@ -446,8 +446,8 @@ def make_copies_images(name, num_copies: int) -> np.array:
     Return an array of copies of the image stored at 
     path/img. The array has num_copies number of copies.
 
-    name:       The path to the image.
-    num_copies: The number of copies that will be made.
+    name:       The path to the image.\n
+    num_copies: The number of copies that will be made.\n
     TODO: change to use generator
     '''
     return np.array(
@@ -461,8 +461,8 @@ def create_bbs(root, shape: int) -> BoundingBoxesOnImage:
     given root and shape by automatically creating a
     new BoundingBox object for every object in the root.
 
-    root:   The root of the xml file.
-    shape:  The shape of the image.
+    root:   The root of the xml file.\n
+    shape:  The shape of the image.\n
     '''
     bboxes = []
     for member in root.findall('object'):
@@ -490,9 +490,9 @@ def lowercase_labels_in_directory(read_dir: Path,
     Lowercase all labels in the xml files in the directory.
     If save_dir is None, the xml files will be saved in the same directory.
 
-    read_dir:   The directory where the xml files exist.
-    save_dir:   The directory where the modified xml files will be saved.
-    progress:   A boolean that determines whether or not a progress bar is shown.
+    read_dir:   The directory where the xml files exist.\n
+    save_dir:   The directory where the modified xml files will be saved.\n
+    progress:   A boolean that determines whether or not a progress bar is shown.\n
     '''
     read_dir = Path(read_dir)
     if save_dir == None:
