@@ -1440,3 +1440,68 @@ def get_device(use_gpu=True, use_mps=True):
         device = 'cpu'
 
     return device
+
+def count_num_labels_per_class_xml(read_dir: Path):
+    '''
+    Given a directory with xml files, count the number of labels per class.
+    - - -
+    read_dir:   The directory where the xml files exist.\n
+    '''
+    read_dir = Path(read_dir)
+    if not read_dir.exists() or not read_dir.is_dir():
+        print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
+        return
+    
+    xmlPaths = list(read_dir.glob('*.xml'))
+    labels = {}
+    for xml in xmlPaths:
+        try:
+            # iterate through all labels in the xml file
+            tree = ET.parse(str(xml))
+            root = tree.getroot()
+            for member in root.findall('object'):
+                label = member.find('name').text
+                if label in labels:
+                    labels[label] += 1
+                else:
+                    labels[label] = 1
+        except:
+            continue
+
+    return labels
+
+def count_num_labels_per_class_yolo(read_dir: Path, json_path: Path):
+    '''
+    Given the parent directory of the yolo file structure, count the number
+    of labels per class.
+    - - -
+    read_dir:   The directory where the yolo file structure exists.\n
+    json_path:  The path to the json file that contains the label map.\n
+    '''
+    read_dir = Path(read_dir)
+    json_path = Path(json_path)
+    if not read_dir.exists() or not read_dir.is_dir():
+        print_red(f"Directory: '{read_dir}' does not exist or is not a directory.")
+        return
+    if not is_json_valid(json_path):
+        return
+    
+    label_map = get_yolo_label_map(json_path, key_is_id=True)
+    labels = {}
+    for label in label_map.keys():
+        labels[label_map[label]] = 0
+
+    label_dir = read_dir / 'labels'
+    if not label_dir.exists() or not label_dir.is_dir():
+        print_red(f"Directory: '{label_dir}' does not exist or is not a directory.")
+        return
+    
+    txtPaths = list(label_dir.glob('**/*.txt'))
+    for txt in txtPaths:
+        with open(txt, 'r') as f:
+            lines = f.readlines()
+            for line in lines:
+                label = line.split(' ')[0]
+                labels[label_map[int(label)]] += 1
+
+    return labels
