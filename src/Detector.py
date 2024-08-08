@@ -2,6 +2,7 @@ from ultralytics import YOLO
 from typing import Generator
 import cv2
 import math
+from pathlib import Path
 
 class Detector:
     '''
@@ -77,21 +78,29 @@ class Detector:
         elif show:
             cv2.imshow(win_name, frame)
 
-    def detect_camera(self, 
-                     confidence=    0.7,
-                     camera=        0,
-                     show=          True
-                     ):
+        return frame
+
+    def detect_camera(self, confidence: float, camera: int, show: bool, save_path: Path):
         '''
         Detect objects in a camera stream and highlights objects 
-        that are not supposed to be in a certain space.
+        that are not supposed to be in a certain space. Can 
+        only save to mp4 format.
         - - -
         confidence: The confidence threshold for the model to detect an object.\n
         camera:     The camera number to use for the stream.\n
         show:       Boolean value to show the camera stream or not.
+        save_path:  An **/*.mp4 path to save the results to. It does not need to exist.\n
         '''
+        if save_path and not save_path.endswith('.mp4'):
+            raise ValueError("Invalid save path. Please provide a path to save the results as an mp4 file.")
+
         cap = cv2.VideoCapture(camera)
         win_name = f'Camera {camera}'
+
+        # get the frame size and initialize the video writer
+        if save_path:
+            frame_size = (int(cap.get(3)), int(cap.get(4))) 
+            out = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), 30.0, frame_size)
 
         # loop to read the camera stream and detect objects
         while True:
@@ -108,31 +117,44 @@ class Detector:
                                          stream=    True)
             
             # show bounding boxes and highlight objects that are not supposed to be in the space
-            self.interpret_frame_result(results, frame, show, 'Camera', win_name)
+            frame = self.interpret_frame_result(results, frame, show, 'Camera', win_name)
+            
+            # save the results to a file
+            if save_path:
+                out.write(frame)
+
+            # break the loop if the 'q' key is pressed
             if cv2.waitKey(1) == ord('q'):
                 break
 
         cap.release()
+        if save_path:
+            out.release()
         cv2.destroyWindow(win_name)
 
-    def detect_media(self, 
-                    confidence,
-                    media_paths,
-                    show):  
+    def detect_media(self, confidence: float, media_paths: list, show: bool, save_path: Path):  
         '''
         Detect objects in images or videos. Highlights objects that are 
-        not supposed to be in a certain space.
+        not supposed to be in a certain space. Can only save to mp4 format.
         - - -
         confidence:     The confidence threshold for the model to detect an object.\n
         media_paths:    A list of paths to the media files to detect objects in.\n
         show:           Boolean value to show the media files or not.\n
+        save_path:      The path to save the results to.\n
         '''
+        if not save_path.exists():
+            save_path.mkdir(parents=True)
+
         # loop through the media paths and detect objects in the media
         for media_path in media_paths:
+            if not Path(media_path).exists():
+                print(f"Invalid media path: {media_path}. Skipping this media file.")
+                continue
+
             # read media as an image
             # if the media is not an image, read it as a video
-
             frame = cv2.imread(media_path)
+            print('dafdfa')
             if frame is not None:
                 # detect objects in the image
                 results = self.model.predict(frame, 
@@ -140,11 +162,25 @@ class Detector:
                                                 conf=      confidence, 
                                                 stream=    True)
                 # show bounding boxes and highlight objects that are not supposed to be in the space
-                self.interpret_frame_result(results, frame, show, 'Image', media_path)
+                frame = self.interpret_frame_result(results, frame, show, 'Image', media_path)
+                
+                # save the results to a file
+                if save_path:
+                    cv2.imwrite(str(save_path / ('detect_' + Path(media_path).name)), frame)
             else:
                 # read the media as a video
                 cap = cv2.VideoCapture(media_path)
-
+                
+                # get the frame size and initialize the video writer
+                if save_path:
+                    frame_size = (int(cap.get(3)), int(cap.get(4)))
+                    if Path(media_path).suffix != '.mp4':
+                        print(f"Cannot save the results of {media_path} to a file. Can only save to mp4 format. Performing detection only. Press 'enter' to continue.")
+                        input()
+                        out = None
+                    else:
+                        out = cv2.VideoWriter(str(save_path / ('detect_' + Path(media_path).name)), cv2.VideoWriter_fourcc(*'mp4v'), 30.0, frame_size)
+                
                 # loop to read the video stream and detect objects
                 while True:
                     ret, frame = cap.read()
@@ -160,9 +196,16 @@ class Detector:
                                                     stream=    True)
                     
                     # show bounding boxes and highlight objects that are not supposed to be in the space
-                    self.interpret_frame_result(results, frame, show, 'Video', media_path)
+                    frame = self.interpret_frame_result(results, frame, show, 'Video', media_path)
+                    
+                    # save the results to a file
+                    if out:
+                        out.write(frame)
+
                     if cv2.waitKey(1) == ord('q'):
                         break
+                if out:
+                    out.release()
                 cv2.destroyWindow(media_path)
             
     def detect(self,  
@@ -176,21 +219,23 @@ class Detector:
         Detect objects in images, videos, or camera streams. Saves the 
         results if a save path is provided. If the input type is 'media',
         the media paths should be provided. If the input type is 'camera',
-        the camera number should be provided.
-        
-        TODO: Add the ability to save the results to a file.
+        the camera number should be provided. Can only save to mp4 format.
+        If your video input is not in mp4 format, you cannot save the results.
         - - -
         input_type:     The type of input to detect objects in.\n
         confidence:     The confidence threshold for the model to detect an object.\n
         media_paths:    A list of paths to the media files to detect objects in.\n
         camera:         The camera number to use for the stream.\n
-        save_path:      The path to save the results to.\n
+        save_path:      The path to save the results to. For media detection, this should
+                        be a **/* directory. For camera detection, this should be a **/*.mp4 
+                        file which does not need to already exist.\n
         show:           Boolean value to show the media files or not.\n
         '''
+        save_path = Path(save_path)
         if input_type == 'media':
             media_paths = [str(media_path) for media_path in media_paths]
-            self.detect_media(confidence, media_paths, show)
+            self.detect_media(confidence, media_paths, show, save_path)
         elif input_type == 'camera':
-            self.detect_camera(confidence, camera, show)
+            self.detect_camera(confidence, camera, show, save_path)
         else:
             raise ValueError("Invalid input type. Please choose either 'media' or 'camera'.")

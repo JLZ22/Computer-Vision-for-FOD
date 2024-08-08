@@ -35,4 +35,4 @@ if __name__ == "__main__":
     detect = config['detect']
     model = YOLO(detect['model_path'])
     detector = Detector(model=model)
-    detector.detect('camera')
+    detector.detect('media', save_path='../test', media_paths=['../test_data/vids/vid1.mp4', '../test_data/pascalvoc_pairs/3277.jpg'])
