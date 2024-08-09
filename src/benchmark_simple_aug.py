@@ -10,7 +10,11 @@ import argparse
 
 def parse_args():
     '''
-    Parse command line arguments
+    Parse command line arguments. The arguments are as follows:
+
+    1. `--max-processes`: Max number of processes to use. 
+        Default is the number of CPUs. This value cannot be less than 1.
+    2. `--copies`: Number of copies per image. This value cannot be less than 1.
     '''
     parser = argparse.ArgumentParser(description='Benchmark SimpleAugSeq')
     parser.add_argument('--max-processes', type=int, default=os.cpu_count(), help='Max number of processes to use', metavar='INT')
@@ -24,8 +28,9 @@ def main():
     The user can specify the max number of processes and the number of copies per image
     through the command line. Below is the usage of the command line arguments:
 
-    Windows: `python benchmark_simple_aug.py [max_processes] [copies]`\n
-    Linux/Mac: `python3 benchmark_simple_aug.py [max_processes] [copies]`\n
+    ```
+    usage: benchmark_simple_aug.py [-h] [--max-processes INT] [--copies INT]
+    ```
     '''
     # Parse command line arguments
     args = parse_args()
