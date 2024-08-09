@@ -7,6 +7,17 @@ import math
 from pathlib import Path
 import Utils
 
+script_description = '_'
+'''
+This is a script to benchmark the SimpleAugSeq class. The user can specify the number of processes
+and the number of copies per image through the command line. The script will perform a benchmark test
+on SimpleAugSeq with 1 to n processes inclusive. The benchmark graph and results will be saved to the
+directory `../benchmark_results_simple_aug`. Below is the usage of the command line arguments:
+
+Windows: `python benchmark_simple_aug.py [max_processes] [copies]`\n
+Linux/Mac: `python3 benchmark_simple_aug.py [max_processes] [copies]`\n
+'''
+
 def check_first_arg(arg: str):
     '''
     Check if the first argument is a positive integer in the range 1 to the number of cpus.
@@ -38,7 +49,11 @@ def main():
     '''
     Perform a benchmark test on SimpleAugSeq with 1 to n processes inclusive. Save the 
     benchmark graph and results to the directory `../benchmark_results_simple_aug`. 
-    The user can specify the max number of processes.
+    The user can specify the max number of processes and the number of copies per image
+    through the command line. Below is the usage of the command line arguments:
+
+    Windows: `python benchmark_simple_aug.py [max_processes] [copies]`\n
+    Linux/Mac: `python3 benchmark_simple_aug.py [max_processes] [copies]`\n
     '''
 
     # temp directories to store copies of data
