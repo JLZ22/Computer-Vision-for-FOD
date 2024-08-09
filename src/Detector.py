@@ -80,7 +80,12 @@ class Detector:
 
         return frame
 
-    def detect_camera(self, confidence: float, camera: int, show: bool, save_path: Path):
+    def detect_camera(self, 
+                      confidence: float, 
+                      camera: int, 
+                      show: bool, 
+                      save_path: Path, 
+                      save_name = None):
         '''
         Detect objects in a camera stream and highlights objects 
         that are not supposed to be in a certain space. Can 
@@ -89,10 +94,17 @@ class Detector:
         `confidence`: The confidence threshold for the model to detect an object.\n
         `camera`:     The camera number to use for the stream.\n
         `show`:       Boolean value to show the camera stream or not.\n
-        `save_path`:  A \*\*/\*.mp4 path to save the results to. It does not need to exist.\n
+        `save_path`:  A directory to save the video.\n
+        `save_name`:  The name of the video file to save the results to including
+                      the extension.\n
         '''
-        if save_path and not save_path.endswith('.mp4'):
-            raise ValueError("Invalid save path. Please provide a path to save the results as an mp4 file.")
+        if save_name is None:
+            save_name = f'predict_on_camera_{camera}.mp4'
+        elif not save_name.endswith('.mp4'):
+            raise ValueError("Can only save to mp4 format. Please provide a valid save name.")
+        
+        if not save_path.exists():
+            save_path.mkdir(parents=True)
 
         cap = cv2.VideoCapture(camera)
         win_name = f'Camera {camera}'
@@ -100,7 +112,7 @@ class Detector:
         # get the frame size and initialize the video writer
         if save_path:
             frame_size = (int(cap.get(3)), int(cap.get(4))) 
-            out = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), 30.0, frame_size)
+            out = cv2.VideoWriter(save_path / save_name, cv2.VideoWriter_fourcc(*'mp4v'), 30.0, frame_size)
 
         # loop to read the camera stream and detect objects
         while True:
