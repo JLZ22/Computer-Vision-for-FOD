@@ -226,6 +226,7 @@ class Detector:
                media_paths= [],
                camera=      0,
                save_path=   None,
+               camera_save_name= None,
                show=        True):
         '''
         Detect objects in images, videos, or camera streams. Saves the 
@@ -234,20 +235,20 @@ class Detector:
         the camera number should be provided. Can only save to mp4 format.
         If your video input is not in mp4 format, you cannot save the results.
         - - -
-        `input_type`:     The type of input to detect objects in.\n
-        `confidence`:     The confidence threshold for the model to detect an object.\n
-        `media_paths`:    A list of paths to the media files to detect objects in.\n
-        `camera`:         The camera number to use for the stream.\n
-        `save_path`:      The path to save the results to. For media detection, this should
-                          be a **/* directory. For camera detection, this should be a \*\*/\*.mp4 
-                          file which does not need to already exist.\n
-        `show`:           Boolean value to show the media files or not.\n
+        `input_type`:       The type of input to detect objects in.\n
+        `confidence`:       The confidence threshold for the model to detect an object.\n
+        `media_paths`:      A list of paths to the media files to detect objects in.\n
+        `camera`:           The camera number to use for the stream.\n
+        `save_path`:        The path to save the results to. For media detection, this should
+                            be a **/* directory.\n
+        'camera_save_name': The name of the video file to save the results to including the extension.\n
+        `show`:             Boolean value to show the media files or not.\n
         '''
         save_path = Path(save_path)
         if input_type == 'media':
             media_paths = [str(media_path) for media_path in media_paths]
             self.detect_media(confidence, media_paths, show, save_path)
         elif input_type == 'camera':
-            self.detect_camera(confidence, camera, show, save_path)
+            self.detect_camera(confidence, camera, show, save_path, camera_save_name)
         else:
             raise ValueError("Invalid input type. Please choose either 'media' or 'camera'.")
