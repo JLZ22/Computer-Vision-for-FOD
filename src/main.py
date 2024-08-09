@@ -19,16 +19,18 @@ yolov8x (Slowest and Most accurate)
 def parse_args():
     '''
     Parse command line arguments for the object detection script. The arguments are as follows:
-    1. `--input-type`: Input type ("media" or "camera")
-    2. `--confidence`: Confidence threshold for predictions
-    3. `--media-paths`: List of media paths to predict on if --input-type is "media"
-    4. `--camera-index`: Camera index if --input-type is "camera"
-    5. `--save-path`: Path to save directory. Will not save if not specified.
-    6. `--camera-save-name`: Name of the file the camera feed will save to if --input-type is
-       "camera" and the save_path is given
-    7. `--show`: Show the output
-    8. `--config`: Path to config file which specifies arguments for this script if you choose 
+    - `--input-type`: Input type ("media" or "camera")
+    - `--confidence`: Confidence threshold for predictions
+    - `--media-paths`: List of media paths to predict on if --input-type is "media"
+    - `--camera-index`: Camera index if --input-type is "camera"    
+    - `--save-path`: Path to save directory. Will not save if not specified.
+    - `--camera-save-name`: Name of the file the camera feed will save to if --save is given
+    - `--config`: Path to config file which specifies arguments for this script if you choose 
        to use a config file instead of or with the other command line arguments
+    - `--no-save`: Do not save the output
+    - `--save`: Save the output
+    - `--no-show`: Do not show the output
+    - `--show`: Show the output
     '''
     parser = argparse.ArgumentParser(description='Detect objects in images or videos')
     parser.add_argument('--input-type',         type=str,   default=None,   help='Input type ("media" or "camera")', 
@@ -39,12 +41,18 @@ def parse_args():
                         metavar='FILE', nargs='+')
     parser.add_argument('--camera-index',       type=int,   default=None,   help='Camera index if --input-type is "camera"',
                          metavar='INT')
+    parser.add_argument('--save',                                           help='Save the output',
+                        action='store_true', default=None, dest='save')
+    parser.add_argument('--no-save',                                        help='Do not save the output',
+                        action='store_false', default=None, dest='save')
     parser.add_argument('--save-path',          type=str,   default=None,   help='Path to save directory. Will not save if not specified.', 
                         metavar='DIR')
-    parser.add_argument('--camera-save-name',   type=str,   default=None,   help='Name of the file the camera feed will save to if --input-type is "camera" and the save_path is given', 
+    parser.add_argument('--camera-save-name',   type=str,   default=None,   help='Name of the file the camera feed will save to if --save is given', 
                         metavar='TEXT')
-    parser.add_argument('--show',               type=bool,  default=None,   help='Show the output', 
-                        metavar='BOOL')
+    parser.add_argument('--show',                                           help='Show the output',
+                        action='store_true', default=None, dest='show')
+    parser.add_argument('--no-show',                                        help='Do not show the output',
+                        action='store_false', default=None, dest='show')
     parser.add_argument('--config',             type=str,   default=None,   help='Path to config file which specifies arguments for this script', 
                         metavar='FILE')
     parser.add_argument('--model-path',         type=str,   default=None,   help='Path to the model file', 
@@ -73,9 +81,10 @@ def main():
     Below is the usage of the command line arguments:
 
     ```
-    usage: main.py [-h] [--input-type TEXT] [--confidence FLOAT]
-               [--media_paths FILE [FILE ...]] [--camera-index INT]
-               [--save_path DIR] [--show BOOL] [--config FILE]
+    usage: main.py [-h] [--input-type TEXT] [--confidence FLOAT] 
+                   [--media-paths FILE [FILE ...]] [--camera-index INT] 
+                   [--save] [--no-save] [--save-path DIR] [--camera-save-name TEXT] 
+                   [--show] [--no-show] [--config FILE] [--model-path FILE]
     ```
     '''
     args = parse_args()
@@ -87,11 +96,15 @@ def main():
         for key in detect:
             if key in args and getattr(args, key) is None:
                 setattr(args, key, detect[key]) 
+    
+    if args.save is False:
+        args.save_path = None
+        args.camera_save_name = None
 
-    model = YOLO(args.model_path)
+    model = YOLO(args.model_path if args.model_path else '../models/yolov8n.pt')
     detector = Detector(model=model)
-    detector.detect(args.input_type, 
-                    save_path=args.save_path, 
+    detector.detect(input_type=args.input_type if args.input_type else 'camera', 
+                    save_dir=args.save_path, 
                     media_paths=args.media_paths, 
                     camera_index=args.camera_index, 
                     camera_save_name=args.camera_save_name, 

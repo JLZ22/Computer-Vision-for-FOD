@@ -84,7 +84,7 @@ class Detector:
                       confidence: float, 
                       camera: int, 
                       show: bool, 
-                      save_path: Path, 
+                      save_dir: Path, 
                       save_name = None):
         '''
         Detect objects in a camera stream and highlights objects 
@@ -94,25 +94,35 @@ class Detector:
         `confidence`: The confidence threshold for the model to detect an object.\n
         `camera`:     The camera number to use for the stream.\n
         `show`:       Boolean value to show the camera stream or not.\n
-        `save_path`:  A directory to save the video.\n
+        `save_dir`:  A directory to save the video.\n
         `save_name`:  The name of the video file to save the results to including
                       the extension.\n
         '''
+        # check if the save name is valid
         if save_name is None:
             save_name = f'predict_on_camera_{camera}.mp4'
         elif not save_name.endswith('.mp4'):
             raise ValueError("Can only save to mp4 format. Please provide a valid save name.")
         
-        if not save_path.exists():
-            save_path.mkdir(parents=True)
+        # check if the save path is valid
+        if save_dir:
+            save_dir = Path(save_dir)
+            if not save_dir.exists():
+                save_dir.mkdir(parents=True)
 
+        # initialize the camera stream
         cap = cv2.VideoCapture(camera)
         win_name = f'Camera {camera}'
 
         # get the frame size and initialize the video writer
-        if save_path:
+        if save_dir:
+            # check if the save path exists and update save_name until it is unique
+            save_path = save_dir / save_name
+            i = 1
+            while save_path.exists():
+                save_path = save_dir / (save_path.stem + f'({i})' + save_path.suffix)
             frame_size = (int(cap.get(3)), int(cap.get(4))) 
-            out = cv2.VideoWriter(save_path / save_name, cv2.VideoWriter_fourcc(*'mp4v'), 30.0, frame_size)
+            out = cv2.VideoWriter(str(save_path), cv2.VideoWriter_fourcc(*'mp4v'), 30.0, frame_size)
 
         # loop to read the camera stream and detect objects
         while True:
@@ -132,7 +142,7 @@ class Detector:
             frame = self.interpret_frame_result(results, frame, show, 'Camera', win_name)
             
             # save the results to a file
-            if save_path:
+            if save_dir:
                 out.write(frame)
 
             # break the loop if the 'q' key is pressed
@@ -140,11 +150,11 @@ class Detector:
                 break
 
         cap.release()
-        if save_path:
+        if save_dir:
             out.release()
         cv2.destroyWindow(win_name)
 
-    def detect_media(self, confidence: float, media_paths: list, show: bool, save_path: Path):  
+    def detect_media(self, confidence: float, media_paths: list, show: bool, save_dir: Path):  
         '''
         Detect objects in images or videos. Highlights objects that are 
         not supposed to be in a certain space. Can only save to mp4 format.
@@ -152,10 +162,10 @@ class Detector:
         `confidence`:     The confidence threshold for the model to detect an object.\n
         `media_paths`:    A list of paths to the media files to detect objects in.\n
         `show`:           Boolean value to show the media files or not.\n
-        `save_path`:      The path of the directory to save the results to.\n
+        `save_dir`:      The path of the directory to save the results to.\n
         '''
-        if not save_path.exists():
-            save_path.mkdir(parents=True)
+        if save_dir and not save_dir.exists():
+            save_dir.mkdir(parents=True)
 
         # loop through the media paths and detect objects in the media
         for media_path in media_paths:
@@ -177,21 +187,21 @@ class Detector:
                 frame = self.interpret_frame_result(results, frame, show, 'Image', media_path)
                 
                 # save the results to a file
-                if save_path:
-                    cv2.imwrite(str(save_path / ('detect_' + Path(media_path).name)), frame)
+                if save_dir:
+                    cv2.imwrite(str(save_dir / ('detect_' + Path(media_path).name)), frame)
             else:
                 # read the media as a video
                 cap = cv2.VideoCapture(media_path)
                 
                 # get the frame size and initialize the video writer
-                if save_path:
+                if save_dir:
                     frame_size = (int(cap.get(3)), int(cap.get(4)))
                     if Path(media_path).suffix != '.mp4':
                         print(f"Cannot save the results of {media_path} to a file. Can only save to mp4 format. Performing detection only. Press 'enter' to continue.")
                         input()
                         out = None
                     else:
-                        out = cv2.VideoWriter(str(save_path / ('detect_' + Path(media_path).name)), cv2.VideoWriter_fourcc(*'mp4v'), 30.0, frame_size)
+                        out = cv2.VideoWriter(str(save_dir / ('detect_' + Path(media_path).name)), cv2.VideoWriter_fourcc(*'mp4v'), 30.0, frame_size)
                 
                 # loop to read the video stream and detect objects
                 while True:
@@ -224,8 +234,8 @@ class Detector:
                input_type: str,
                confidence=  0.7,
                media_paths= [],
-               camera=      0,
-               save_path=   None,
+               camera_index=      0,
+               save_dir=   None,
                camera_save_name= None,
                show=        True):
         '''
@@ -239,16 +249,15 @@ class Detector:
         `confidence`:       The confidence threshold for the model to detect an object.\n
         `media_paths`:      A list of paths to the media files to detect objects in.\n
         `camera`:           The camera number to use for the stream.\n
-        `save_path`:        The path to save the results to. For media detection, this should
+        `save_dir`:        The path to save the results to. For media detection, this should
                             be a **/* directory.\n
         'camera_save_name': The name of the video file to save the results to including the extension.\n
         `show`:             Boolean value to show the media files or not.\n
         '''
-        save_path = Path(save_path)
         if input_type == 'media':
             media_paths = [str(media_path) for media_path in media_paths]
-            self.detect_media(confidence, media_paths, show, save_path)
+            self.detect_media(confidence, media_paths, show, save_dir)
         elif input_type == 'camera':
-            self.detect_camera(confidence, camera, show, save_path, camera_save_name)
+            self.detect_camera(confidence, camera_index, show, save_dir, camera_save_name)
         else:
             raise ValueError("Invalid input type. Please choose either 'media' or 'camera'.")
