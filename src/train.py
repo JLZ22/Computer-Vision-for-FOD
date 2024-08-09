@@ -1,13 +1,44 @@
 from ultralytics import YOLO
-from clearml import Task
 import yaml
 import Utils
+import argparse
+from clearml import Task
 
-def get_config_and_hyperparameters():
+def parse_args():
+    '''
+    Parse the command line arguments. The argument(s) are as follows:
+    - `--config`: Path to the config.yaml file which must have the following structure: 
+        
+        model_variant: 
+        
+        train:
+            data_path: 
+            epochs: 
+            batch_size: 
+            imgsz: 
+            hyp: 
+            patience:
+
+    You may optionally include the following if you are using ClearML:
+
+    ```
+    train:
+        clear_ml:
+            project_name: 
+            task_name:
+    ```
+    '''
+    parser = argparse.ArgumentParser(description='Train a YOLO model')
+    parser.add_argument('--config', type=str, required=True, help='Path to the config.yaml file', metavar='STR')
+    return parser.parse_args()
+
+def get_config_and_hyperparameters(args):
    '''
-   Load the configuration and hyperparameters from the config.yaml file
+   Load the configuration and hyperparameters from the command line arguments.
+   - - -
+   `args`: command line arguments
    '''
-   with open('../config.yaml') as f:
+   with open(args.config) as f:
         config = yaml.safe_load(f)
         try:
             with open(config['train']['hyp']) as f:
@@ -16,21 +47,23 @@ def get_config_and_hyperparameters():
         except:
             return config, None
 
-def train(model, config, hyperparameters):
+def train(model, config: dict, hyp_exists: bool):
     '''
-    Train the model using the configuration and hyperparameters if they exist.
-    Otherwise, train the model using the default YOLO hyperparameter configuration.
+    Train the model using the configuration and hyperparameters. 
+    - - -
+    `model`:        YOLO model
+    `config`:       dictionary with config parameters
+    `hyp_exists`:   boolean indicating whether hyperparameters exist
     '''
     device = Utils.get_device()
     train = config['train']
-    if hyperparameters:
+    if hyp_exists:
         return model.train(
             data=           train['data_path'],
             epochs=         train['epochs'],
             batch=          train['batch_size'],
             imgsz=          train['imgsz'],
             cfg=            train['hyp'],
-            name=           train['name'],
             patience=       train['patience'],
             device=         device,
             verbose=        True,
@@ -47,28 +80,43 @@ def train(model, config, hyperparameters):
             verbose=        True,
             deterministic=  False
         )
+    
+def main():
+    '''
+    Train a YOLO model using the configuration and hyperparameters 
+    specified in the config.yaml file. This file must be given in 
+    order to run this script.
+    '''
+    # Parse command line arguments
+    args = parse_args()
 
-if __name__ == '__main__':
     # Get the configuration and hyperparameters from the config.yaml file
-    config, hyperparameters = get_config_and_hyperparameters()
+    config, hyperparameters = get_config_and_hyperparameters(args)
+    hyp_exists = hyperparameters is not None
 
     # Initialize a new ClearML task
-    task = Task.init(project_name=  config['project'], 
-                    task_name=      config['train']['name'], 
-                    task_type=      Task.TaskTypes.training)
-
+    task = None
+    if 'clear_ml' in config:
+        task = Task.init(project_name=  config['project_name'], 
+                        task_name=      config['train']['task_name'], 
+                        task_type=      Task.TaskTypes.training)
 
     # Connect the hyperparameters to the task if they exist
-    if hyperparameters:
+    if hyp_exists:
         task.connect(hyperparameters)
     
     # Load the model
     model = YOLO(f'../models/{config['model_variant']}.pt')
 
     # Connect the model to the task
-    task.connect(model)
+    if task:
+        task.connect(model)
 
     # Train the model
-    train(model, config, hyperparameters)
+    train(model, config, hyp_exists)
 
-    task.close()
+    if task:
+        task.close()
+
+if __name__ == '__main__':
+    main()
