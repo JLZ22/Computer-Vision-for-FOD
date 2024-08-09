@@ -221,7 +221,7 @@ class Detector:
                 cv2.destroyWindow(media_path)
             
     def detect(self,  
-               input_type,
+               input_type: str,
                confidence=  0.7,
                media_paths= [],
                camera=      0,
