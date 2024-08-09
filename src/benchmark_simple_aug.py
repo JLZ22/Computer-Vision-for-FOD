@@ -6,44 +6,16 @@ import sys
 import math
 from pathlib import Path
 import Utils
+import argparse
 
-script_description = '_'
-'''
-This is a script to benchmark the SimpleAugSeq class. The user can specify the number of processes
-and the number of copies per image through the command line. The script will perform a benchmark test
-on SimpleAugSeq with 1 to n processes inclusive. The benchmark graph and results will be saved to the
-directory `../benchmark_results_simple_aug`. Below is the usage of the command line arguments:
-
-Windows: `python benchmark_simple_aug.py [max_processes] [copies]`\n
-Linux/Mac: `python3 benchmark_simple_aug.py [max_processes] [copies]`\n
-'''
-
-def check_first_arg(arg: str):
+def parse_args():
     '''
-    Check if the first argument is a positive integer in the range 1 to the number of cpus.
-    If the argument is not a positive integer, the program will exit. 
-
-    arg: The first argument from the command line.
+    Parse command line arguments
     '''
-    if not arg.isdigit():
-        exit(f'Please enter a integer in the range 1 to {os.cpu_count()} for the first argument.')
-    max_processes = int(arg)
-    if max_processes < 1:
-        exit(f'Please enter a integer in the range 1 to {os.cpu_count()} for the first argument.')
-    elif max_processes > os.cpu_count():
-        exit(f'Please enter a integer of processes less than or equal to {os.cpu_count()} for the first argument.')
-    return max_processes
-
-def check_second_arg(arg: str):
-    '''
-    Check if the second argument is a positive integer. If the argument is not a positive integer, 
-    the program will exit.
-
-    arg: The second argument from the command line.
-    '''
-    if not arg.isdigit() or int(arg) <= 0:
-        exit(f'Please enter a positive integer for the second argument.')
-    return int(arg)
+    parser = argparse.ArgumentParser(description='Benchmark SimpleAugSeq')
+    parser.add_argument('--max-processes', type=int, default=os.cpu_count(), help='Max number of processes to use', metavar='INT')
+    parser.add_argument('--copies', type=int, default=16, help='Number of copies per image', metavar='INT')
+    return parser.parse_args()
 
 def main():
     '''
@@ -55,6 +27,16 @@ def main():
     Windows: `python benchmark_simple_aug.py [max_processes] [copies]`\n
     Linux/Mac: `python3 benchmark_simple_aug.py [max_processes] [copies]`\n
     '''
+    # Parse command line arguments
+    args = parse_args()
+    max_processes = min(args.max_processes, os.cpu_count())
+    copies = args.copies
+    if max_processes < 1:
+        print('Max number of processes must be at least 1.')
+        sys.exit(1)
+    if copies < 1:
+        print('Number of copies per image must be at least 1.')
+        sys.exit(1)
 
     # temp directories to store copies of data
     out0 = Path('../test_data/out0')
@@ -65,19 +47,6 @@ def main():
     # read directory
     pascalvoc_pairs = Path('../test_data/pascalvoc_pairs')
     Utils.pad_and_resize_square_in_directory(pascalvoc_pairs, out0)
-
-    # Initialize variables
-    max_processes = os.cpu_count()
-    max_processes = 16
-    copies = 64
-
-    # Check command line arguments
-    if len(sys.argv) > 3:
-        exit('Too many arguments.')
-    if len(sys.argv) >= 2:
-        max_processes = check_first_arg(sys.argv[1])
-    if len(sys.argv) == 3:
-        copies = check_second_arg(sys.argv[2])
 
     # Create array of augmenters with different number of processes
     sass = [SimpleAugSeq(read_path=out0, 
@@ -106,7 +75,9 @@ def main():
         gc.collect()
         
     # Find the minimum time and plot the benchmark graph
-    min = times.index(min(times))
+    minimum = times.index(min(times))
+    min_process = processes[minimum]
+    min_time = times[minimum]
 
     # Plot the benchmark graph
     processes = [i for i in range(1, max_processes+1)]
@@ -116,8 +87,8 @@ def main():
              linestyle='-', 
              color='b', 
              label='Data Points', zorder = 1)
-    plt.scatter(processes[min], times[min], color='red', label='Minimum Time', zorder = 2)
-    plt.text(processes[min], times[min] - math.ceil(max(times)/20), f'Minimum: {processes[min]} processes, {round(times[min],3)} seconds', 
+    plt.scatter(min_process, min_time, color='red', label='Minimum Time', zorder = 2)
+    plt.text(min_process, min_time - math.ceil(max(times)/20), f'Minimum: {min_process} processes, {round(min_time,3)} seconds', 
          fontsize=10, ha='center', va='top', wrap=True)
     plt.title(f'Time to Augment (s) vs Number of Processes ({copies} copies per image)')
     plt.xlabel('Number of Processes')
@@ -139,7 +110,7 @@ def main():
     with txt.open(mode='w') as f:
         for i in range(len(times)):
             f.write(f"Time to Augment: {times[i]} seconds with {processes[i]} processes\n")
-        f.write(f"Minimum Time: {times[min]} seconds with {processes[min]} processes\n")
+        f.write(f"Minimum Time: {min_time} seconds with {min_process} processes\n")
     plt.show()
 
 if __name__ == '__main__':
