@@ -9,15 +9,15 @@ def parse_args():
     Parse the command line arguments. The argument(s) are as follows:
     - `--config`: Path to the config.yaml file which must have the following structure: 
         
-        model_variant: 
+        model_variant:  TEXT (e.g. yolov8n)
         
         train:
-            data_path: 
-            epochs: 
-            batch_size: 
-            imgsz: 
-            hyp: 
-            patience:
+            data_path:  DIR
+            epochs:     INT
+            batch_size: INT
+            imgsz:      INT
+            hyp:        FILE
+            patience:   INT
 
     You may optionally include the following if you are using ClearML:
 
