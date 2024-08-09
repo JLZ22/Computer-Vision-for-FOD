@@ -14,7 +14,7 @@ class Detector:
         '''
         Initialize the Detector with the YOLO model.
         - - -
-        model: The YOLO model to use for object detection.
+        `model`: The YOLO model to use for object detection.
         '''
         if model is None:
             self.model = YOLO('../models/yolov8n.pt')
@@ -30,7 +30,7 @@ class Detector:
         Shows the results of the detection on the frame and highlights objects 
         that are within a certain space.
 
-        TODO: interpret the frame in the context of the FOD problem
+        **TODO**: interpret the frame in the context of the FOD problem
         '''
         # get the next result from the generator
         r = next(results, None)
@@ -86,10 +86,10 @@ class Detector:
         that are not supposed to be in a certain space. Can 
         only save to mp4 format.
         - - -
-        confidence: The confidence threshold for the model to detect an object.\n
-        camera:     The camera number to use for the stream.\n
-        show:       Boolean value to show the camera stream or not.
-        save_path:  An **/*.mp4 path to save the results to. It does not need to exist.\n
+        `confidence`: The confidence threshold for the model to detect an object.\n
+        `camera`:     The camera number to use for the stream.\n
+        `show`:       Boolean value to show the camera stream or not.\n
+        `save_path`:  A \*\*/\*.mp4 path to save the results to. It does not need to exist.\n
         '''
         if save_path and not save_path.endswith('.mp4'):
             raise ValueError("Invalid save path. Please provide a path to save the results as an mp4 file.")
@@ -137,10 +137,10 @@ class Detector:
         Detect objects in images or videos. Highlights objects that are 
         not supposed to be in a certain space. Can only save to mp4 format.
         - - -
-        confidence:     The confidence threshold for the model to detect an object.\n
-        media_paths:    A list of paths to the media files to detect objects in.\n
-        show:           Boolean value to show the media files or not.\n
-        save_path:      The path to save the results to.\n
+        `confidence`:     The confidence threshold for the model to detect an object.\n
+        `media_paths`:    A list of paths to the media files to detect objects in.\n
+        `show`:           Boolean value to show the media files or not.\n
+        `save_path`:      The path of the directory to save the results to.\n
         '''
         if not save_path.exists():
             save_path.mkdir(parents=True)
@@ -222,14 +222,14 @@ class Detector:
         the camera number should be provided. Can only save to mp4 format.
         If your video input is not in mp4 format, you cannot save the results.
         - - -
-        input_type:     The type of input to detect objects in.\n
-        confidence:     The confidence threshold for the model to detect an object.\n
-        media_paths:    A list of paths to the media files to detect objects in.\n
-        camera:         The camera number to use for the stream.\n
-        save_path:      The path to save the results to. For media detection, this should
-                        be a **/* directory. For camera detection, this should be a **/*.mp4 
-                        file which does not need to already exist.\n
-        show:           Boolean value to show the media files or not.\n
+        `input_type`:     The type of input to detect objects in.\n
+        `confidence`:     The confidence threshold for the model to detect an object.\n
+        `media_paths`:    A list of paths to the media files to detect objects in.\n
+        `camera`:         The camera number to use for the stream.\n
+        `save_path`:      The path to save the results to. For media detection, this should
+                          be a **/* directory. For camera detection, this should be a \*\*/\*.mp4 
+                          file which does not need to already exist.\n
+        `show`:           Boolean value to show the media files or not.\n
         '''
         save_path = Path(save_path)
         if input_type == 'media':
