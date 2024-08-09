@@ -17,17 +17,29 @@ from tqdm import tqdm
 import random
 import torch
 
-def print_red(text: str):
-    print("\033[91m{}\033[0m".format(text))
+def print_red(text: str, **kwargs):
+    '''
+    Print the text in red.
+    - - -
+    `text`: The text that will be printed in red.\n
+    `**kwargs`: Additional keyword arguments that will be passed to the print function.
+    '''
+    print("\033[91m{}\033[0m".format(text), **kwargs)
 
-def print_green(text: str):
-    print("\033[92m{}\033[0m".format(text))
+def print_green(text: str, **kwargs):
+    '''
+    Print the text in green.
+    - - -
+    `text`: The text that will be printed in green.\n
+    `**kwargs`: Additional keyword arguments that will be passed to the print function.
+    '''
+    print("\033[92m{}\033[0m".format(text), **kwargs)
 
 def is_json_valid(json_path: Path):
     '''
     Checks if the given json path points to a valid json file.
     - - -
-    json_path: A pathlib.Path object which represents the path to the 
+    `json_path`: A pathlib.Path object which represents the path to the 
                json file in question 
     '''
     json_path = Path(json_path)
@@ -48,8 +60,8 @@ def get_jpg_paths(dir: Path, range=(-1, -1)):
     only gets the jpg paths that fall within the range inclusive. If a file's 
     name is not an integer, this function will skip it. 
     - - -
-    dir:    The directory where we are getting the jpg paths from.\n
-    range:  A tuple that specifies the range of jpg paths to retrieve.
+    `dir`:    The directory where we are getting the jpg paths from.\n
+    `range`:  A tuple that specifies the range of jpg paths to retrieve.
     '''
     # check if range is valid
     if range[0] == -1 and range[1] != -1:
@@ -86,19 +98,20 @@ def rename_in_directory(read_dir: Path,
                         prefix = '', 
                         extensions=[]):
     '''
-    Rename all the jpg, xml, and txt files in the directory to the
-    format prefix + index + '.jpg' and prefix + index + '.xml'. If 
-    extensions are specified, it will only rename files with those 
-    extensions. This function has no recursive functionality.
+    Rename all the `.jpg`, `.xml`, and `.txt` files in the directory to the
+    format `<prefix>_<index>.<extension>` where index is incremented for every 
+    file renamed. If extensions are specified, it will only rename files 
+    with those extensions. This function has no recursive functionality.
     - - -
-    read_dir:   The directory where we are renaming files.\n
-    startIndex: The index that the first renamed file will be assigned.
-                all following files will be named by incrementing from the 
-                startIndex.\n
-    prefix:     An optional prefix that will be prepended to the beginning of 
-                every renamed file. \n
-    extensions: A list of strings that specifies the extension(s) of the files 
-                to be renamed.\n
+    `read_dir`:     The directory where we are renaming files.\n
+    `startIndex`:   The index that the first renamed file will be assigned.
+                    all following files will be named by incrementing from the 
+                    startIndex.\n
+    `prefix`:       An optional prefix that will be prepended to the beginning of 
+                    every renamed file. \n
+    `extensions`:   A list of strings that specifies the extension(s) of the files 
+                    to be renamed. The extensions that are supported are `.jpg`, `.xml`,
+                    and `.txt`.\n
     '''
     read_dir = Path(read_dir)
     files = get_jpg_paths(read_dir)
@@ -141,10 +154,10 @@ def delete_files(read_dir: Path,
     Delete all files in the directory. If it is recursive, removes all files 
     without affecting directory structure.
     - - -
-    read_dir:   The directory where all files will be deleted.\n
-    recursive:  A boolean that determines whether or not files will be 
+    `read_dir`:   The directory where all files will be deleted.\n
+    `recursive`:  A boolean that determines whether or not files will be 
                 removed recursively.\n
-    verbose:    A boolean that determines whether or not the function will print 
+    `verbose`:    A boolean that determines whether or not the function will print 
                 error/success messages.\n
     '''
     read_dir = Path(read_dir)
@@ -168,7 +181,7 @@ def subtract_mean(image: cv2.typing.MatLike):
     '''
     Subtract the mean pixel values from the image and returns the image. 
     - - -
-    image: A MatLike object that represents an image.\n
+    `image`: A MatLike object that represents an image.\n
     '''
     image = np.array(image)
     # calculate per channel mean pixel values
@@ -183,9 +196,9 @@ def subtract_mean_in_directory(read_dir: Path,
     '''
     Subtract the mean pixel values from all the jpg files in the directory.
     - - -
-    read_dir:   The directory where jpgs will be read from.\n
-    save_dir:   The directory where modified jpgs will be saved.\n
-    progress:   Boolean that determines whether or not a progress bar is shown.\n
+    `read_dir`:   The directory where jpgs will be read from.\n
+    `save_dir`:   The directory where modified jpgs will be saved.\n
+    `progress`:   Boolean that determines whether or not a progress bar is shown.\n
     '''
     read_dir = Path(read_dir)
     if save_dir is None:
@@ -218,8 +231,8 @@ def get_corresponding_bbox(read_dir: Path, jpg_path: Path):
     Creates the BoundingBoxesOnImage object from the xml file with the same name as the 
     jpg path provided. Returns the BoundingBoxesOnImage object. 
     - - -
-    read_dir: The directory where the xml and jpg files exist.\n
-    jpg_path: The path of the jpg file for which we are finding an xml file.\n
+    `read_dir`: The directory where the xml and jpg files exist.\n
+    `jpg_path`: The path of the jpg file for which we are finding an xml file.\n
     '''
     read_dir = Path(read_dir)
     jpg_path = Path(jpg_path)
@@ -236,8 +249,8 @@ def get_yolo_label_map(json_path: Path, key_is_id=True):
     '''
     Get the yolo label map from the json file.
     - - -
-    json_path:  The path to the json file that contains the label map.\n
-    key_is_id:  A boolean that determines whether or not the key in the label map\n
+    `json_path`:  The path to the json file that contains the label map.\n
+    `key_is_id`:  A boolean that determines whether or not the key in the label map\n
     '''
     json_path = Path(json_path)
     if not is_json_valid(json_path):
@@ -260,9 +273,9 @@ def visualize_pascalvoc_annotations_in_directory(read_dir: Path,
     saves new images with the bounding boxes drawn in save_dir. The function is a modified 
     version of code found at https://piyush-kulkarni.medium.com/visualize-the-xml-annotations-in-python-c9696ba9c188. 
     - - -
-    read_dir:   The directory where the xml and jpg files exist.\n
-    save_dir:   The directory where the new images with bounding boxes drawn will be saved.\n
-    progress:   A boolean that determines whether or not a progress bar is shown.\n
+    `read_dir`:   The directory where the xml and jpg files exist.\n
+    `save_dir`:   The directory where the new images with bounding boxes drawn will be saved.\n
+    `progress`:   A boolean that determines whether or not a progress bar is shown.\n
     '''
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
@@ -350,10 +363,10 @@ def visualize_yolo_annotations_in_directory(read_dir: Path,
     Overlay the bounding boxes from the txt files on the images in the directory and
     save new images with the bounding boxes drawn in save_dir.
     - - -
-    read_dir:   The directory where the txt and jpg files exist.\n
-    save_dir:   The directory where the new images with bounding boxes drawn will be saved.\n
-    json_path:  The path to the json file that contains the label map.\n
-    progress:   A boolean that determines whether or not a progress bar is shown.\n
+    `read_dir`:   The directory where the txt and jpg files exist.\n
+    `save_dir`:   The directory where the new images with bounding boxes drawn will be saved.\n
+    `json_path`:  The path to the json file that contains the label map.\n
+    `progress`:   A boolean that determines whether or not a progress bar is shown.\n
     '''
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
@@ -438,7 +451,7 @@ def make_copies_bboxes(bbs: BoundingBoxesOnImage, num_copies: int) -> np.array:
     - - -
     bbs:        The BoundingBoxesOnImage object that will be copied.\n
     num_copies: The number of copies that will be made.\n
-    TODO: change to use generator
+    **TODO**: change to use generator
     '''
     return [bbs for _ in range(num_copies)]
 
@@ -447,9 +460,9 @@ def make_copies_images(name, num_copies: int) -> np.array:
     Return an array of copies of the image stored at 
     path/img. The array has num_copies number of copies.
     - - -
-    name:       The path to the image.\n
-    num_copies: The number of copies that will be made.\n
-    TODO: change to use generator
+    `name`:       The path to the image.\n
+    `num_copies`: The number of copies that will be made.\n
+    **TODO**: change to use generator
     '''
     return np.array(
         [cv2.imread(name) for _ in range(num_copies)],
@@ -462,8 +475,8 @@ def create_bbs(root, shape: int) -> BoundingBoxesOnImage:
     given root and shape by automatically creating a
     new BoundingBox object for every object in the root.
     - - -
-    root:   The root of the xml file.\n
-    shape:  The shape of the image.\n
+    `root`:   The root of the xml file.\n
+    `shape`:  The shape of the image.\n
     '''
     bboxes = []
     for member in root.findall('object'):
@@ -491,9 +504,9 @@ def lowercase_labels_in_directory(read_dir: Path,
     Lowercase all labels in the xml files in the directory.
     If save_dir is None, the xml files will be saved in the same directory.
     - - -
-    read_dir:   The directory where the xml files exist.\n
-    save_dir:   The directory where the modified xml files will be saved.\n
-    progress:   A boolean that determines whether or not a progress bar is shown.\n
+    `read_dir`:   The directory where the xml files exist.\n
+    `save_dir`:   The directory where the modified xml files will be saved.\n
+    `progress`:   A boolean that determines whether or not a progress bar is shown.\n
     '''
     read_dir = Path(read_dir)
     if save_dir == None:
@@ -530,10 +543,10 @@ def update_jpg_path_in_xml(read_dir: Path,
     If save_dir is None, the xml files will be saved in the same directory.
     If new_path is None, the path in the xml files will be updated to the read path.
     - - -
-    read_dir:   The directory where the xml files exist.\n
-    save_dir:   The directory where the modified xml files will be saved.\n
-    new_path:   The new path that will be updated in the xml files.\n
-    progress:   A boolean that determines whether or not a progress bar is shown.\n
+    `read_dir`:   The directory where the xml files exist.\n
+    `save_dir`:   The directory where the modified xml files will be saved.\n
+    `new_path`:   The new path that will be updated in the xml files.\n
+    `progress`:   A boolean that determines whether or not a progress bar is shown.\n
     '''
     read_dir = Path(read_dir)
     if save_dir == None:
@@ -581,10 +594,10 @@ def aug_in_directory(read_dir: Path,
     and save the augmented images in the save_dir directory.
     If includeXML is True, the bounding boxes will be augmented.
     - - -
-    read_dir:   The directory where the images and xml files exist.\n
-    save_dir:   The directory where the augmented images and xml files will be saved.\n
-    aug:        The imgaug augmenter that will be used to augment the images.\n
-    includeXML: A boolean that determines whether or not the xml files will be augmented.\n
+    `read_dir`:   The directory where the images and xml files exist.\n
+    `save_dir`:   The directory where the augmented images and xml files will be saved.\n
+    `aug`:        The imgaug augmenter that will be used to augment the images.\n
+    `includeXML`: A boolean that determines whether or not the xml files will be augmented.\n
     '''
     # check read and write paths
     read_dir = Path(read_dir)
@@ -645,9 +658,9 @@ def flip_horizontal_in_directory(read_dir, save_dir, includeXML=True):
     Flip the images in the directory horizontally and save them. 
     If includeXML is True, the bounding boxes will be flipped as well.
     - - -
-    read_dir:   The directory where the images and xml files exist.\n
-    save_dir:   The directory where the flipped images and xml files will be saved.\n
-    includeXML: A boolean that determines whether or not the xml files will be flipped.\n
+    `read_dir`:   The directory where the images and xml files exist.\n
+    `save_dir`:   The directory where the flipped images and xml files will be saved.\n
+    `includeXML`: A boolean that determines whether or not the xml files will be flipped.\n
     '''
     aug = iaa.Fliplr(1.0)
     aug_in_directory(read_dir, save_dir, aug, includeXML)
@@ -657,9 +670,9 @@ def flip_vertical_in_directory(read_dir, save_dir, includeXML=True):
     Flip the images in the directory vertically and save them.
     If includeXML is True, the bounding boxes will be flipped as well.
     - - -
-    read_dir:   The directory where the images and xml files exist.\n
-    save_dir:   The directory where the flipped images and xml files will be saved.\n
-    includeXML: A boolean that determines whether or not the xml files will be flipped.\n
+    `read_dir`:   The directory where the images and xml files exist.\n
+    `save_dir`:   The directory where the flipped images and xml files will be saved.\n
+    `includeXML`: A boolean that determines whether or not the xml files will be flipped.\n
     '''
     aug = iaa.Flipud(1.0)
     aug_in_directory(read_dir, save_dir, aug, includeXML)
@@ -670,9 +683,9 @@ def rotate_in_directory(read_dir, save_dir, angle, includeXML=True):
     without altering the aspect ratio.
     If includeXML is True, the bounding boxes will be rotated as well.
     - - -
-    read_dir:   The directory where the images and xml files exist.\n
-    save_dir:   The directory where the rotated images and xml files will be saved.\n
-    angle:      The angle by which the images will be rotated.\n
+    `read_dir`:   The directory where the images and xml files exist.\n
+    `save_dir`:   The directory where the rotated images and xml files will be saved.\n
+    `angle`:      The angle by which the images will be rotated.\n
     '''
     if angle % 90 != 0:
         aug = iaa.Affine(rotate=angle)
@@ -686,10 +699,10 @@ def rotate_90_in_directory(read_dir, save_dir, repetitions=1, includeXML=True):
     them without altering the aspect ratio.
     If includeXML is True, the bounding boxes will be rotated as well.
     - - -
-    read_dir:       The directory where the images and xml files exist.\n
-    save_dir:       The directory where the rotated images and xml files will be saved.\n
-    repetitions:    The number of times the images will be rotated by 90 degrees.\n
-    includeXML:     A boolean that determines whether or not the xml files will be rotated.\n
+    `read_dir`:       The directory where the images and xml files exist.\n
+    `save_dir`:       The directory where the rotated images and xml files will be saved.\n
+    `repetitions`:    The number of times the images will be rotated by 90 degrees.\n
+    `includeXML`:     A boolean that determines whether or not the xml files will be rotated.\n
     '''
     aug = iaa.Rot90(repetitions)
     aug_in_directory(read_dir, save_dir, aug, includeXML)
@@ -700,11 +713,11 @@ def resize_in_directory(read_dir: Path, save_dir: Path, width=512, height=512, i
     This does not guarantee that the aspect ratio will remain the same.
     If includeXML is True, the bounding boxes will be resized as well.
     - - -
-    read_dir:   The directory where the images and xml files exist.\n
-    save_dir:   The directory where the resized images and xml files will be saved.\n
-    width:      The width to which the images will be resized.\n
-    height:     The height to which the images will be resized.\n
-    includeXML: A boolean that determines whether or not the xml files will be resized.\n
+    `read_dir`:   The directory where the images and xml files exist.\n
+    `save_dir`:   The directory where the resized images and xml files will be saved.\n
+    `width`:      The width to which the images will be resized.\n
+    `height`:     The height to which the images will be resized.\n
+    `includeXML`: A boolean that determines whether or not the xml files will be resized.\n
     '''
     # augmenters
     aug = iaa.Resize({"height": height, "width": width})
@@ -719,11 +732,11 @@ def pad_and_resize_square_in_directory(read_dir: Path,
     resize them to the given dimension while maintaining aspect ratio.
     If includeXML is True, the bounding boxes will be resized as well.
     - - -
-    read_dir:   The directory where the images and xml files exist.\n
-    save_dir:   The directory where the padded and resized images and 
+    `read_dir`:   The directory where the images and xml files exist.\n
+    `save_dir`:   The directory where the padded and resized images and 
                 xml files will be saved.\n
-    dim:        The dimension to which the images will be resized.\n
-    includeXML: A boolean that determines whether or not the xml files will be resized.\n
+    `dim`:        The dimension to which the images will be resized.\n
+    `includeXML`: A boolean that determines whether or not the xml files will be resized.\n
     '''
     # augmenters
     aug = iaa.Sequential([
@@ -739,11 +752,11 @@ def copy_files_in_directory(read_dir: Path,
     '''
     Copy the files in the read_dir directory to the save_dir directory.
     - - -
-    read_dir:   The directory where the files will be copied from.\n
-    save_dir:   The directory where the copied files will be saved.\n
-    extensions: A list of strings that specifies the extension(s) of the files
+    `read_dir`:   The directory where the files will be copied from.\n
+    `save_dir`:   The directory where the copied files will be saved.\n
+    `extensions`: A list of strings that specifies the extension(s) of the files
                 to be copied.\n
-    progress:   A boolean that determines whether or not a progress bar is shown.\n
+    `progress`:   A boolean that determines whether or not a progress bar is shown.\n
     '''
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
@@ -772,11 +785,11 @@ def move_files_in_directory(read_dir: Path,
     '''
     Move the files in the read_dir directory to the save_dir directory.
     - - -
-    read_dir:   The directory where the files will be moved from.\n
-    save_dir:   The directory where the moved files will be saved.\n
-    extensions: A list of strings that specifies the extension(s) of the files
+    `read_dir`:   The directory where the files will be moved from.\n
+    `save_dir`:   The directory where the moved files will be saved.\n
+    `extensions`: A list of strings that specifies the extension(s) of the files
                 to be moved.\n
-    progress:   A boolean that determines whether or not a progress bar is shown.\n
+    `progress`:   A boolean that determines whether or not a progress bar is shown.\n
     '''
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
@@ -805,9 +818,9 @@ def rotate_image_and_save(img_read_path: Path,
     Rotate the image at img_read_dir by the given angle and save it in img_save_dir.
     The rotateCode is the cv2 rotate code.
     - - -
-    img_read_path:  The path to the image that will be rotated.\n
-    img_save_dir:   The directory where the rotated image will be saved.\n
-    rotateCode:     The cv2 rotate code that determines how the image will be rotated.\n
+    `img_read_path`:  The path to the image that will be rotated.\n
+    `img_save_dir`:   The directory where the rotated image will be saved.\n
+    `rotateCode`:     The cv2 rotate code that determines how the image will be rotated.\n
     '''
     img_read_path = Path(img_read_path)
     if img_save_dir == None:
@@ -837,11 +850,11 @@ def rotate_image_and_save_in_directory(read_dir: Path,
     and save them in the save_dir directory if range is (-1, -1).
     If range is not (-1, -1), only rotate the images in the range.
     - - -
-    read_dir:       The directory where the images exist.\n
-    save_dir:       The directory where the rotated images will be saved.\n
-    rotateCode:     The cv2 rotate code that determines how the images will be rotated.\n
-    range:          The range of images that will be rotated. If (-1, -1), all images will be rotated.\n
-    progress:       A boolean that determines whether or not a progress bar is shown.\n
+    `read_dir`:       The directory where the images exist.\n
+    `save_dir`:       The directory where the rotated images will be saved.\n
+    `rotateCode`:     The cv2 rotate code that determines how the images will be rotated.\n
+    `range`:          The range of images that will be rotated. If (-1, -1), all images will be rotated.\n
+    `progress`:       A boolean that determines whether or not a progress bar is shown.\n
     '''
     read_dir = Path(read_dir)
     if save_dir == None:
@@ -863,8 +876,8 @@ def delete_all_xml_without_jpg(read_dir: Path, progress=True):
     '''
     Delete all xml files in the directory that do not have a corresponding jpg file.
     - - -
-    read_dir:   The directory where the xml and jpg files exist.\n
-    progress:   A boolean that determines whether or not a progress bar is shown.\n
+    `read_dir`:   The directory where the xml and jpg files exist.\n
+    `progress`:   A boolean that determines whether or not a progress bar is shown.\n
     '''
     read_dir = Path(read_dir)
     if not read_dir.exists() or not read_dir.is_dir():
@@ -882,8 +895,8 @@ def count_files_in_directory(read_dir: Path, extensions=[]):
     '''
     Count the number of files in the directory.
     - - -
-    read_dir:   The directory where the files exist.\n
-    extensions: A list of strings that specifies the extension(s) of the files
+    `read_dir`:   The directory where the files exist.\n
+    `extensions`: A list of strings that specifies the extension(s) of the files
     '''
     read_dir = Path(read_dir)
     if not read_dir.exists() or not read_dir.is_dir():
@@ -901,8 +914,8 @@ def jpeg_to_jpg(read_dir: Path, progress=True):
     '''
     Rename all jpeg files in the directory to jpg.
     - - -
-    read_dir:   The directory where the jpeg files exist.\n
-    progress:   A boolean that determines whether or not a progress bar is shown.\n
+    `read_dir`:   The directory where the jpeg files exist.\n
+    `progress`:   A boolean that determines whether or not a progress bar is shown.\n
     '''
     read_dir = Path(read_dir)
     if not read_dir.exists() or not read_dir.is_dir():
@@ -917,7 +930,7 @@ def cut_off_bbox(xml_pth: Path):
     '''
     Cut off the bounding box in the xml file that is outside the image.
     - - -
-    xml_pth:    The path to the xml file.\n
+    `xml_pth`:    The path to the xml file.\n
     '''
     xml_pth = Path(xml_pth)
     if not xml_pth.exists() or not xml_pth.is_file() or xml_pth.suffix != '.xml':
@@ -969,8 +982,8 @@ def cut_off_bboxes_in_directory(read_dir: Path, progress=True):
     '''
     Cut off the bounding boxes in the xml files that are outside the image.
     - - -
-    read_dir:   The directory where the xml files exist.\n
-    progress:   A boolean that determines whether or not a progress bar is shown.\n
+    `read_dir`:   The directory where the xml files exist.\n
+    `progress`:   A boolean that determines whether or not a progress bar is shown.\n
     '''
     read_dir = Path(read_dir)
     if not read_dir.exists() or not read_dir.is_dir():
@@ -988,9 +1001,9 @@ def pascalvoc_to_yolo(xml_path: Path, save_file_path: Path, json_path: Path):
     '''
     Convert pascal voc xml file to yolo txt file.
     - - -
-    xml_path:           The path to the xml file.\n
-    save_file_path:     The path to the txt file where the bounding boxes will be saved.\n
-    json_path:          The path to the json file that contains the label map.\n
+    `xml_path`:           The path to the xml file.\n
+    `save_file_path`:     The path to the txt file where the bounding boxes will be saved.\n
+    `json_path`:          The path to the json file that contains the label map.\n
     '''
     xml_path = Path(xml_path)
     save_file_path = Path(save_file_path)
@@ -1033,11 +1046,11 @@ def pascalvoc_to_yolo_in_directory(read_dir: Path,
     '''
     Convert all pascal_voc xml files in the directory to yolo txt files.
     - - -
-    read_dir:   The directory where the xml files exist.\n
-    save_dir:   The directory where the yolo txt files will be saved.\n
-    json:       The path to the json file that contains the label map.\n
-    verbose:    A boolean that determines whether or not the function prints messages.\n
-    progress:   A boolean that determines whether or not a progress bar is shown.\n
+    `read_dir`:   The directory where the xml files exist.\n
+    `save_dir`:   The directory where the yolo txt files will be saved.\n
+    `json`:       The path to the json file that contains the label map.\n
+    `verbose`:    A boolean that determines whether or not the function prints messages.\n
+    `progress`:   A boolean that determines whether or not a progress bar is shown.\n
     '''
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
@@ -1069,10 +1082,10 @@ def move_percent_of_datapoints_in_directory(read_dir: Path,
     to the save directory. One data point consists of a jpg file and 
     a corresponding xml or txt file. 
     - - -
-    read_dir:       The directory where the data points exist.\n
-    save_dir:       The directory where the moved data points will be saved.\n
-    percent:        The percentage of data points that will be moved.\n
-    random_sample:  A boolean that determines whether or not the data points will be randomly sampled.\n
+    `read_dir`:       The directory where the data points exist.\n
+    `save_dir`:       The directory where the moved data points will be saved.\n
+    `percent`:        The percentage of data points that will be moved.\n
+    `random_sample`:  A boolean that determines whether or not the data points will be randomly sampled.\n
     '''
     num = int(count_files_in_directory(read_dir, ['.jpg']) * percent)
     move_number_of_datapoints_in_directory(read_dir, 
@@ -1088,11 +1101,11 @@ def move_number_of_datapoints_in_directory(read_dir: Path,
     '''
     Move a number of data points in the read directory to the save directory.
     - - -
-    read_dir:       The directory where the data points exist.\n
-    save_dir:       The directory where the moved data points will be saved.\n
-    num_files:      The number of data points that will be moved.\n
-    random_sample:  A boolean that determines whether or not the data points will be randomly sampled.\n
-    progress:       A boolean that determines whether or not a progress bar is shown.\n
+    `read_dir`:       The directory where the data points exist.\n
+    `save_dir`:       The directory where the moved data points will be saved.\n
+    `num_files`:      The number of data points that will be moved.\n
+    `random_sample`:  A boolean that determines whether or not the data points will be randomly sampled.\n
+    `progress`:       A boolean that determines whether or not a progress bar is shown.\n
     '''
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
@@ -1131,10 +1144,10 @@ def copy_percent_of_datapoints_in_directory(read_dir: Path,
     '''
     Copy a percentage of the data points in the read directory.
     - - -
-    read_dir:       The directory where the data points exist.\n
-    save_dir:       The directory where the copied data points will be saved.\n
-    percent:        The percentage of data points that will be copied.\n
-    random_sample:  A boolean that determines whether or not the data points will be randomly sampled.\n
+    `read_dir`:       The directory where the data points exist.\n
+    `save_dir`:       The directory where the copied data points will be saved.\n
+    `percent`:        The percentage of data points that will be copied.\n
+    `random_sample`:  A boolean that determines whether or not the data points will be randomly sampled.\n
     '''
     num = int(count_files_in_directory(read_dir, ['.jpg']) * percent)
     copy_number_of_datapoints_in_directory(read_dir, 
@@ -1151,11 +1164,11 @@ def copy_number_of_datapoints_in_directory(read_dir: Path,
     '''
     Copy a number of data points in the read directory to the save directory.
     - - -
-    read_dir:       The directory where the data points exist.\n
-    save_dir:       The directory where the copied data points will be saved.\n
-    num_files:      The number of data points that will be copied.\n
-    random_sample:  A boolean that determines whether or not the data points will be randomly sampled.\n
-    progress:       A boolean that determines whether or not a progress bar is shown.\n
+    `read_dir`:       The directory where the data points exist.\n
+    `save_dir`:       The directory where the copied data points will be saved.\n
+    `num_files`:      The number of data points that will be copied.\n
+    `random_sample`:  A boolean that determines whether or not the data points will be randomly sampled.\n
+    `progress`:       A boolean that determines whether or not a progress bar is shown.\n
     '''
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
@@ -1197,11 +1210,11 @@ def split_number_datapoints_in_directory(read_dir: Path,
     '''
     Split the images and annotations in the read directory into two separate directories.
     - - -
-    read_dir:   The directory where the images and annotations exist.\n
-    img_dir:    The directory where the images will be saved.\n
-    ann_dir:    The directory where the annotations will be saved.\n
-    num:        The number of images and annotations that will be split.\n
-    progress:   A boolean that determines whether or not a progress bar is shown.\n
+    `read_dir`:   The directory where the images and annotations exist.\n
+    `img_dir`:    The directory where the images will be saved.\n
+    `ann_dir`:    The directory where the annotations will be saved.\n
+    `num`:        The number of images and annotations that will be split.\n
+    `progress`:   A boolean that determines whether or not a progress bar is shown.\n
     '''
     num = int(num)
     assert(num > 0)
@@ -1245,7 +1258,7 @@ def count_data_points_in_directory(read_dir: Path):
     '''
     Count the number of data points in the directory.
     - - -
-    read_dir:   The directory where the data points exist.\n
+    `read_dir`:   The directory where the data points exist.\n
     '''
     read_dir = Path(read_dir)
     if not read_dir.exists() or not read_dir.is_dir():
@@ -1265,12 +1278,12 @@ def partition_yolo_data_for_training(read_dir: Path,
     Typically, allocating test is optional. If you would not like to partition
     a test set, set test_percent to 0.
     - - -
-    read_dir:       The directory where the images and labels exist.\n
-    save_dir:       The directory where the partitioned data will be saved.\n
-    train_percent:  The percentage of data that will be used for training.\n
-    test_percent:   The percentage of data that will be used for testing.\n
-    verbose:        A boolean that determines whether or not the function prints messages.\n
-    append:         A boolean that determines whether or not the data will be appended to the save directory.\n
+    `read_dir`:       The directory where the images and labels exist.\n
+    `save_dir`:       The directory where the partitioned data will be saved.\n
+    `train_percent`:  The percentage of data that will be used for training.\n
+    `test_percent`:   The percentage of data that will be used for testing.\n
+    `verbose`:        A boolean that determines whether or not the function prints messages.\n
+    `append`:         A boolean that determines whether or not the data will be appended to the save directory.\n
     '''
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
@@ -1334,9 +1347,9 @@ def verify_yolo_file_structure(read_dir: Path,
     the names of the images and labels in the train, val, and test
     are the same.
     - - -
-    read_dir:   The directory where the images and labels exist.\n
-    test:       A boolean that determines whether or not the test set will be checked.\n
-    verbose:    A boolean that determines whether or not the function prints messages.\n
+    `read_dir`:   The directory where the images and labels exist.\n
+    `test`:       A boolean that determines whether or not the test set will be checked.\n
+    `verbose`:    A boolean that determines whether or not the function prints messages.\n
     '''
     read_dir = Path(read_dir)
     if not read_dir.exists() or not read_dir.is_dir():
@@ -1410,8 +1423,8 @@ def diff_names_between_directories(dir1: Path, dir2: Path):
     '''
     Returns the names of the files in dir1 that are not in dir2 or vice versa.
     - - -
-    dir1:   The first directory.\n
-    dir2:   The second directory.\n
+    `dir1`:   The first directory.\n
+    `dir2`:   The second directory.\n
     '''
     dir1 = Path(dir1)
     dir2 = Path(dir2)
@@ -1429,8 +1442,8 @@ def get_device(use_gpu=True, use_mps=True):
     '''
     Determine the device to use for training.
     - - -
-    use_gpu:    A boolean that determines whether or not the gpu will be used.\n
-    use_mps:    A boolean that determines whether or not the mps will be used.\n
+    `use_gpu`:    A boolean that determines whether or not the gpu will be used.\n
+    `use_mps`:    A boolean that determines whether or not the mps will be used.\n
     '''
     if torch.cuda.is_available() and use_gpu:
         device = 'cuda'
@@ -1445,7 +1458,7 @@ def count_num_labels_per_class_xml(read_dir: Path):
     '''
     Given a directory with xml files, count the number of labels per class.
     - - -
-    read_dir:   The directory where the xml files exist.\n
+    `read_dir`:   The directory where the xml files exist.\n
     '''
     read_dir = Path(read_dir)
     if not read_dir.exists() or not read_dir.is_dir():
@@ -1475,8 +1488,8 @@ def count_num_labels_per_class_yolo(read_dir: Path, json_path: Path):
     Given the parent directory of the yolo file structure, count the number
     of labels per class.
     - - -
-    read_dir:   The directory where the yolo file structure exists.\n
-    json_path:  The path to the json file that contains the label map.\n
+    `read_dir`:   The directory where the yolo file structure exists.\n
+    `json_path`:  The path to the json file that contains the label map.\n
     '''
     read_dir = Path(read_dir)
     json_path = Path(json_path)
