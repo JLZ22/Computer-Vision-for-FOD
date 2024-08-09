@@ -1,18 +1,58 @@
 from ultralytics import YOLO
 import Utils
-from pathlib import Path
 import yaml
+import argparse
 
-if __name__ == '__main__':
-    data_path = Path('../test_data/dataset/dataset.yaml')
-    with open('../config.yaml') as f:
-        config = yaml.safe_load(f)
+def parse_args():
+    '''
+    Parse the command line arguments. The argument(s) are as follows:
+    - `--config`: Path to the config.yaml file which must have the following structure: 
+        
+        model_variant:  TEXT (e.g. yolov8n)
+        
+        tune:
+            iterations: INT
+        train:
+            data_path:  DIR
+            epochs:     INT
+            batch_size: INT
+            imgsz:      INT
+            hyp:        FILE
+            patience:   INT
 
-    model = YOLO(f'../models/{config['model_variant']}.pt')
+    You may optionally include the following if you are using ClearML:
 
+    ```
+    train:
+        clear_ml:
+            project_name:   TEXT
+            task_name:      TEXT
+    ```
+    '''
+    parser = argparse.ArgumentParser(description='Tune a YOLO model')
+    parser.add_argument('--config', type=str, required=True, help='Path to the config.yaml file', metavar='STR')
+    return parser.parse_args()
+
+def load_config(args):
+    '''
+    Load the configuration from the command line arguments.
+    - - -
+    `args`: command line arguments
+    '''
+    with open(args.config) as f:
+        return yaml.safe_load(f)
+    
+def main():
+    '''
+    Tune a YOLO model using the configuration specified in the config.yaml file 
+    which is passed as a command line argument. 
+    '''
+    args = parse_args()
+    config = load_config(args)
+    model = YOLO(f'../models/{config["model_variant"]}.pt')
     tune = config['tune']
     train = config['train']
-    results = model.tune(
+    model.tune(
         # Tuning params
         iterations= tune['iterations'],
 
@@ -25,3 +65,6 @@ if __name__ == '__main__':
         val=        True,               # Evaluate the model on the validation set
         device=     Utils.get_device()  # Specify device for training based on availability
     )
+
+if __name__ == '__main__':
+    main()
