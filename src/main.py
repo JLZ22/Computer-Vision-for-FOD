@@ -25,8 +25,7 @@ def parse_args():
     - `--camera-index`: Camera index if --input-type is "camera"    
     - `--save-path`: Path to save directory. Will not save if not specified.
     - `--camera-save-name`: Name of the file the camera feed will save to if --save is given
-    - `--config`: Path to config file which specifies arguments for this script if you choose 
-       to use a config file instead of or with the other command line arguments
+    - `--config`: Path to config file which specifies arguments for this script
     - `--no-save`: Do not save the output
     - `--save`: Save the output
     - `--no-show`: Do not show the output
@@ -68,14 +67,18 @@ def main():
     'detect' section. If any arguments are specified in the command line, they will
     override the arguments in the config file.
 
-    Below is an example of a config file:
+    Below is the format of the config file:
     ```
     detect:
-        confidence: 0.7
-        media_paths: ['../test_data/vids/vid1.mp4', '../test_data/pascalvoc_pairs/3277.jpg']
-        camera_index: 0
-        save_path: '../test'
-        show: True
+        input_type:         TEXT
+        confidence:         FLOAT
+        media_paths:        FILE [FILE ...]
+        camera_index:       INT
+        save_dir:           DIR
+        save:               BOOL
+        camera_save_name:   TEXT.mp4
+        show:               BOOL
+        model_path:         FILE
     ```
 
     Below is the usage of the command line arguments:
