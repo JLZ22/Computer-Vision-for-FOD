@@ -251,7 +251,7 @@ class Detector:
         `camera`:           The camera number to use for the stream.\n
         `save_dir`:        The path to save the results to. For media detection, this should
                             be a **/* directory.\n
-        'camera_save_name': The name of the video file to save the results to including the extension.\n
+        `camera_save_name`: The name of the video file to save the results to including the extension.\n
         `show`:             Boolean value to show the media files or not.\n
         '''
         if input_type == 'media':
