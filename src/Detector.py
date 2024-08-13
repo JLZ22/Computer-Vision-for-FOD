@@ -20,17 +20,16 @@ class Detector:
         self.model = model
 
     def detect(self,  
-               input_type: str,
-               confidence=  0.7,
-               media_paths= [],
-               camera_index=      0,
-               save_dir=   None,
-               camera_save_name= None,
-               show=        True,
-               iou=         0.5):
+               input_type:          str,
+               confidence=          0.7,
+               media_paths=         [],
+               camera_index=        0,
+               save_dir=            None,
+               camera_save_name=    None,
+               show=                True):
         '''
-        Detect objects in images, videos, or camera streams. Saves the 
-        results if a save path is provided. If the input type is 'media',
+        Tract objects in videos or camera streams. Saves the 
+        results if a save path is provided. If the input type is 'video',
         the media paths should be provided. If the input type is 'camera',
         the camera number should be provided. Can only save to mp4 format.
         If your video input is not in mp4 format, you cannot save the results.
