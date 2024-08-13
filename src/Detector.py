@@ -4,7 +4,7 @@ import cv2
 from pathlib import Path
 import time
 
-class Object:
+class Box:
     '''
     Represents an object in an image or video frame.
     '''
@@ -27,12 +27,52 @@ class Object:
         self.xyxy = xyxy
         self.id = id
         self.time_created = time.time()
+        self.timestamp_of_exit_from_roi = None
 
-    def get_time_elapsed(self) -> float:
+    def get_age(self) -> float:
         '''
         Get the time (seconds) elapsed since the object was created.
         '''
         return time.time() - self.time_created
+    
+    def update(self, 
+               label:       str = None,
+               confidence:  float = None,
+               xyxy:        list = None):
+        '''
+        Update the object with new values. If a value is not provided,
+        the current value will remain the same.
+        - - -
+        `label`:       The label of the object.\n
+        `confidence`:  The confidence of the object.\n
+        `xyxy`:        The bounding box coordinates of the object.\n
+        '''
+        if label:
+            self.label = label
+        if confidence:
+            self.confidence = confidence
+        if xyxy:
+            self.xyxy = xyxy
+
+    def update_exit_timestamp(self):
+        '''
+        Update the time when the object was last not in the roi.
+        '''
+        self.timestamp_of_exit_from_roi = time.time()
+
+    def get_time_outside_roi(self) -> float:
+        '''
+        Get the time (seconds) elapsed since the object exited the roi.
+        '''
+        if self.timestamp_of_exit_from_roi is None:
+            return 0
+        return time.time() - self.timestamp_of_exit_from_roi
+    
+    def reset_exit_timestamp(self):
+        '''
+        Reset the time when the object was last not in the roi.
+        '''
+        self.timestamp_of_exit_from_roi = None
 
 class Detector:
     '''
@@ -49,7 +89,7 @@ class Detector:
         if model is None:
             self.model = YOLO('../models/yolov8n.pt')
         self.model = model
-        self.objects_in_roi = set()
+        self.objects_in_roi = dict()
 
     def detect(self,  
                input_type:          str,
@@ -123,7 +163,7 @@ class Detector:
                                             iou=       0.5, # default value TODO: tune if necessary
             )
                 # show bounding boxes and highlight objects that are not supposed to be in the space
-                frame = self.interpret_frame_result(results, frame, show, 'Image', media_path)
+                frame = self.interpret_frame_result(results[0], frame, show, 'Image', media_path)
                 
                 # save the results to a file
                 if save_dir:
@@ -158,7 +198,7 @@ class Detector:
                     )
                     
                     # show bounding boxes and highlight objects that are not supposed to be in the space
-                    frame = self.interpret_frame_result(results, show, 'Video', media_path)
+                    frame = self.interpret_frame_result(results[0], show, 'Video', media_path)
                     
                     # save the results to a file
                     if out:
@@ -232,7 +272,7 @@ class Detector:
             )
             
             # show bounding boxes and highlight objects that are not supposed to be in the space
-            frame = self.interpret_frame_result(results, show, 'Camera', win_name)
+            frame = self.interpret_frame_result(results[0], show, 'Camera', win_name)
             
             # save the results to a file
             if save_dir:
@@ -266,6 +306,43 @@ class Detector:
         `win_name`:     The name of the window to show the frame in.\n
         `roi`:          The region of interest to highlight objects in.\n
         '''
+        # get the boxes to highlight
+        to_highlight = set()
+        boxes = results.boxes
+        try:
+            for i in range(boxes.xyxy.shape[0]):
+                # create a box object from the results for ease of access
+                cls = boxes.cls[i]
+                conf = boxes.conf[i]
+                xyxy = boxes.xyxy[i]
+                id = boxes.id[i]
+
+                if id in self.objects_in_roi:
+                    curr_obj = self.objects_in_roi[id]
+                    if self.is_object_in_roi(xyxy, roi):
+                        # update the object with the new detection values
+                        curr_obj.update(cls, conf, xyxy)
+                        # reset the exit time of the object to None
+                        curr_obj.reset_exit_time()
+
+                        # add the object to the set of objects to highlight if it has been in the roi for more than 3 seconds
+                        if curr_obj.get_age() > 3:
+                            to_highlight.add(curr_obj)
+
+                    # remove the object from the roi if it has been outside the roi for more than 1 second
+                    elif curr_obj.get_time_outside_roi() > 1:
+                        self.objects_in_roi.pop(id)
+
+                    # update the exit timestamp of the object if it is not in the roi and the exit timestamp has not already been set
+                    elif curr_obj.timestamp_of_exit_from_roi is None:
+                        curr_obj.update_exit_time()
+                else:
+                    # add the object to the roi if it is in the roi
+                    if self.is_object_in_roi(xyxy, roi):
+                        self.objects_in_roi[id] = Box(cls, conf, xyxy, id)
+        except:
+            pass
+        
         # plot the results on the frame
         frame = results.plot()
 
@@ -283,10 +360,10 @@ class Detector:
 
         return frame
     
-    def object_in_roi(self,
+    def is_object_in_roi(self,
                       xyxy: list,
                       roi: list,
-                      percentage: 0.5) -> bool:
+                      percentage: float = 0.5) -> bool:
         '''
         Check if the xyxy coordinates of a bounding box overlap with
         the roi by at least the percentage specified. 
