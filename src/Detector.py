@@ -1,4 +1,4 @@
-from ultralytics.engine.results import Results
+from ultralytics.engine.results import Results, Boxes
 from ultralytics import YOLO
 import cv2
 from pathlib import Path
@@ -220,7 +220,7 @@ class Detector:
                                show: bool, 
                                input_type: str, 
                                win_name: str, 
-                               roi= ((20, 40), (600, 700))):
+                               roi= [50, 50, 50, 50]):
         '''
         Shows the results of the detection on the frame and highlights objects 
         that are within a certain space.
@@ -250,3 +250,33 @@ class Detector:
             cv2.imshow(win_name, frame)
 
         return frame
+    
+    def object_in_roi(self,
+                      xyxy: list,
+                      roi: list,
+                      percentage: 0.5) -> bool:
+        '''
+        Check if the xyxy coordinates of a bounding box overlap with
+        the roi by at least the percentage specified. 
+        - - -
+        `xyxy`:       The bounding box coordinates.\n
+        `roi`:        The region of interest to check the bounding box against.\n
+        `percentage`: The percentage of the bounding box that must overlap with the roi.\n
+        '''
+        # calculate the area of the bounding box
+        box_area = (xyxy[2] - xyxy[0]) * (xyxy[3] - xyxy[1])
+
+        # calculate the area of the roi
+        roi_area = (roi[2] - roi[0]) * (roi[3] - roi[1])
+
+        # calculate the area of the intersection
+        intersection = ((min(xyxy[2], roi[2]) - max(xyxy[0], roi[0])) * 
+                        (min(xyxy[3], roi[3]) - max(xyxy[1], roi[1])))
+        
+        # calculate the area of the union
+        union = box_area + roi_area - intersection
+
+        # calculate the percentage of the intersection
+        percentage_overlap = intersection / union
+
+        return percentage_overlap >= percentage
