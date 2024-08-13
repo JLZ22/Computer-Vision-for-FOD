@@ -375,6 +375,8 @@ class Detector:
     def get_boxes_in_roi(self, boxes: Boxes, roi: list) -> set:
         '''
         Interpret the boxes detected by the model.
+
+        TODO: test if the function works as expected. should change border to red if object is in roi for more than 3 seconds.
         - - -
         `boxes`: The boxes detected by the model.\n
         `roi`:   The region of interest to check the bounding boxes against.\n
