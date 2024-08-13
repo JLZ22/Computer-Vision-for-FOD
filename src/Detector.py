@@ -307,42 +307,8 @@ class Detector:
         `roi`:          The region of interest to highlight objects in.\n
         '''
         # get the boxes to highlight
-        to_highlight = set()
-        boxes = results.boxes
-        try:
-            for i in range(boxes.xyxy.shape[0]):
-                # create a box object from the results for ease of access
-                cls = boxes.cls[i]
-                conf = boxes.conf[i]
-                xyxy = boxes.xyxy[i]
-                id = boxes.id[i]
+        to_highlight = self.get_boxes_in_roi(results.boxes, roi)
 
-                if id in self.objects_in_roi:
-                    curr_obj = self.objects_in_roi[id]
-                    if self.is_object_in_roi(xyxy, roi):
-                        # update the object with the new detection values
-                        curr_obj.update(cls, conf, xyxy)
-                        # reset the exit time of the object to None
-                        curr_obj.reset_exit_time()
-
-                        # add the object to the set of objects to highlight if it has been in the roi for more than 3 seconds
-                        if curr_obj.get_age() > 3:
-                            to_highlight.add(curr_obj)
-
-                    # remove the object from the roi if it has been outside the roi for more than 1 second
-                    elif curr_obj.get_time_outside_roi() > 1:
-                        self.objects_in_roi.pop(id)
-
-                    # update the exit timestamp of the object if it is not in the roi and the exit timestamp has not already been set
-                    elif curr_obj.timestamp_of_exit_from_roi is None:
-                        curr_obj.update_exit_time()
-                else:
-                    # add the object to the roi if it is in the roi
-                    if self.is_object_in_roi(xyxy, roi):
-                        self.objects_in_roi[id] = Box(cls, conf, xyxy, id)
-        except:
-            pass
-        
         # plot the results on the frame
         frame = results.plot()
 
@@ -389,3 +355,47 @@ class Detector:
         percentage_overlap = intersection / union
 
         return percentage_overlap >= percentage
+    
+    def get_boxes_in_roi(self, boxes: Boxes, roi: list) -> set:
+        '''
+        Interpret the boxes detected by the model.
+        - - -
+        `boxes`: The boxes detected by the model.\n
+        `roi`:   The region of interest to check the bounding boxes against.\n
+        '''
+        try:
+            to_highlight = set()
+            for i in range(boxes.xyxy.shape[0]):
+                # create a box object from the results for ease of access
+                cls = boxes.cls[i]
+                conf = boxes.conf[i]
+                xyxy = boxes.xyxy[i]
+                id = boxes.id[i]
+
+                if id in self.objects_in_roi:
+                    curr_obj = self.objects_in_roi[id]
+                    if self.is_object_in_roi(xyxy, roi):
+                        # update the object with the new detection values
+                        curr_obj.update(cls, conf, xyxy)
+                        # reset the exit time of the object to None
+                        curr_obj.reset_exit_time()
+
+                        # add the object to the set of objects to highlight if it has been in the roi for more than 3 seconds
+                        if curr_obj.get_age() > 3:
+                            to_highlight.add(curr_obj)
+
+                    # remove the object from the roi if it has been outside the roi for more than 1 second
+                    elif curr_obj.get_time_outside_roi() > 1:
+                        self.objects_in_roi.pop(id)
+
+                    # update the exit timestamp of the object if it is not in the roi and the exit timestamp has not already been set
+                    elif curr_obj.timestamp_of_exit_from_roi is None:
+                        curr_obj.update_exit_time()
+                else:
+                    # add the object to the roi if it is in the roi
+                    if self.is_object_in_roi(xyxy, roi):
+                        self.objects_in_roi[id] = Box(cls, conf, xyxy, id)
+
+            return to_highlight
+        except:
+            return None
