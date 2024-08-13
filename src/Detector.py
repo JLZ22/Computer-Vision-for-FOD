@@ -292,7 +292,7 @@ class Detector:
                                show: bool, 
                                input_type: str, 
                                win_name: str, 
-                               roi= [50, 50, 50, 50]):
+                               roi= [50, 50, 1000, 1000]):
         '''
         Shows the results of the detection on the frame and highlights objects 
         that are within a certain space.
@@ -310,7 +310,23 @@ class Detector:
         to_highlight = self.get_boxes_in_roi(results.boxes, roi)
 
         # plot the results on the frame
-        frame = results.plot()
+        frame = results.plot(line_width=2, font_size=1.0)
+        if to_highlight:
+            for box in to_highlight:
+                frame = self.draw_box(frame, 
+                                    (box.xyxy[0], box.xyxy[1]), 
+                                    (box.xyxy[2], box.xyxy[3]), 
+                                    f'id: {box.id} {box.label} {box.confidence:.2f}',
+                                    edge_color= (0, 0, 255),
+                )
+
+        # draw the roi on the frame
+        frame = self.draw_box(frame, 
+                              (roi[0], roi[1]), 
+                              (roi[2], roi[3]), 
+                              'Region of Interest', 
+                              edge_color= (255, 0, 255),
+        )
 
         # if the input type is an image, show the image with a loop
         # video and camera streams are shown with a single frame because
@@ -363,39 +379,96 @@ class Detector:
         `boxes`: The boxes detected by the model.\n
         `roi`:   The region of interest to check the bounding boxes against.\n
         '''
-        try:
-            to_highlight = set()
-            for i in range(boxes.xyxy.shape[0]):
-                # create a box object from the results for ease of access
-                cls = boxes.cls[i]
-                conf = boxes.conf[i]
-                xyxy = boxes.xyxy[i]
-                id = boxes.id[i]
-
-                if id in self.objects_in_roi:
-                    curr_obj = self.objects_in_roi[id]
-                    if self.is_object_in_roi(xyxy, roi):
-                        # update the object with the new detection values
-                        curr_obj.update(cls, conf, xyxy)
-                        # reset the exit time of the object to None
-                        curr_obj.reset_exit_time()
-
-                        # add the object to the set of objects to highlight if it has been in the roi for more than 3 seconds
-                        if curr_obj.get_age() > 3:
-                            to_highlight.add(curr_obj)
-
-                    # remove the object from the roi if it has been outside the roi for more than 1 second
-                    elif curr_obj.get_time_outside_roi() > 1:
-                        self.objects_in_roi.pop(id)
-
-                    # update the exit timestamp of the object if it is not in the roi and the exit timestamp has not already been set
-                    elif curr_obj.timestamp_of_exit_from_roi is None:
-                        curr_obj.update_exit_time()
-                else:
-                    # add the object to the roi if it is in the roi
-                    if self.is_object_in_roi(xyxy, roi):
-                        self.objects_in_roi[id] = Box(cls, conf, xyxy, id)
-
+        assert(len(roi) == 4), "The roi must have 4 coordinates."
+        assert(roi[0] < roi[2] and roi[1] < roi[3]), "The roi coordinates must be in the format [x1, y1, x2, y2]."
+        to_highlight = set()
+        if not boxes:
             return to_highlight
-        except:
-            return None
+        for i in range(boxes.xyxy.shape[0]):
+            # create a box object from the results for ease of access
+            cls = boxes.cls[i]
+            conf = boxes.conf[i]
+            xyxy = boxes.xyxy[i]
+            if not boxes.id:
+                continue
+            id = boxes.id[i]
+
+            if id in self.objects_in_roi:
+                curr_obj = self.objects_in_roi[id]
+                if self.is_object_in_roi(xyxy, roi):
+                    # update the object with the new detection values
+                    curr_obj.update(cls, conf, xyxy)
+                    # reset the exit time of the object to None
+                    curr_obj.reset_exit_time()
+
+                    # add the object to the set of objects to highlight if it has been in the roi for more than 3 seconds
+                    if curr_obj.get_age() > 3:
+                        to_highlight.add(curr_obj)
+
+                # remove the object from the roi if it has been outside the roi for more than 1 second
+                elif curr_obj.get_time_outside_roi() > 1:
+                    self.objects_in_roi.pop(id)
+
+                # update the exit timestamp of the object if it is not in the roi and the exit timestamp has not already been set
+                elif curr_obj.timestamp_of_exit_from_roi is None:
+                    curr_obj.update_exit_time()
+            else:
+                # add the object to the roi if it is in the roi
+                if self.is_object_in_roi(xyxy, roi):
+                    self.objects_in_roi[id] = Box(cls, conf, xyxy, id)
+
+        return to_highlight
+        
+    def draw_box(self, 
+                 frame:             cv2.typing.MatLike, 
+                 pt1:               tuple,
+                 pt2:               tuple,
+                 text:              str,
+                 edge_color=        (0, 255, 0),
+                 edge_thickness=    2,
+                 text_color=        (255, 255, 255),
+                 text_thickness=    2,
+                 font_scale=        1.0,
+                 font=              cv2.FONT_HERSHEY_SIMPLEX,
+                 text_offset=       (5, 25)):
+        '''
+        Draw a bounding box on the frame.
+        - - -
+        `frame`:            The frame to draw the bounding box on.\n
+        `box`:              The bounding box coordinates.\n
+        `edge_color`:       The color of the bounding box.\n
+        `edge_thickness`:   The thickness of the bounding box.\n
+        `text_color`:       The color of the text.\n
+        `text_thickness`:   The thickness of the text.\n
+        `font_scale`:       The scale of the font.\n
+        `font`:             The font to use for the text.\n
+        `text_offset`:      The offset of the text from the top left corner of the bounding box.\n
+        '''
+        # draw the bounding box on the frame
+        cv2.rectangle(frame, 
+                        pt1, 
+                        pt2, 
+                        edge_color, 
+                        edge_thickness
+        )
+
+        # specify text details
+        org = [pt1[0] + text_offset[0], pt1[1] + text_offset[1]]
+
+        # Draw a filled rectangle behind the text
+        (text_width, _), baseline = cv2.getTextSize(text, font, font_scale, text_thickness)
+        top_left = (pt1[0], pt1[1])
+        bottom_right = (org[0] + text_width, org[1] + baseline)
+        cv2.rectangle(frame, top_left, bottom_right, edge_color, cv2.FILLED)
+
+        # write the class name and confidence on the frame
+        cv2.putText(frame, 
+                    text, 
+                    org, 
+                    font, 
+                    font_scale, 
+                    text_color, 
+                    text_thickness
+        )
+
+        return frame
