@@ -25,11 +25,27 @@ def parse_args():
     - `--camera-index`: Camera index if --input-type is "camera"    
     - `--save-path`: Path to save directory. Will not save if not specified.
     - `--camera-save-name`: Name of the file the camera feed will save to if --save is given
-    - `--config`: Path to config file which specifies arguments for this script
+    - `--config`: Path to yaml config file which specifies arguments for this script
     - `--no-save`: Do not save the output
     - `--save`: Save the output
     - `--no-show`: Do not show the output
     - `--show`: Show the output
+    - - -
+
+    Below is the format of the config file if you choose to use one:
+
+    ```
+    detect:
+        input_type:         TEXT
+        confidence:         FLOAT
+        media_paths:        FILE [FILE ...]
+        camera_index:       INT
+        save_dir:           DIR
+        save:               BOOL
+        camera_save_name:   TEXT.mp4
+        show:               BOOL
+        model_path:         FILE
+    ```
     '''
     parser = argparse.ArgumentParser(description='Detect objects in images or videos')
     parser.add_argument('--input-type',         type=str,   default=None,   help='Input type ("media" or "camera")', 
@@ -66,23 +82,7 @@ def main():
     you choose to use a config file, you can specify the arguments for this script in the
     'detect' section. If any arguments are specified in the command line, they will
     override the arguments in the config file.
-
-    Below is the format of the config file:
-    ```
-    detect:
-        input_type:         TEXT
-        confidence:         FLOAT
-        media_paths:        FILE [FILE ...]
-        camera_index:       INT
-        save_dir:           DIR
-        save:               BOOL
-        camera_save_name:   TEXT.mp4
-        show:               BOOL
-        model_path:         FILE
-    ```
-
-    Below is the usage of the command line arguments:
-
+    - - -
     ```
     usage: main.py [-h] [--input-type TEXT] [--confidence FLOAT] 
                    [--media-paths FILE [FILE ...]] [--camera-index INT] 

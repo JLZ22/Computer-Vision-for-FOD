@@ -7,7 +7,7 @@ from clearml import Task
 def parse_args():
     '''
     Parse the command line arguments. The argument(s) are as follows:
-    - `--config`: Path to the config.yaml file which must have the following structure: 
+    - `--config`: Path to the yaml config file which must have the following structure: 
         
         model_variant:  TEXT (e.g. yolov8n)
         
@@ -84,8 +84,12 @@ def train(model, config: dict, hyp_exists: bool):
 def main():
     '''
     Train a YOLO model using the configuration and hyperparameters 
-    specified in the config.yaml file. This file must be given in 
+    specified in the yaml config file. This file must be given in 
     order to run this script.
+    - - -
+    ```
+    usage: train.py [-h] --config STR
+    ```
     '''
     # Parse command line arguments
     args = parse_args()
