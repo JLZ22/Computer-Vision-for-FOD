@@ -2,6 +2,37 @@ from ultralytics.engine.results import Results, Boxes
 from ultralytics import YOLO
 import cv2
 from pathlib import Path
+import time
+
+class Object:
+    '''
+    Represents an object in an image or video frame.
+    '''
+
+    def __init__(self, 
+                 label: str, 
+                 confidence: float, 
+                 xyxy: list,
+                 id: int):
+        '''
+        Initialize the object with the label, confidence, and bounding box coordinates.
+        - - -
+        `label`:       The label of the object.\n
+        `confidence`:  The confidence of the object.\n
+        `xyxy`:        The bounding box coordinates of the object.\n
+        `id`:          The id of the object.\n
+        '''
+        self.label = label
+        self.confidence = confidence
+        self.xyxy = xyxy
+        self.id = id
+        self.time_created = time.time()
+
+    def get_time_elapsed(self) -> float:
+        '''
+        Get the time (seconds) elapsed since the object was created.
+        '''
+        return time.time() - self.time_created
 
 class Detector:
     '''
@@ -18,6 +49,7 @@ class Detector:
         if model is None:
             self.model = YOLO('../models/yolov8n.pt')
         self.model = model
+        self.objects_in_roi = set()
 
     def detect(self,  
                input_type:          str,
