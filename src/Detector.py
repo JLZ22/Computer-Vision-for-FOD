@@ -1,7 +1,6 @@
+from ultralytics.engine.results import Results
 from ultralytics import YOLO
-from typing import Generator
 import cv2
-import math
 from pathlib import Path
 
 class Detector:
@@ -19,7 +18,7 @@ class Detector:
         if model is None:
             self.model = YOLO('../models/yolov8n.pt')
         self.model = model
-            
+
     def detect(self,  
                input_type: str,
                confidence=  0.7,
@@ -27,7 +26,8 @@ class Detector:
                camera_index=      0,
                save_dir=   None,
                camera_save_name= None,
-               show=        True):
+               show=        True,
+               iou=         0.5):
         '''
         Detect objects in images, videos, or camera streams. Saves the 
         results if a save path is provided. If the input type is 'media',
@@ -41,10 +41,11 @@ class Detector:
         `confidence`:       The confidence threshold for the model to detect an object.\n
         `media_paths`:      A list of paths to the media files to detect objects in.\n
         `camera`:           The camera number to use for the stream.\n
-        `save_dir`:        The path to save the results to. For media detection, this should
+        `save_dir`:         The path to save the results to. For media detection, this should
                             be a **/* directory.\n
         `camera_save_name`: The name of the video file to save the results to including the extension.\n
         `show`:             Boolean value to show the media files or not.\n
+        `iou`:              The intersection over union threshold for the model to detect an object.\n
         '''
         if input_type == 'media':
             media_paths = [str(media_path) for media_path in media_paths]
@@ -54,7 +55,12 @@ class Detector:
         else:
             raise ValueError("Invalid input type. Please choose either 'media' or 'camera'.")
     
-    def detect_media(self, confidence: float, media_paths: list, show: bool, save_dir: Path):  
+    def detect_media(self, 
+                     confidence: float, 
+                     media_paths: list, 
+                     show: bool, 
+                     save_dir: Path, 
+                     iou: float):  
         '''
         Detect objects in images or videos. Highlights objects that are 
         not supposed to be in a certain space. Can only save to mp4 format.
@@ -62,7 +68,8 @@ class Detector:
         `confidence`:     The confidence threshold for the model to detect an object.\n
         `media_paths`:    A list of paths to the media files to detect objects in.\n
         `show`:           Boolean value to show the media files or not.\n
-        `save_dir`:      The path of the directory to save the results to.\n
+        `save_dir`:       The path of the directory to save the results to.\n
+        `iou`:            The intersection over union threshold for the model to detect an object.\n
         '''
         if save_dir and not save_dir.exists():
             save_dir.mkdir(parents=True)
@@ -79,10 +86,11 @@ class Detector:
             print('dafdfa')
             if frame is not None:
                 # detect objects in the image
-                results = self.model.predict(frame, 
-                                                show=      False, 
-                                                conf=      confidence, 
-                                                stream=    True)
+                results = self.model.track( frame, 
+                                            persist=   True,
+                                            conf=      confidence,
+                                            iou=       0.5, # default value TODO: tune if necessary
+            )
                 # show bounding boxes and highlight objects that are not supposed to be in the space
                 frame = self.interpret_frame_result(results, frame, show, 'Image', media_path)
                 
@@ -112,13 +120,14 @@ class Detector:
                         break
 
                     # detect objects in the frame
-                    results = self.model.predict(frame, 
-                                                    show=      False, 
-                                                    conf=      confidence, 
-                                                    stream=    True)
+                    results = self.model.track( frame, 
+                                                persist=   True,
+                                                conf=      confidence,
+                                                iou=       0.5, # default value TODO: tune if necessary
+                    )
                     
                     # show bounding boxes and highlight objects that are not supposed to be in the space
-                    frame = self.interpret_frame_result(results, frame, show, 'Video', media_path)
+                    frame = self.interpret_frame_result(results, show, 'Video', media_path)
                     
                     # save the results to a file
                     if out:
@@ -135,6 +144,7 @@ class Detector:
                       camera: int, 
                       show: bool, 
                       save_dir: Path, 
+                      iou: float,
                       save_name = None):
         '''
         Detect objects in a camera stream and highlights objects 
@@ -144,13 +154,14 @@ class Detector:
         `confidence`: The confidence threshold for the model to detect an object.\n
         `camera`:     The camera number to use for the stream.\n
         `show`:       Boolean value to show the camera stream or not.\n
-        `save_dir`:  A directory to save the video.\n
+        `save_dir`:   A directory to save the video.\n
+        `iou`:        The intersection over union threshold for the model to detect an object.\n
         `save_name`:  The name of the video file to save the results to including
                       the extension.\n
         '''
         # check if the save name is valid
         if save_name is None:
-            save_name = f'predict_on_camera_{camera}.mp4'
+            save_name = f'track_on_camera_{camera}.mp4'
         elif not save_name.endswith('.mp4'):
             raise ValueError("Can only save to mp4 format. Please provide a valid save name.")
         
@@ -183,13 +194,14 @@ class Detector:
                 break
 
             # detect objects in the frame
-            results = self.model.predict(frame, 
-                                         show=      False, 
-                                         conf=      confidence, 
-                                         stream=    True)
+            results = self.model.track( frame, 
+                                        persist=   True,
+                                        conf=      confidence,
+                                        iou=       0.5, # default value TODO: tune if necessary
+            )
             
             # show bounding boxes and highlight objects that are not supposed to be in the space
-            frame = self.interpret_frame_result(results, frame, show, 'Camera', win_name)
+            frame = self.interpret_frame_result(results, show, 'Camera', win_name)
             
             # save the results to a file
             if save_dir:
@@ -205,8 +217,7 @@ class Detector:
         cv2.destroyWindow(win_name)
 
     def interpret_frame_result(self, 
-                               results: Generator, 
-                               frame: cv2.typing.MatLike, 
+                               results: Results, 
                                show: bool, 
                                input_type: str, 
                                win_name: str, 
@@ -215,7 +226,7 @@ class Detector:
         Shows the results of the detection on the frame and highlights objects 
         that are within a certain space.
 
-        **TODO**: interpret the frame in the context of the FOD problem
+        **TODO**: highlight objects that are in the roi after a certain duration.
         - - -
         `results`:      The results of the detection.\n
         `frame`:        The frame to show the results on.\n
@@ -224,34 +235,9 @@ class Detector:
         `win_name`:     The name of the window to show the frame in.\n
         `roi`:          The region of interest to highlight objects in.\n
         '''
-        # get the next result from the generator
-        r = next(results, None)
-        if r:
-            # draw the boundary box on the frame
-            frame = self.draw_box(frame, 
-                                  roi[0], 
-                                  roi[1], 
-                                  'Assembly Boundary', 
-                                  (0, 0, 255), 
-                                  2, 
-                                  text_color=(0, 0, 255), 
-                                  text_thickness=2
-            )
+        # plot the results on the frame
+        frame = results.plot()
 
-            # for each detected object in the frame, draw the box and label on the frame
-            for box in r.boxes:
-                # get the box coordinates
-                x1, y1, x2, y2 = box.xyxy[0]
-                x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
-
-                # get the class and confidence of the box
-                conf = math.ceil((box.conf[0]*100))/100
-                cls = int(box.cls[0])
-                text = self.model.names[cls] + ' ' + str(conf)
-
-                # draw the box on the frame
-                frame = self.draw_box(frame, (x1, y1), (x2, y2), text)
-        
         # if the input type is an image, show the image with a loop
         # video and camera streams are shown with a single frame because
         # the loop to display is outside of this function
@@ -263,53 +249,5 @@ class Detector:
             cv2.destroyWindow(win_name)
         elif show:
             cv2.imshow(win_name, frame)
-
-        return frame
-
-    def draw_box(self, 
-                 frame:         cv2.typing.MatLike, 
-                 pt1:           tuple,
-                 pt2:           tuple,
-                 text:          str,
-                 edge_color=         (0, 255, 0),
-                 edge_thickness=     1,
-                 text_color=    (0, 255, 0),
-                 text_thickness=1,
-                 font_scale=    1.0,
-                 font=          cv2.FONT_HERSHEY_SIMPLEX,
-                 text_offset=   (5, 25)):
-        '''
-        Draw a bounding box on the frame.
-        - - -
-        `frame`:            The frame to draw the bounding box on.\n
-        `box`:              The bounding box coordinates.\n
-        `edge_color`:       The color of the bounding box.\n
-        `edge_thickness`:   The thickness of the bounding box.\n
-        `text_color`:       The color of the text.\n
-        `text_thickness`:   The thickness of the text.\n
-        `font_scale`:       The scale of the font.\n
-        `font`:             The font to use for the text.\n
-        `text_offset`:      The offset of the text from the top left corner of the bounding box.\n
-        '''
-        # draw the bounding box on the frame
-        cv2.rectangle(frame, 
-                        pt1, 
-                        pt2, 
-                        edge_color, 
-                        edge_thickness
-        )
-
-        # specify text details
-        org = [pt1[0] + text_offset[0], pt1[1] + text_offset[1]]
-
-        # write the class name and confidence on the frame
-        cv2.putText(frame, 
-                    text, 
-                    org, 
-                    font, 
-                    font_scale, 
-                    text_color, 
-                    text_thickness
-        )
 
         return frame
