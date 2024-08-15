@@ -458,8 +458,8 @@ class Detector:
         org = [pt1[0] + text_offset[0], pt1[1] + text_offset[1]]
 
         # Draw a filled rectangle behind the text
-        (text_width, _), baseline = cv2.getTextSize(text, font, font_scale, text_thickness)
-        top_left = (pt1[0], pt1[1])
+        (text_width, text_height), baseline = cv2.getTextSize(text, font, font_scale, text_thickness)
+        top_left = (org[0], org[1] - text_height - baseline)
         bottom_right = (org[0] + text_width, org[1] + baseline)
         cv2.rectangle(frame, top_left, bottom_right, edge_color, cv2.FILLED)
 
