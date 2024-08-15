@@ -8,13 +8,16 @@ from pathlib import Path
 import Utils
 import argparse
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     '''
     Parse command line arguments. The arguments are as follows:
 
     1. `--max-processes`: Max number of processes to use. 
         Default is the number of CPUs. This value cannot be less than 1.
     2. `--copies`: Number of copies per image. This value cannot be less than 1.
+    - - -
+    #####Return: `argparse.Namespace`
+    The parsed arguments.
     '''
     parser = argparse.ArgumentParser(description='Benchmark SimpleAugSeq')
     parser.add_argument('--max-processes', type=int, default=os.cpu_count(), help='Max number of processes to use', metavar='INT')
