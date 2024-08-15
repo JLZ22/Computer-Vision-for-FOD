@@ -204,8 +204,19 @@ class Detector:
                     if out:
                         out.write(frame)
 
-                    if cv2.waitKey(1) == ord('q'):
+                    # Check for key press
+                    key = cv2.waitKey(1) & 0xFF
+
+                    if key == ord('p') or key == ord(' '):  # Press 'p' or ' ' to pause
+                        while True:
+                            # Wait indefinitely until 'r', ' ', or 'q' is pressed to resume
+                            resume_key = cv2.waitKey(0) & 0xFF
+                            if resume_key == ord('r') or resume_key == ord(' ') or resume_key == ord('q'):
+                                break  # Break out of the loop and resume the stream
+
+                    if key == ord('q'):  # Press 'q' to quit
                         break
+                    
                 if out:
                     out.release()
                 cv2.destroyWindow(media_path)
@@ -278,8 +289,17 @@ class Detector:
             if save_dir:
                 out.write(frame)
 
-            # break the loop if the 'q' key is pressed
-            if cv2.waitKey(1) == ord('q'):
+            # Check for key press
+            key = cv2.waitKey(1) & 0xFF
+
+            if key == ord('p') or key == ord(' '):  # Press 'p' or ' ' to pause
+                while True:
+                    # Wait indefinitely until 'r', ' ', or 'q' is pressed to resume
+                    resume_key = cv2.waitKey(0) & 0xFF
+                    if resume_key == ord('r') or resume_key == ord(' ') or resume_key == ord('q'):
+                        break  # Break out of the loop and resume the stream
+
+            if key == ord('q'):  # Press 'q' to quit
                 break
 
         cap.release()
@@ -420,7 +440,7 @@ class Detector:
 
                 # update the exit timestamp of the object if it is not in the roi and the exit timestamp has not already been set
                 elif curr_obj.timestamp_of_exit_from_roi is None:
-                    curr_obj.update_exit_time()
+                    curr_obj.update_exit_timestamp()
             else:
                 # add the object to the roi if it is in the roi
                 if self.is_object_in_roi(xyxy, roi):
