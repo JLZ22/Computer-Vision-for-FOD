@@ -59,7 +59,9 @@ In a random sample of 128 data points, we found that 4 data points were faulty. 
 - [x] separate txt and jpg
 - [x] train on augmented data
 - [x] train on unaugmented data
-- [ ] interpret model predictions in the context of FOD problem
+- [x] use tracking to highlight objects that are within a roi for a certain duration
+- [ ] find most effective standard for determining if an object is in the roi or not
+- [ ] keep objects highlighted if they leave the roi briefly
 - [ ] test in assembly space on 1 camera
 - [ ] test in assembly space on 3 cameras
 
