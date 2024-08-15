@@ -222,11 +222,13 @@ class Detector:
         cv2.destroyWindow(win_name)
 
     def interpret_frame_result(self, 
-                               results: Results, 
-                               show: bool, 
-                               input_type: str, 
-                               win_name: str, 
-                               roi= [50, 50, 1000, 1000]):
+                               results:         Results, 
+                               show:            bool, 
+                               input_type:      str, 
+                               win_name:        str, 
+                               roi=             [50, 50, 1000, 1000],
+                               roi_time=        3,
+                               roi_exit_time=   3) -> cv2.typing.MatLike:
         '''
         Shows the results of the detection on the frame and highlights objects 
         that are within a certain space.
@@ -240,12 +242,14 @@ class Detector:
         `input_type`:   The type of input the frame is from.\n
         `win_name`:     The name of the window to show the frame in.\n
         `roi`:          The region of interest to highlight objects in.\n
+        `roi_time`:     The time in seconds an object must be in the roi to be highlighted.\n
+        `roi_exit_time`:The time in seconds an object must be outside the roi to be removed from the roi.
         - - -
         #####Return: `cv2.typing.MatLike`
         The frame with the results of the detection shown on it.
         '''
         # get the boxes to highlight
-        to_highlight = self.get_boxes_in_roi(results.boxes, roi)
+        to_highlight = self.get_boxes_in_roi(results.boxes, roi, roi_time, roi_exit_time)
 
         # plot the results on the frame
         # frame = results.plot(line_width=1, font_size=1.0)
@@ -322,15 +326,17 @@ class Detector:
 
         return percentage_overlap >= percentage
     
-    def get_boxes_in_roi(self, boxes: Boxes, roi: list, verbose = True) -> set:
+    def get_boxes_in_roi(self, boxes: Boxes, roi: list, roi_time: int, roi_exit_time: int, verbose = True) -> set:
         '''
         Interpret the boxes detected by the model.
 
         TODO: test if the function works as expected. should change border to red if object is in roi for more than 3 seconds.
         - - -
-        `boxes`:    The boxes detected by the model.\n
-        `roi`:      The region of interest to check the bounding boxes against.\n
-        `verbose`:  Boolean value to print the set to highlight and the dict of items in the roi.\n
+        `boxes`:            The boxes detected by the model.\n
+        `roi`:              The region of interest to check the bounding boxes against.\n
+        `verbose`:          Boolean value to print the set to highlight and the dict of items in the roi.\n
+        `roi_time`:         The time in seconds an object must be in the roi to be highlighted.\n
+        `roi_exit_time`:    The time in seconds an object must be outside the roi to be removed from the roi.\n
         - - -
         #####Return: `set`
         A set of boxes to highlight.
@@ -351,23 +357,26 @@ class Detector:
 
             if id in self.objects_in_roi:
                 curr_obj = self.objects_in_roi[id]
+
+
+                # update the object if it is in the roi
                 if self.is_object_in_roi(xyxy, roi):
-                    # update the object with the new detection values
                     curr_obj.update(cls, conf, xyxy)
-                    # reset the exit time of the object to None
                     curr_obj.reset_exit_timestamp()
+                else:
+                    # update the exit timestamp if the object is not in the roi and it does not already have an exit timestamp
+                    if curr_obj.timestamp_of_exit_from_roi is None:
+                        curr_obj.update_exit_timestamp()
+                    # remove the object from the roi if it has been outside the roi for more than roi_exit_time seconds
+                    elif curr_obj.get_time_elapsed_outside_roi() > roi_exit_time:
+                        self.objects_in_roi.pop(id)
 
-                    # add the object to the set of objects to highlight if it has been in the roi for more than 3 seconds
-                    if curr_obj.get_time_elapsed_in_roi() > 3:
-                        to_highlight.add(curr_obj)
+                # add the object to the highlight set if it has been in the roi for more than roi_time seconds
+                # and it has not been removed from the roi
+                # TODO: modify this to create a set of non-highlight boxes
+                if id in self.objects_in_roi and self.objects_in_roi[id].get_time_elapsed_in_roi() > roi_time:
+                    to_highlight.add(self.objects_in_roi[id])
 
-                # remove the object from the roi if it has been outside the roi for more than 1 second
-                elif curr_obj.get_time_elapsed_outside_roi() > 1:
-                    self.objects_in_roi.pop(id)
-
-                # update the exit timestamp of the object if it is not in the roi and the exit timestamp has not already been set
-                elif curr_obj.timestamp_of_exit_from_roi is None:
-                    curr_obj.update_exit_timestamp()
             else:
                 # add the object to the roi if it is in the roi
                 if self.is_object_in_roi(xyxy, roi):
@@ -376,6 +385,9 @@ class Detector:
         if verbose:
             print(f'Objects in the roi: {self.objects_in_roi}')
             print(f'Objects to highlight: {to_highlight}')
+            for key in self.objects_in_roi:
+                print(f'Object {key} has been in the roi for {self.objects_in_roi[key].get_time_elapsed_in_roi()} seconds.')
+                print(f'Object {key} has been outside the roi for {self.objects_in_roi[key].get_time_elapsed_outside_roi()} seconds.')
 
         return to_highlight
         
