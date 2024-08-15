@@ -220,16 +220,7 @@ class Detector:
                         out.write(frame)
 
                     # Check for key press
-                    key = cv2.waitKey(1) & 0xFF
-
-                    if key == ord('p') or key == ord(' '):  # Press 'p' or ' ' to pause
-                        while True:
-                            # Wait indefinitely until 'r', ' ', or 'q' is pressed to resume
-                            resume_key = cv2.waitKey(0) & 0xFF
-                            if resume_key == ord('r') or resume_key == ord(' ') or resume_key == ord('q'):
-                                break  # Break out of the loop and resume the stream
-
-                    if key == ord('q'):  # Press 'q' to quit
+                    if self.check_key_press():
                         break
                     
                 if out:
@@ -305,16 +296,7 @@ class Detector:
                 out.write(frame)
 
             # Check for key press
-            key = cv2.waitKey(1) & 0xFF
-
-            if key == ord('p') or key == ord(' '):  # Press 'p' or ' ' to pause
-                while True:
-                    # Wait indefinitely until 'r', ' ', or 'q' is pressed to resume
-                    resume_key = cv2.waitKey(0) & 0xFF
-                    if resume_key == ord('r') or resume_key == ord(' ') or resume_key == ord('q'):
-                        break  # Break out of the loop and resume the stream
-
-            if key == ord('q'):  # Press 'q' to quit
+            if self.check_key_press():
                 break
 
         cap.release()
@@ -529,3 +511,23 @@ class Detector:
         )
 
         return frame
+    
+    def check_key_press(self) -> bool:
+        '''
+        Check for key presses to pause the program or quit the stream. If the 
+        keys 'p' or ' ' are pressed, the program will pause until 'r' or ' '
+        is pressed to resume.
+        - - -
+        Returns: true if the key 'q' is pressed, false otherwise.
+        '''
+        key = cv2.waitKey(1) & 0xFF
+        resume_key = None
+
+        if key == ord('p') or key == ord(' '):  # Press 'p' or ' ' to pause
+            while True:
+                # Wait indefinitely until 'r', ' ', or 'q' is pressed to resume
+                resume_key = cv2.waitKey(0) & 0xFF
+                if resume_key == ord('r') or resume_key == ord(' ') or resume_key == ord('q'):
+                    break  # Break out of the loop and resume the stream
+
+        return key == ord('q') or resume_key == ord('q')  # Press 'q' to quit
