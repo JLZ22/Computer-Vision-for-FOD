@@ -26,14 +26,22 @@ class Box:
         self.confidence = confidence
         self.xyxy = xyxy
         self.id = id
-        self.time_created = time.time()
+        self.timestamp_of_entering_roi = None
         self.timestamp_of_exit_from_roi = None
+    
+    def update_enter_timestamp(self):
+        '''
+        Update the time when the object entered the roi.
+        '''
+        self.timestamp_of_entering_roi = time.time()
 
-    def get_age(self) -> float:
+    def get_time_elapsed_in_roi(self) -> float:
         '''
         Get the time (seconds) elapsed since the object was created.
         '''
-        return time.time() - self.time_created
+        if self.timestamp_of_entering_roi is None:
+            return 0
+        return time.time() - self.timestamp_of_entering_roi
     
     def update(self, 
                label:       str = None,
@@ -60,7 +68,7 @@ class Box:
         '''
         self.timestamp_of_exit_from_roi = time.time()
 
-    def get_time_outside_roi(self) -> float:
+    def get_time_elapsed_outside_roi(self) -> float:
         '''
         Get the time (seconds) elapsed since the object exited the roi.
         '''
@@ -73,6 +81,12 @@ class Box:
         Reset the time when the object was last not in the roi.
         '''
         self.timestamp_of_exit_from_roi = None
+
+    def reset_enter_timestamp(self):
+        '''
+        Reset the time when the object entered the roi.
+        '''
+        self.timestamp_of_entering_roi = None
 
 class Detector:
     '''
@@ -89,6 +103,7 @@ class Detector:
         if model is None:
             self.model = YOLO('../models/yolov8n.pt')
         self.model = model
+        self.names = model.names
         self.objects_in_roi = dict()
 
     def detect(self,  
@@ -317,7 +332,8 @@ class Detector:
         Shows the results of the detection on the frame and highlights objects 
         that are within a certain space.
 
-        **TODO**: highlight objects that are in the roi after a certain duration.
+        **TODO**: fix issue where item is immediately unhighlighted after being removed from the roi instead of after 1 second.
+        **TODO**: partition all results into highlight and non-highlighted objects.
         - - -
         `results`:      The results of the detection.\n
         `frame`:        The frame to show the results on.\n
@@ -330,7 +346,8 @@ class Detector:
         to_highlight = self.get_boxes_in_roi(results.boxes, roi)
 
         # plot the results on the frame
-        frame = results.plot(line_width=2, font_size=1.0)
+        # frame = results.plot(line_width=1, font_size=1.0)
+        frame = results.orig_img
         if to_highlight:
             for box in to_highlight:
                 frame = self.draw_box(frame, 
@@ -370,6 +387,8 @@ class Detector:
         '''
         Check if the xyxy coordinates of a bounding box overlap with
         the roi by at least the percentage specified. 
+
+        **TODO**: update condition for an object being in the roi. current condition is not accurate.
         - - -
         `xyxy`:       The bounding box coordinates.\n
         `roi`:        The region of interest to check the bounding box against.\n
@@ -431,11 +450,11 @@ class Detector:
                     curr_obj.reset_exit_timestamp()
 
                     # add the object to the set of objects to highlight if it has been in the roi for more than 3 seconds
-                    if curr_obj.get_age() > 3:
+                    if curr_obj.get_time_elapsed_in_roi() > 3:
                         to_highlight.add(curr_obj)
 
                 # remove the object from the roi if it has been outside the roi for more than 1 second
-                elif curr_obj.get_time_outside_roi() > 1:
+                elif curr_obj.get_time_elapsed_outside_roi() > 1:
                     self.objects_in_roi.pop(id)
 
                 # update the exit timestamp of the object if it is not in the roi and the exit timestamp has not already been set
@@ -445,6 +464,7 @@ class Detector:
                 # add the object to the roi if it is in the roi
                 if self.is_object_in_roi(xyxy, roi):
                     self.objects_in_roi[id] = Box(cls, conf, xyxy, id)
+                    self.objects_in_roi[id].update_enter_timestamp()
 
         if verbose:
             print(f'Objects in the roi: {self.objects_in_roi}')
@@ -477,6 +497,10 @@ class Detector:
         `font`:             The font to use for the text.\n
         `text_offset`:      The offset of the text from the top left corner of the bounding box.\n
         '''
+        # convert the bounding box coordinates to integers if they are not (typically floats or tensors wrapping floats)
+        pt1 = (int(pt1[0]), int(pt1[1]))
+        pt2 = (int(pt2[0]), int(pt2[1]))
+
         # draw the bounding box on the frame
         cv2.rectangle(frame, 
                         pt1, 
