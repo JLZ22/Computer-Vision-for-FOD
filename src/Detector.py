@@ -38,6 +38,9 @@ class Box:
     def get_time_elapsed_in_roi(self) -> float:
         '''
         Get the time (seconds) elapsed since the object was created.
+        - - -
+        #####Return: `float`
+        The time elapsed since the object was created.
         '''
         if self.timestamp_of_entering_roi is None:
             return 0
@@ -71,6 +74,9 @@ class Box:
     def get_time_elapsed_outside_roi(self) -> float:
         '''
         Get the time (seconds) elapsed since the object exited the roi.
+        - - -
+        #####Return: `float`
+        The time elapsed since the object exited the roi.
         '''
         if self.timestamp_of_exit_from_roi is None:
             return 0
@@ -323,6 +329,9 @@ class Detector:
         `input_type`:   The type of input the frame is from.\n
         `win_name`:     The name of the window to show the frame in.\n
         `roi`:          The region of interest to highlight objects in.\n
+        - - -
+        #####Return: `cv2.typing.MatLike`
+        The frame with the results of the detection shown on it.
         '''
         # get the boxes to highlight
         to_highlight = self.get_boxes_in_roi(results.boxes, roi)
@@ -376,6 +385,9 @@ class Detector:
         `roi`:        The region of interest to check the bounding box against.\n
         `percentage`: The percentage of the bounding box that must overlap with the roi.\n
         `verbose`:    Boolean value to print the percentage overlap and union.\n
+        - - - 
+        #####Return: `bool`
+        True if the bounding box overlaps with the roi by at least the percentage specified, false otherwise.
         '''
         # calculate the area of the bounding box
         box_area = (xyxy[2] - xyxy[0]) * (xyxy[3] - xyxy[1])
@@ -408,6 +420,9 @@ class Detector:
         `boxes`:    The boxes detected by the model.\n
         `roi`:      The region of interest to check the bounding boxes against.\n
         `verbose`:  Boolean value to print the set to highlight and the dict of items in the roi.\n
+        - - -
+        #####Return: `set`
+        A set of boxes to highlight.
         '''
         assert(len(roi) == 4), "The roi must have 4 coordinates."
         assert(roi[0] < roi[2] and roi[1] < roi[3]), "The roi coordinates must be in the format [x1, y1, x2, y2]."
@@ -478,6 +493,9 @@ class Detector:
         `font_scale`:       The scale of the font.\n
         `font`:             The font to use for the text.\n
         `text_offset`:      The offset of the text from the top left corner of the bounding box.\n
+        - - -
+        #####Return: `cv2.typing.MatLike`
+        The frame with the bounding box drawn on it.
         '''
         # convert the bounding box coordinates to integers if they are not (typically floats or tensors wrapping floats)
         pt1 = (int(pt1[0]), int(pt1[1]))
@@ -518,7 +536,8 @@ class Detector:
         keys 'p' or ' ' are pressed, the program will pause until 'r' or ' '
         is pressed to resume.
         - - -
-        Returns: true if the key 'q' is pressed, false otherwise.
+        #####Return: `bool` 
+        True if the key 'q' is pressed, false otherwise.
         '''
         key = cv2.waitKey(1) & 0xFF
         resume_key = None
