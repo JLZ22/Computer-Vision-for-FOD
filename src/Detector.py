@@ -400,8 +400,7 @@ class Detector:
                  text_color=        (255, 255, 255),
                  text_thickness=    2,
                  font_scale=        1.0,
-                 font=              cv2.FONT_HERSHEY_SIMPLEX,
-                 text_offset=       (5, 25)):
+                 font=              cv2.FONT_HERSHEY_SIMPLEX):
         '''
         Draw a bounding box on the frame.
         - - -
@@ -413,7 +412,6 @@ class Detector:
         `text_thickness`:   The thickness of the text.\n
         `font_scale`:       The scale of the font.\n
         `font`:             The font to use for the text.\n
-        `text_offset`:      The offset of the text from the top left corner of the bounding box.\n
         - - -
         #####Return: `cv2.typing.MatLike`
         The frame with the bounding box drawn on it.
@@ -430,11 +428,13 @@ class Detector:
                         edge_thickness
         )
 
-        # specify text details
-        org = [pt1[0] + text_offset[0], pt1[1] + text_offset[1]]
-
-        # Draw a filled rectangle behind the text
+        # Get text size information
         (text_width, text_height), baseline = cv2.getTextSize(text, font, font_scale, text_thickness)
+
+        # Calculate the orgin of the text
+        org = (pt1[0], pt1[1] + text_height + baseline)
+
+        # Draw a filled rectangle to act as text background
         top_left = (org[0], org[1] - text_height - baseline)
         bottom_right = (org[0] + text_width, org[1] + baseline)
         cv2.rectangle(frame, top_left, bottom_right, edge_color, cv2.FILLED)
