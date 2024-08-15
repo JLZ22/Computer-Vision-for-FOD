@@ -47,11 +47,11 @@ class Box:
         `confidence`:  The confidence of the object.\n
         `xyxy`:        The bounding box coordinates of the object.\n
         '''
-        if label:
+        if label is not None:
             self.label = label
-        if confidence:
+        if confidence is not None:
             self.confidence = confidence
-        if xyxy:
+        if xyxy is not None:
             self.xyxy = xyxy
 
     def update_exit_timestamp(self):
@@ -343,9 +343,10 @@ class Detector:
         return frame
     
     def is_object_in_roi(self,
-                      xyxy: list,
-                      roi: list,
-                      percentage: float = 0.5) -> bool:
+                      xyxy:         list,
+                      roi:          list,
+                      percentage:   float = 0.5,
+                      verbose =     True) -> bool:
         '''
         Check if the xyxy coordinates of a bounding box overlap with
         the roi by at least the percentage specified. 
@@ -353,6 +354,7 @@ class Detector:
         `xyxy`:       The bounding box coordinates.\n
         `roi`:        The region of interest to check the bounding box against.\n
         `percentage`: The percentage of the bounding box that must overlap with the roi.\n
+        `verbose`:    Boolean value to print the percentage overlap and union.\n
         '''
         # calculate the area of the bounding box
         box_area = (xyxy[2] - xyxy[0]) * (xyxy[3] - xyxy[1])
@@ -369,17 +371,22 @@ class Detector:
 
         # calculate the percentage of the intersection
         percentage_overlap = intersection / union
+        
+        if verbose:
+            print(f'Percentage overlap: {percentage_overlap}')
+            print(f'Union: {union}')
 
         return percentage_overlap >= percentage
     
-    def get_boxes_in_roi(self, boxes: Boxes, roi: list) -> set:
+    def get_boxes_in_roi(self, boxes: Boxes, roi: list, verbose = True) -> set:
         '''
         Interpret the boxes detected by the model.
 
         TODO: test if the function works as expected. should change border to red if object is in roi for more than 3 seconds.
         - - -
-        `boxes`: The boxes detected by the model.\n
-        `roi`:   The region of interest to check the bounding boxes against.\n
+        `boxes`:    The boxes detected by the model.\n
+        `roi`:      The region of interest to check the bounding boxes against.\n
+        `verbose`:  Boolean value to print the set to highlight and the dict of items in the roi.\n
         '''
         assert(len(roi) == 4), "The roi must have 4 coordinates."
         assert(roi[0] < roi[2] and roi[1] < roi[3]), "The roi coordinates must be in the format [x1, y1, x2, y2]."
@@ -391,9 +398,9 @@ class Detector:
             cls = boxes.cls[i]
             conf = boxes.conf[i]
             xyxy = boxes.xyxy[i]
-            if not boxes.id:
+            if boxes.id is None:
                 continue
-            id = boxes.id[i]
+            id = int(boxes.id[i])
 
             if id in self.objects_in_roi:
                 curr_obj = self.objects_in_roi[id]
@@ -401,7 +408,7 @@ class Detector:
                     # update the object with the new detection values
                     curr_obj.update(cls, conf, xyxy)
                     # reset the exit time of the object to None
-                    curr_obj.reset_exit_time()
+                    curr_obj.reset_exit_timestamp()
 
                     # add the object to the set of objects to highlight if it has been in the roi for more than 3 seconds
                     if curr_obj.get_age() > 3:
@@ -418,6 +425,10 @@ class Detector:
                 # add the object to the roi if it is in the roi
                 if self.is_object_in_roi(xyxy, roi):
                     self.objects_in_roi[id] = Box(cls, conf, xyxy, id)
+
+        if verbose:
+            print(f'Objects in the roi: {self.objects_in_roi}')
+            print(f'Objects to highlight: {to_highlight}')
 
         return to_highlight
         
