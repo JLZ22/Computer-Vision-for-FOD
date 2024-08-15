@@ -357,11 +357,10 @@ class Detector:
 
             if id in self.objects_in_roi:
                 curr_obj = self.objects_in_roi[id]
+                curr_obj.update(cls, conf, xyxy)
 
-
-                # update the object if it is in the roi
+                # update the object exit timestamp if it is in the roi
                 if self.is_object_in_roi(xyxy, roi):
-                    curr_obj.update(cls, conf, xyxy)
                     curr_obj.reset_exit_timestamp()
                 else:
                     # update the exit timestamp if the object is not in the roi and it does not already have an exit timestamp
