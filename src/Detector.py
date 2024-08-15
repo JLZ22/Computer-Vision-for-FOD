@@ -3,6 +3,7 @@ from ultralytics import YOLO
 import cv2
 from pathlib import Path
 from Box import Box
+import time
 
 class Detector:
     '''
@@ -341,8 +342,8 @@ class Detector:
             return to_highlight
         for i in range(boxes.xyxy.shape[0]):
             # create a box object from the results for ease of access
-            cls = boxes.cls[i]
-            conf = boxes.conf[i]
+            cls = self.names[int(boxes.cls[i])]
+            conf = float(boxes.conf[i])
             xyxy = boxes.xyxy[i]
             if boxes.id is None:
                 continue
@@ -370,8 +371,7 @@ class Detector:
             else:
                 # add the object to the roi if it is in the roi
                 if self.is_object_in_roi(xyxy, roi):
-                    self.objects_in_roi[id] = Box(cls, conf, xyxy, id)
-                    self.objects_in_roi[id].update_enter_timestamp()
+                    self.objects_in_roi[id] = Box(cls, conf, xyxy, id, time.time())
 
         if verbose:
             print(f'Objects in the roi: {self.objects_in_roi}')

@@ -9,21 +9,25 @@ class Box:
                  label: str, 
                  confidence: float, 
                  xyxy: list,
-                 id: int):
+                 id: int,
+                 timestamp_of_entering_roi: float = None,
+                 timestamp_of_exit_from_roi: float = None):
         '''
         Initialize the object with the label, confidence, and bounding box coordinates.
         - - -
-        `label`:       The label of the object.\n
-        `confidence`:  The confidence of the object.\n
-        `xyxy`:        The bounding box coordinates of the object.\n
-        `id`:          The id of the object.\n
+        `label`:                        The label of the object.\n
+        `confidence`:                   The confidence of the object.\n
+        `xyxy`:                         The bounding box coordinates of the object.\n
+        `id`:                           The id of the object.\n
+        `timestamp_of_entering_roi`:    The time when the object entered the roi.\n
+        `timestamp_of_exit_from_roi`:   The time when the object was last not in the roi.
         '''
         self.label = label
         self.confidence = confidence
         self.xyxy = xyxy
         self.id = id
-        self.timestamp_of_entering_roi = None
-        self.timestamp_of_exit_from_roi = None
+        self.timestamp_of_entering_roi = timestamp_of_entering_roi
+        self.timestamp_of_exit_from_roi = timestamp_of_exit_from_roi
     
     def update_enter_timestamp(self):
         '''
