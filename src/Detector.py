@@ -28,6 +28,7 @@ class Detector:
                confidence=          0.7,
                media_paths=         [],
                camera_index=        0,
+               iou=                 0.5,
                save_dir=            None,
                camera_save_name=    None,
                show=                True):
@@ -43,18 +44,27 @@ class Detector:
         `input_type`:       The type of input to detect objects in.\n
         `confidence`:       The confidence threshold for the model to detect an object.\n
         `media_paths`:      A list of paths to the media files to detect objects in.\n
-        `camera`:           The camera number to use for the stream.\n
+        `camera_index`:     The camera number to use for the stream.\n
+        `iou`:              The intersection over union threshold for the model to detect an object.\n
+        `camera_save_name`: The name of the video file to save the results to including the extension.\n
         `save_dir`:         The path to save the results to. For media detection, this should
                             be a **/* directory.\n
-        `camera_save_name`: The name of the video file to save the results to including the extension.\n
         `show`:             Boolean value to show the media files or not.\n
-        `iou`:              The intersection over union threshold for the model to detect an object.\n
         '''
         if input_type == 'media':
             media_paths = [str(media_path) for media_path in media_paths]
-            self.detect_media(confidence, media_paths, show, save_dir)
+            self.detect_media(confidence=confidence,
+                              media_paths=media_paths,
+                              show=show,
+                              save_dir=save_dir,
+                              iou=iou)
         elif input_type == 'camera':
-            self.detect_camera(confidence, camera_index, show, save_dir, camera_save_name)
+            self.detect_camera(confidence=confidence,
+                               camera=camera_index,
+                               show=show,
+                               save_dir=save_dir,
+                               iou=iou,
+                               save_name=camera_save_name)
         else:
             raise ValueError("Invalid input type. Please choose either 'media' or 'camera'.")
     
@@ -105,40 +115,17 @@ class Detector:
                 cap = cv2.VideoCapture(media_path)
                 
                 # get the frame size and initialize the video writer
+                out = None
                 if save_dir:
                     frame_size = (int(cap.get(3)), int(cap.get(4)))
                     if Path(media_path).suffix != '.mp4':
                         print(f"Cannot save the results of {media_path} to a file. Can only save to mp4 format. Performing detection only. Press 'enter' to continue.")
                         input()
-                        out = None
                     else:
                         out = cv2.VideoWriter(str(save_dir / ('detect_' + Path(media_path).name)), cv2.VideoWriter_fourcc(*'mp4v'), 30.0, frame_size)
                 
                 # loop to read the video stream and detect objects
-                while True:
-                    ret, frame = cap.read()
-
-                    # if the frame is not read, break the loop
-                    if not ret:
-                        break
-
-                    # detect objects in the frame
-                    results = self.model.track( frame, 
-                                                persist=   True,
-                                                conf=      confidence,
-                                                iou=       0.5, # default value TODO: tune if necessary
-                    )
-                    
-                    # show bounding boxes and highlight objects that are not supposed to be in the space
-                    frame = self.interpret_frame_result(results[0], show, 'Video', media_path)
-                    
-                    # save the results to a file
-                    if out:
-                        out.write(frame)
-
-                    # Check for key press
-                    if self.check_key_press():
-                        break
+                self.run_video_loop(confidence, cap, show, media_path, out, iou)
                     
                 if out:
                     out.release()
@@ -181,6 +168,7 @@ class Detector:
         win_name = f'Camera {camera}'
 
         # get the frame size and initialize the video writer
+        out = None
         if save_dir:
             # check if the save path exists and update save_name until it is unique
             save_path = save_dir / save_name
@@ -191,6 +179,30 @@ class Detector:
             out = cv2.VideoWriter(str(save_path), cv2.VideoWriter_fourcc(*'mp4v'), 30.0, frame_size)
 
         # loop to read the camera stream and detect objects
+        self.run_video_loop(confidence, cap, show, win_name, out, iou)
+
+        cap.release()
+        if save_dir:
+            out.release()
+        cv2.destroyWindow(win_name)
+
+    def run_video_loop(self, 
+                       confidence:  float,
+                       cap:         cv2.VideoCapture,
+                       show:        bool,
+                       win_name:    str,
+                       out:         cv2.VideoWriter | None,
+                       iou:         float,):
+        '''
+        Run the loop to read the video stream and detect objects.
+        - - -
+        `confidence`: The confidence threshold for the model to detect an object.\n
+        `cap`:        The video capture object to read the video stream.\n
+        `show`:       Boolean value to show the camera stream or not.\n
+        `win_name`:   The name of the window to show the camera stream in.\n
+        `out`:        The video writer object to save the results to.\n
+        `iou`:        The intersection over union threshold for the model to detect an object.\n
+        '''
         while True:
             ret, frame = cap.read()
 
@@ -202,24 +214,19 @@ class Detector:
             results = self.model.track( frame, 
                                         persist=   True,
                                         conf=      confidence,
-                                        iou=       0.5, # default value TODO: tune if necessary
+                                        iou=       iou, # default value TODO: tune if necessary
             )
             
             # show bounding boxes and highlight objects that are not supposed to be in the space
             frame = self.interpret_frame_result(results[0], show, 'Camera', win_name)
             
             # save the results to a file
-            if save_dir:
+            if out is not None:
                 out.write(frame)
 
             # Check for key press
             if self.check_key_press():
                 break
-
-        cap.release()
-        if save_dir:
-            out.release()
-        cv2.destroyWindow(win_name)
 
     def interpret_frame_result(self, 
                                results:         Results, 
