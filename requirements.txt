@@ -9,3 +9,4 @@ tqdm
 matplotlib
 clearml
 pdoc
+pyside6
