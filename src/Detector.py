@@ -389,8 +389,9 @@ class Detector:
             print(f'Objects in the roi: {self.objects_in_roi}')
             print(f'Objects to highlight: {to_highlight}')
             for key in self.objects_in_roi:
-                print(f'Object {key} has been in the roi for {self.objects_in_roi[key].get_time_elapsed_in_roi()} seconds.')
-                print(f'Object {key} has been outside the roi for {self.objects_in_roi[key].get_time_elapsed_outside_roi()} seconds.')
+                obj = self.objects_in_roi[key]
+                print(f'Object {key} {obj.label} has been in the roi for {obj.get_time_elapsed_in_roi()} seconds.')
+                print(f'Object {key} {obj.label} has been outside the roi for {obj.get_time_elapsed_outside_roi()} seconds.')
 
         return to_highlight
         
