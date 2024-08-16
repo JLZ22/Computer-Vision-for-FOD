@@ -16,7 +16,7 @@ yolov8l
 yolov8x (Slowest and Most accurate)
 '''
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     '''
     Parse command line arguments for the object detection script. The arguments are as follows:
     - `--input-type`: Input type ("media" or "camera")

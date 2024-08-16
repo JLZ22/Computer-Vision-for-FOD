@@ -400,7 +400,7 @@ class Detector:
                  text_color=        (255, 255, 255),
                  text_thickness=    2,
                  font_scale=        1.0,
-                 font=              cv2.FONT_HERSHEY_SIMPLEX):
+                 font=              cv2.FONT_HERSHEY_SIMPLEX) -> cv2.typing.MatLike:
         '''
         Draw a bounding box on the frame.
         - - -
