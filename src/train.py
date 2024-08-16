@@ -4,7 +4,7 @@ import Utils
 import argparse
 from clearml import Task
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     '''
     Parse the command line arguments. The argument(s) are as follows:
     - `--config`: Path to the yaml config file which must have the following structure: 
@@ -27,16 +27,23 @@ def parse_args():
             project_name: 
             task_name:
     ```
+    - - -
+    #####Return: `argparse.Namespace`
+    An object that represents the parsed arguments.
     '''
     parser = argparse.ArgumentParser(description='Train a YOLO model')
     parser.add_argument('--config', type=str, required=True, help='Path to the config.yaml file', metavar='STR')
     return parser.parse_args()
 
-def get_config_and_hyperparameters(args):
+def get_config_and_hyperparameters(args) -> tuple[dict, dict]:
    '''
-   Load the configuration and hyperparameters from the command line arguments.
-   - - -
-   `args`: command line arguments
+    Load the configuration and hyperparameters from the command line arguments.
+    If hyperparameters do not exist, return None.
+    - - -
+    `args`: command line arguments
+    - - -
+    #####Return: `dict`, `dict`
+    A pair of dictionaries representing the configuration and hyperparameters.
    '''
    with open(args.config) as f:
         config = yaml.safe_load(f)
@@ -58,7 +65,7 @@ def train(model, config: dict, hyp_exists: bool):
     device = Utils.get_device()
     train = config['train']
     if hyp_exists:
-        return model.train(
+        model.train(
             data=           train['data_path'],
             epochs=         train['epochs'],
             batch=          train['batch_size'],
@@ -70,7 +77,7 @@ def train(model, config: dict, hyp_exists: bool):
             deterministic=  False
         )
     else:
-        return model.train(
+        model.train(
             data=           train['data_path'],
             epochs=         train['epochs'],
             batch=          train['batch_size'],
