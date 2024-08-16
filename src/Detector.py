@@ -371,7 +371,8 @@ class Detector:
                         curr_obj.update_exit_timestamp()
                     # remove the object from the roi if it has been outside the roi for more than roi_exit_time seconds
                     elif curr_obj.get_time_elapsed_outside_roi() > roi_exit_time:
-                        self.objects_in_roi.pop(id)
+                        # self.objects_in_roi.pop(id)
+                        del self.objects_in_roi[id]
 
                 # add the object to the highlight set if it has been in the roi for more than roi_time seconds
                 # and it has not been removed from the roi
