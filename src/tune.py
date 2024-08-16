@@ -3,7 +3,7 @@ import Utils
 import yaml
 import argparse
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     '''
     Parse the command line arguments. The argument(s) are as follows:
     - `--config`: Path to the yaml config file which must have the following structure: 
@@ -28,16 +28,22 @@ def parse_args():
             project_name:   TEXT
             task_name:      TEXT
     ```
+    - - -
+    #####Return: `argparse.Namespace`
+    An object that represents the parsed arguments.
     '''
     parser = argparse.ArgumentParser(description='Tune a YOLO model')
     parser.add_argument('--config', type=str, required=True, help='Path to the config.yaml file', metavar='STR')
     return parser.parse_args()
 
-def load_config(args):
+def load_config(args) -> dict:
     '''
     Load the configuration from the command line arguments.
     - - -
     `args`: command line arguments
+    - - -
+    #####Return: `dict`
+    A dictionary representing the configuration.
     '''
     with open(args.config) as f:
         return yaml.safe_load(f)
