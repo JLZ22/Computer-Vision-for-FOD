@@ -31,6 +31,9 @@ def parse_args():
     - `--no-show`: Do not show the output
     - `--show`: Show the output
     - - -
+    #####Return: `argparse.Namespace`
+    An object that represents the parsed arguments.
+    - - -
 
     Below is the format of the config file if you choose to use one:
 
