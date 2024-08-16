@@ -63,10 +63,13 @@ class SimpleAugSeq:
     
     def create_sequential(self, children=None, random_order=True) -> iaa.Sequential:
         '''
-        Return a simple imgaug Sequential object that can augment image/xml pairs.
+        Make a simple imgaug Sequential object that can augment image/xml pairs.
         - - -
         `children`:       A list of augmenters to apply to the image.\n
         `random_order`:   True if the augmenters should be applied in random order
+        - - -
+        #####Return: `iaa.Sequential`
+        An augmenter that applies the augmenters in the children list.
         '''
         if children is None:
             children = [  #randomly transforms the image
