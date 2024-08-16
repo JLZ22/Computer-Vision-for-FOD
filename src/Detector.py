@@ -294,18 +294,16 @@ class Detector:
     def is_object_in_roi(self,
                       xyxy:         list,
                       roi:          list,
-                      percentage:   float = 0.5,
+                      overlap_threshold:   float = 0.5,
                       verbose =     True) -> bool:
         '''
         Check if the xyxy coordinates of a bounding box overlap with
         the roi by at least the percentage specified. 
-
-        **TODO**: update condition for an object being in the roi. current condition is not accurate.
         - - -
-        `xyxy`:       The bounding box coordinates.\n
-        `roi`:        The region of interest to check the bounding box against.\n
-        `percentage`: The percentage of the bounding box that must overlap with the roi.\n
-        `verbose`:    Boolean value to print the percentage overlap and union.\n
+        `xyxy`:                 The bounding box coordinates.\n
+        `roi`:                  The region of interest to check the bounding box against.\n
+        `overlap_threshold`:    The percentage of the bounding box that must overlap with the roi.\n
+        `verbose`:              Boolean value to print the percentage overlap and union.\n
         - - - 
         #####Return: `bool`
         True if the bounding box overlaps with the roi by at least the percentage specified, false otherwise.
@@ -320,17 +318,16 @@ class Detector:
         intersection = ((min(xyxy[2], roi[2]) - max(xyxy[0], roi[0])) * 
                         (min(xyxy[3], roi[3]) - max(xyxy[1], roi[1])))
         
-        # calculate the area of the union
-        union = box_area + roi_area - intersection
+        # calculate normalized overlap of the object that is in the roi
+        normalized_overlap = intersection / box_area
 
-        # calculate the percentage of the intersection
-        percentage_overlap = intersection / union
-        
         if verbose:
-            print(f'Percentage overlap: {percentage_overlap}')
-            print(f'Union: {union}')
+            print(f'ROI area: {roi_area}')
+            print(f'Box area: {box_area}')
+            print(f'Intersection: {intersection}')
+            print(f'Percentage overlap: {normalized_overlap}')
 
-        return percentage_overlap >= percentage
+        return normalized_overlap >= overlap_threshold
     
     def get_boxes_in_roi(self, boxes: Boxes, roi: list, roi_time: int, roi_exit_time: int, verbose = True) -> set:
         '''
