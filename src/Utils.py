@@ -35,12 +35,15 @@ def print_green(text: str, **kwargs):
     '''
     print("\033[92m{}\033[0m".format(text), **kwargs)
 
-def is_json_valid(json_path: Path):
+def is_json_valid(json_path: Path) -> bool:
     '''
     Checks if the given json path points to a valid json file.
     - - -
     `json_path`: A pathlib.Path object which represents the path to the 
                json file in question 
+    - - -
+    #####Return: `bool`
+    True if the json file is valid, False otherwise.
     '''
     json_path = Path(json_path)
     if not json_path.exists() or not json_path.is_file() or json_path.suffix != '.json':
@@ -54,7 +57,7 @@ def is_json_valid(json_path: Path):
         return False
     return True
 
-def get_jpg_paths(dir: Path, range=(-1, -1)):
+def get_jpg_paths(dir: Path, range=(-1, -1)) -> list[Path]:
     '''
     Get the paths to jpg files in the directory. If a range is specifiied,
     only gets the jpg paths that fall within the range inclusive. If a file's 
@@ -62,22 +65,25 @@ def get_jpg_paths(dir: Path, range=(-1, -1)):
     - - -
     `dir`:    The directory where we are getting the jpg paths from.\n
     `range`:  A tuple that specifies the range of jpg paths to retrieve.
+    - - -
+    #####Return: `list[Path]`
+    A list of Path objects that represent the jpg files in the directory.
     '''
     # check if range is valid
     if range[0] == -1 and range[1] != -1:
         print_red("Invalid range.")
-        return 
+        return None
     if range[0] != -1 and range[1] == -1:
         print_red("Invalid range.")
-        return
+        return None
     if range[0] > range[1]:
         print_red("Invalid range.")
-        return
+        return None
     # check path is valid
     dir = Path(dir)
     if not dir.exists() or not dir.is_dir():
         print_red(f"Directory: '{dir}' does not exist or is not a directory.")
-        return
+        return None
     # get all jpg files in the directory
     jpgs = list(dir.glob('*.jpg')) + list(dir.glob('*.jpeg'))
     if range == (-1, -1):
@@ -177,11 +183,14 @@ def delete_files(read_dir: Path,
         else:
             print_green(f"Deleted all files in the directory: '{read_dir}'")
 
-def subtract_mean(image: cv2.typing.MatLike):
+def subtract_mean(image: cv2.typing.MatLike) -> cv2.typing.MatLike:
     '''
     Subtract the mean pixel values from the image and returns the image. 
     - - -
     `image`: A MatLike object that represents an image.\n
+    - - -
+    #####Return: `cv2.typing.MatLike`
+    The image with the mean pixel values subtracted.
     '''
     image = np.array(image)
     # calculate per channel mean pixel values
@@ -226,13 +235,16 @@ def subtract_mean_in_directory(read_dir: Path,
         if save_created:
             save_dir.rmdir()
                 
-def get_corresponding_bbox(read_dir: Path, jpg_path: Path):
+def get_corresponding_bbox(read_dir: Path, jpg_path: Path) -> BoundingBoxesOnImage:
     '''
     Creates the BoundingBoxesOnImage object from the xml file with the same name as the 
     jpg path provided. Returns the BoundingBoxesOnImage object. 
     - - -
     `read_dir`: The directory where the xml and jpg files exist.\n
     `jpg_path`: The path of the jpg file for which we are finding an xml file.\n
+    - - -
+    #####Return: `BoundingBoxesOnImage`
+    The BoundingBoxesOnImage object that represents the bounding boxes in the xml file.
     '''
     read_dir = Path(read_dir)
     jpg_path = Path(jpg_path)
@@ -245,12 +257,17 @@ def get_corresponding_bbox(read_dir: Path, jpg_path: Path):
     bbs = create_bbs(root, cv2.imread(str(jpg_path)).shape)
     return bbs
 
-def get_yolo_label_map(json_path: Path, key_is_id=True):
+def get_yolo_label_map(json_path: Path, key_is_id=True) -> dict:
     '''
-    Get the yolo label map from the json file.
+    Get the yolo label map from the json file. The key is the id and the value is the label
+    if key_is_id is True. Otherwise, the key is the label and the value is the
     - - -
     `json_path`:  The path to the json file that contains the label map.\n
     `key_is_id`:  A boolean that determines whether or not the key in the label map\n
+    - - -
+    #####Return: `dict`
+    The label map where the key is the id and the value is the label if key_is_id is True.
+    Otherwise, the key is the label and the value is the id.
     '''
     json_path = Path(json_path)
     if not is_json_valid(json_path):
@@ -444,7 +461,7 @@ def visualize_yolo_annotations_in_directory(read_dir: Path,
         if save_created:
             save_dir.rmdir()
 
-def make_copies_bboxes(bbs: BoundingBoxesOnImage, num_copies: int) -> np.array:
+def make_copies_bboxes(bbs: BoundingBoxesOnImage, num_copies: int) -> list[BoundingBoxesOnImage]:
     '''
     Make num_copies number of the bbs object and return it 
     in an array.
@@ -452,10 +469,13 @@ def make_copies_bboxes(bbs: BoundingBoxesOnImage, num_copies: int) -> np.array:
     bbs:        The BoundingBoxesOnImage object that will be copied.\n
     num_copies: The number of copies that will be made.\n
     **TODO**: change to use generator
+    - - -
+    #####Return: `list[BoundingBoxesOnImage]`
+    An array of BoundingBoxesOnImage objects that are copies of the original.
     '''
     return [bbs for _ in range(num_copies)]
 
-def make_copies_images(name, num_copies: int) -> np.array:
+def make_copies_images(name, num_copies: int) -> np.ndarray:
     '''
     Return an array of copies of the image stored at 
     path/img. The array has num_copies number of copies.
@@ -463,6 +483,9 @@ def make_copies_images(name, num_copies: int) -> np.array:
     `name`:       The path to the image.\n
     `num_copies`: The number of copies that will be made.\n
     **TODO**: change to use generator
+    - - -
+    #####Return: `np.ndarray`
+    An array of copies of the image.
     '''
     return np.array(
         [cv2.imread(name) for _ in range(num_copies)],
@@ -477,6 +500,9 @@ def create_bbs(root, shape: int) -> BoundingBoxesOnImage:
     - - -
     `root`:   The root of the xml file.\n
     `shape`:  The shape of the image.\n
+    - - -
+    #####Return: `BoundingBoxesOnImage`
+    A BoundingBoxesOnImage object that represents the bounding boxes in the xml file.
     '''
     bboxes = []
     for member in root.findall('object'):
@@ -488,10 +514,13 @@ def create_bbs(root, shape: int) -> BoundingBoxesOnImage:
         bboxes.append(BoundingBox(x1=xmin, y1=ymin, x2=xmax, y2=ymax, label=member.find('name').text))
     return BoundingBoxesOnImage(bboxes, shape)
 
-def get_children_mem_consumption():
+def get_children_mem_consumption() -> int:
     '''
     Return the memory consumption in bytes of all children processes.
     If no children processes are found, return 0.
+    - - -
+    #####Return: `int`
+    The memory consumption in bytes of all children processes.
     '''
     pid = os.getpid()
     children = psutil.Process(pid).children(recursive=True)
@@ -891,12 +920,15 @@ def delete_all_xml_without_jpg(read_dir: Path, progress=True):
         if not any([jpg.stem == name for jpg in jpgPaths]):
             xml.unlink()
 
-def count_files_in_directory(read_dir: Path, extensions=[]):
+def count_files_in_directory(read_dir: Path, extensions=[]) -> int:
     '''
     Count the number of files in the directory.
     - - -
     `read_dir`:   The directory where the files exist.\n
-    `extensions`: A list of strings that specifies the extension(s) of the files
+    `extensions`: A list of strings that specifies the extension(s) of the files.\n
+    - - -
+    #####Return: `int`
+    The number of files in the directory.
     '''
     read_dir = Path(read_dir)
     if not read_dir.exists() or not read_dir.is_dir():
@@ -1254,11 +1286,16 @@ def split_number_datapoints_in_directory(read_dir: Path,
         if ann_created:
             ann_dir.rmdir()
 
-def count_data_points_in_directory(read_dir: Path):
+def count_data_points_in_directory(read_dir: Path) -> int:
     '''
-    Count the number of data points in the directory.
+    Count the number of data points in the directory where a datapoint
+    is an image and a corresponding `xml` or `txt` file. It is assumed 
+    that every `jpg` file has a corresponding `xml` or `txt` file.
     - - -
     `read_dir`:   The directory where the data points exist.\n
+    - - -
+    #####Return: `int`
+    The number of data points in the directory.
     '''
     read_dir = Path(read_dir)
     if not read_dir.exists() or not read_dir.is_dir():
@@ -1271,7 +1308,7 @@ def partition_yolo_data_for_training(read_dir: Path,
                                 train_percent=0.8,
                                 test_percent=0.1,
                                 verbose=False,
-                                append=False):
+                                append=False) -> bool:
     '''
     Partition the data in the read directory into training, validation, 
     and test sets according to the YOLO file structure and given percentages.
@@ -1284,6 +1321,9 @@ def partition_yolo_data_for_training(read_dir: Path,
     `test_percent`:   The percentage of data that will be used for testing.\n
     `verbose`:        A boolean that determines whether or not the function prints messages.\n
     `append`:         A boolean that determines whether or not the data will be appended to the save directory.\n
+    - - -
+    #####Return: `bool`
+    True if the data was successfully partitioned, False otherwise.
     '''
     read_dir = Path(read_dir)
     save_dir = Path(save_dir)
@@ -1341,7 +1381,7 @@ def partition_yolo_data_for_training(read_dir: Path,
 
 def verify_yolo_file_structure(read_dir: Path, 
                                test=True,
-                               verbose=False):
+                               verbose=False) -> bool:
     '''
     Check if the yolo file structure is correct and checks if 
     the names of the images and labels in the train, val, and test
@@ -1350,6 +1390,9 @@ def verify_yolo_file_structure(read_dir: Path,
     `read_dir`:   The directory where the images and labels exist.\n
     `test`:       A boolean that determines whether or not the test set will be checked.\n
     `verbose`:    A boolean that determines whether or not the function prints messages.\n
+    - - -
+    #####Return: `bool`
+    True if the yolo file structure is correct, False otherwise.
     '''
     read_dir = Path(read_dir)
     if not read_dir.exists() or not read_dir.is_dir():
@@ -1419,12 +1462,15 @@ def verify_yolo_file_structure(read_dir: Path,
     return True
         
     
-def diff_names_between_directories(dir1: Path, dir2: Path):
+def diff_names_between_directories(dir1: Path, dir2: Path) -> set:
     '''
     Returns the names of the files in dir1 that are not in dir2 or vice versa.
     - - -
     `dir1`:   The first directory.\n
     `dir2`:   The second directory.\n
+    - - -
+    #####Return: `set`
+    The names of the files in dir1 that are not in dir2 or vice versa.
     '''
     dir1 = Path(dir1)
     dir2 = Path(dir2)
@@ -1438,12 +1484,15 @@ def diff_names_between_directories(dir1: Path, dir2: Path):
     files2 = set([f.stem for f in dir2.iterdir()])
     return files1 - files2 if len(files1) > len(files2) else files2 - files1
 
-def get_device(use_gpu=True, use_mps=True):
+def get_device(use_gpu=True, use_mps=True) -> str:
     '''
     Determine the device to use for training.
     - - -
     `use_gpu`:    A boolean that determines whether or not the gpu will be used.\n
     `use_mps`:    A boolean that determines whether or not the mps will be used.\n
+    - - -
+    #####Return: `str`
+    The device to use for training.
     '''
     if torch.cuda.is_available() and use_gpu:
         device = 'cuda'
@@ -1454,11 +1503,14 @@ def get_device(use_gpu=True, use_mps=True):
 
     return device
 
-def count_num_labels_per_class_xml(read_dir: Path):
+def count_num_labels_per_class_xml(read_dir: Path) -> dict:
     '''
     Given a directory with xml files, count the number of labels per class.
     - - -
     `read_dir`:   The directory where the xml files exist.\n
+    - - -
+    #####Return: `dict`
+    A dictionary where the keys are the classes and the values are the number of labels for that class.
     '''
     read_dir = Path(read_dir)
     if not read_dir.exists() or not read_dir.is_dir():
@@ -1483,13 +1535,16 @@ def count_num_labels_per_class_xml(read_dir: Path):
 
     return labels
 
-def count_num_labels_per_class_yolo(read_dir: Path, json_path: Path):
+def count_num_labels_per_class_yolo(read_dir: Path, json_path: Path) -> dict:
     '''
     Given the parent directory of the yolo file structure, count the number
     of labels per class.
     - - -
     `read_dir`:   The directory where the yolo file structure exists.\n
     `json_path`:  The path to the json file that contains the label map.\n
+    - - -
+    #####Return: `dict`
+    A dictionary where the keys are the classes and the values are the number of labels for that class.
     '''
     read_dir = Path(read_dir)
     json_path = Path(json_path)
