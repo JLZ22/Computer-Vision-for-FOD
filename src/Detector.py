@@ -96,7 +96,6 @@ class Detector:
             # read media as an image
             # if the media is not an image, read it as a video
             frame = cv2.imread(media_path)
-            print('dafdfa')
             if frame is not None:
                 # detect objects in the image
                 results = self.model.track( frame, 
