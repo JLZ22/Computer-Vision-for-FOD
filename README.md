@@ -24,7 +24,11 @@ clearml
 pdoc
 ```
 
-To install using `pip`, run `pip install -r requirements.txt`. For proper functionality of `clearml` (optional), make an [account](https://app.clear.ml/login) and follow setup instructions.  
+To install using `pip`, run `pip install -r requirements.txt`. For proper functionality of `clearml` (optional), make an [account](https://app.clear.ml/login) and follow setup instructions. 
+
+### Package Issues
+
+- `ultralytics` and `pytorch` may have some dependency issues. A solution that was found to work is to downgrade `pytorch` to `2.3.1` instead of `2.4.0` and reinstall `torchvision` with a version that is compatible with `pytorch==2.3.1`.
 
 ## Documentation
 
