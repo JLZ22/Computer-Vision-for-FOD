@@ -115,7 +115,8 @@ def main():
                     camera_index=args.camera_index, 
                     camera_save_name=args.camera_save_name, 
                     confidence=args.confidence, 
-                    show=args.show)
+                    show=args.show,
+                    roi=[50, 50, 400, 400]) # [x1, y1, x2, y2]
 
 if __name__ == "__main__":
     main()

@@ -31,7 +31,8 @@ class Detector:
                iou=                 0.5,
                save_dir=            None,
                camera_save_name=    None,
-               show=                True):
+               show=                True,
+               roi=                 [50, 50, 1000, 1000]):
         '''
         Tract objects in videos or camera streams. Saves the 
         results if a save path is provided. If the input type is 'video',
@@ -50,6 +51,7 @@ class Detector:
         `save_dir`:         The path to save the results to. For media detection, this should
                             be a **/* directory.\n
         `show`:             Boolean value to show the media files or not.\n
+        `roi`:              The region of interest to highlight objects in.
         '''
         if input_type == 'media':
             media_paths = [str(media_path) for media_path in media_paths]
@@ -57,14 +59,16 @@ class Detector:
                               media_paths=media_paths,
                               show=show,
                               save_dir=save_dir,
-                              iou=iou)
+                              iou=iou,
+                              roi=roi)
         elif input_type == 'camera':
             self.detect_camera(confidence=confidence,
                                camera=camera_index,
                                show=show,
                                save_dir=save_dir,
                                iou=iou,
-                               save_name=camera_save_name)
+                               save_name=camera_save_name,
+                               roi=roi)
         else:
             raise ValueError("Invalid input type. Please choose either 'media' or 'camera'.")
     
@@ -73,7 +77,8 @@ class Detector:
                      media_paths: list, 
                      show: bool, 
                      save_dir: Path, 
-                     iou: float):  
+                     iou: float,
+                     roi: list = [50, 50, 1000, 1000]):  
         '''
         Detect objects in images or videos. Highlights objects that are 
         not supposed to be in a certain space. Can only save to mp4 format.
@@ -83,6 +88,7 @@ class Detector:
         `show`:           Boolean value to show the media files or not.\n
         `save_dir`:       The path of the directory to save the results to.\n
         `iou`:            The intersection over union threshold for the model to detect an object.\n
+        `roi`:            The region of interest to highlight objects in.
         '''
         if save_dir and not save_dir.exists():
             save_dir.mkdir(parents=True)
@@ -136,7 +142,8 @@ class Detector:
                       show: bool, 
                       save_dir: Path, 
                       iou: float,
-                      save_name = None):
+                      save_name = None,
+                      roi: list = [50, 50, 1000, 1000]):
         '''
         Detect objects in a camera stream and highlights objects 
         that are not supposed to be in a certain space. Can 
@@ -149,6 +156,7 @@ class Detector:
         `iou`:        The intersection over union threshold for the model to detect an object.\n
         `save_name`:  The name of the video file to save the results to including
                       the extension.\n
+        `roi`:        The region of interest to highlight objects in.
         '''
         # check if the save name is valid
         if save_name is None:
