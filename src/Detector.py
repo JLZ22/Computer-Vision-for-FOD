@@ -349,6 +349,9 @@ class Detector:
         to_highlight = set()
         if not boxes:
             return to_highlight
+        
+        ids = set([int(boxes.id[i]) if boxes.id is not None else None for i in range(boxes.xyxy.shape[0])])
+        ids.discard(None)
         for i in range(boxes.xyxy.shape[0]):
             # create a box object from the results for ease of access
             cls = self.names[int(boxes.cls[i])]
@@ -385,13 +388,27 @@ class Detector:
                 if self.is_object_in_roi(xyxy, roi):
                     self.objects_in_roi[id] = Box(cls, conf, xyxy, id, time.time())
 
+        to_remove = set()
+        for box_id in self.objects_in_roi:
+            obj = self.objects_in_roi[box_id]
+            if box_id not in ids and obj.timestamp_of_exit_from_roi is None:
+                to_remove.add(box_id)
+
+        for box_id in to_remove:
+            self.objects_in_roi.pop(box_id)
+
         if verbose:
             print(f'Objects in the roi: {self.objects_in_roi}')
             print(f'Objects to highlight: {to_highlight}')
+            print(f'IDs: {ids}')
             for key in self.objects_in_roi:
                 obj = self.objects_in_roi[key]
-                print(f'Object {key} {obj.label} has been in the roi for {obj.get_time_elapsed_in_roi()} seconds.')
-                print(f'Object {key} {obj.label} has been outside the roi for {obj.get_time_elapsed_outside_roi()} seconds.')
+                print(f'Object {key} {obj.label}')
+                print('-'*5 + f'in the roi for {obj.get_time_elapsed_in_roi()} seconds.')
+                print('-'*5 + f'outside the roi for {obj.get_time_elapsed_outside_roi()} seconds.')
+                print('-'*5 + f'obj in roi?: {self.is_object_in_roi(obj.xyxy, roi, verbose=False)}')
+                print('-'*5 + f'exit timestamp: {obj.timestamp_of_exit_from_roi}')
+
 
         return to_highlight
         
