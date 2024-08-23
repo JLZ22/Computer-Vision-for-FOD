@@ -49,7 +49,11 @@ After augmentation, for each image in the dataset, the mean pixel value per chan
 
 In a random sample of 128 data points, we found that 4 data points were faulty. Using a one sample t-test, we concluded with 99% confidence that 0.084% and 7.09% of the dataset of 10,048 images are faulty.
 
-### Todo
+### Note for using augmentation modules:
+
+Be **very careful** when augmenting with **high resolution images** because it can be memory intensive and **crash** your computer. **ALWAYS**, resize your images to sub-1k dimensions before attempting augmentation.
+
+## Todo
 
 - [x] find solution to memory issue
 - [x] finish augmenting rest of the classes
