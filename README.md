@@ -66,10 +66,35 @@ Be **very careful** when augmenting with **high resolution images** because it c
 - [x] train on augmented data
 - [x] train on unaugmented data
 - [x] use tracking to highlight objects that are within a roi for a certain duration
-- [ ] find most effective standard for determining if an object is in the roi or not
-- [ ] keep objects highlighted if they leave the roi briefly
+- [x] find most effective standard for determining if an object is in the roi or not
+- [x] keep objects highlighted if they leave the roi briefly
 - [ ] test in assembly space on 1 camera
 - [ ] test in assembly space on 3 cameras
+
+## Info about dataset version 1
+
+- Post augmentation labels per class: 
+    - `allen wrench:` 4608 labels
+    - `pencil:` 17728 labels
+    - `screwdriver:` 5120 labels
+    - `tool bit:` 10688 labels
+    - `wrench:` 10624 labels
+    - `total:` 48768 labels
+
+- Pre augmentation labels per class: 
+    - `allen wrench:` 72 labels
+    - `pencil:` 277 labels
+    - `screwdriver:` 80 labels
+    - `tool bit:` 167 labels
+    - `wrench:` 166 labels
+    - `total: ` 762 labels
+
+- Normalized labels per class: 
+    - `allen wrench:` 0.094
+    - `pencil:` 0.364 
+    - `screwdriver:` 0.105 
+    - `tool bit:` 0.219 
+    - `wrench:` 0.218 
 
 ## Literature Review
 
