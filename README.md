@@ -105,3 +105,5 @@ Be **very careful** when augmenting with **high resolution images** because it c
 5. (June 2022) [Foreign objects detection using deep learning techniques for graphic card assembly line](https://link.springer.com/article/10.1007/s10845-022-01980-7)
 6. (April 2020) [Deep Learning Models for Visual Inspection on Automotive Assembling Line](https://arxiv.org/ftp/arxiv/papers/2007/2007.01857.pdf)
 7. (July 2019) [Best Practices for Preparing and Augmenting Image Data for CNNs](https://machinelearningmastery.com/best-practices-for-preparing-and-augmenting-image-data-for-convolutional-neural-networks/)
+8. (September 2012) [Practical Recommendations for Gradient-Based Training of Deep
+Architectures](https://arxiv.org/pdf/1206.5533)
