@@ -51,7 +51,7 @@ In a random sample of 128 data points, we found that 4 data points were faulty. 
 
 ### Note for using augmentation modules:
 
-Be **very careful** when augmenting with **high resolution images** because it can be memory intensive and **crash** your computer. **ALWAYS**, resize your images to sub-1k dimensions before attempting augmentation.
+Be **very careful** when augmenting with **high resolution images** because it can be memory intensive and **crash** your computer. **ALWAYS**, resize your images to sub-1k dimensions before attempting augmentation. 
 
 ## Todo
 
