@@ -69,7 +69,7 @@ Be **very careful** when augmenting with **high resolution images** because it c
 - [x] find most effective standard for determining if an object is in the roi or not
 - [x] keep objects highlighted if they leave the roi briefly
 - [ ] test in assembly space on 1 camera
-- [ ] test in assembly space on 3 cameras
+- [ ] test in assembly space on 3 cameras 
 
 ## Info about dataset version 1
 
