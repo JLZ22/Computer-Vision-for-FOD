@@ -1241,6 +1241,7 @@ def split_number_datapoints_in_directory(read_dir: Path,
                                          progress=True):
     '''
     Split the images and annotations in the read directory into two separate directories.
+    This function moves files from read_dir. Read_dir will be empty upon completion.
     - - -
     `read_dir`:   The directory where the images and annotations exist.\n
     `img_dir`:    The directory where the images will be saved.\n
