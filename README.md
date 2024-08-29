@@ -26,7 +26,9 @@ To install using `pip`, run `pip install -r requirements.txt`. For proper functi
 
 ### Package Issues
 
-- `ultralytics` and `pytorch` may have some dependency issues. A solution that was found to work is to downgrade `pytorch` to `2.3.1` instead of `2.4.0` and reinstall `torchvision` with a version that is compatible with `pytorch==2.3.1`.
+- `pytorch`: depending on your system, pytorch may have different arguments for installation. The PyTorch website offers a very helpful tool to get the right arguments for you. After running `pip install -r requirements.txt`, please visit the PyTorch getting started [website](https://pytorch.org/get-started/locally/) and copy paste the command they give you after using the provided tool. 
+- `ultralytics` and `pytorch` may have some dependency issues. A solution that was found to work is to downgrade `pytorch` to `2.3.1` instead of `2.4.0` and reinstall `torchvision` with a version that is compatible with `pytorch==2.3.1`. Only attempt this after trying the previous solution. 
+
 
 ## Documentation
 
