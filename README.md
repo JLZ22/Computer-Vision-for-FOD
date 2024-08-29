@@ -22,13 +22,17 @@ clearml
 pdoc
 ```
 
-To install using `pip`, run `pip install -r requirements.txt`. For proper functionality of `clearml` (optional), make an [account](https://app.clear.ml/login) and follow setup instructions. 
+### Steps: 
+1. Run `pip install -r requirements.txt`. This installs everything necessary if you are using **only CPU**
+2. If you are using **CUDA** or **RocM**, 
+    - uninstall `torch` and `torchvision` with `pip uninstall torch torchvision`. 
+    - reinstall the PyTorch packages for your machine specifications by visiting their getting started [website](https://pytorch.org/get-started/locally/). 
+3. Optional `clearml` setup:
+    - make an [account](https://app.clear.ml/login) and follow setup instructions on the website. 
 
-### Package Issues
+### Package Notes
 
-- `pytorch`: depending on your system, pytorch may have different arguments for installation. The PyTorch website offers a very helpful tool to get the right arguments for you. After running `pip install -r requirements.txt`, please visit the PyTorch getting started [website](https://pytorch.org/get-started/locally/) and copy paste the command they give you after using the provided tool. 
-- `ultralytics` and `pytorch` may have some dependency issues. A solution that was found to work is to downgrade `pytorch` to `2.3.1` instead of `2.4.0` and reinstall `torchvision` with a version that is compatible with `pytorch==2.3.1`. Only attempt this after trying the previous solution. 
-
+- `pytorch`: depending on your system, pytorch may have different arguments for installation. Since the default PyTorch packages that ultralytics installs for you does not include CUDA or RocM support, you may need to reinstall for yourself. 
 
 ## Documentation
 
