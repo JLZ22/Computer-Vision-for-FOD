@@ -6,7 +6,7 @@ import argparse
 def parse_args() -> argparse.Namespace:
     '''
     Parse the command line arguments. The argument(s) are as follows:
-    - `--config`: Path to the yaml config file which must have the following structure: 
+    - Path to the yaml config file which must have the following structure: 
         
         model_variant:  TEXT (e.g. yolov8n)
         
@@ -33,7 +33,7 @@ def parse_args() -> argparse.Namespace:
     An object that represents the parsed arguments.
     '''
     parser = argparse.ArgumentParser(description='Tune a YOLO model')
-    parser.add_argument('--config', type=str, required=True, help='Path to the config.yaml file', metavar='STR')
+    parser.add_argument('config', type=str, help='Path to the config.yaml file', metavar='STR')
     return parser.parse_args()
 
 def load_config(args) -> dict:
@@ -54,7 +54,12 @@ def main():
     which is passed as a command line argument. 
     - - -
     ```
-    usage: tune.py [-h] --config STR
+    usage: tune.py [-h] STR
+
+    Tune a YOLO model
+
+    positional arguments:
+    STR         Path to the config.yaml file
     ```
     '''
     args = parse_args()
