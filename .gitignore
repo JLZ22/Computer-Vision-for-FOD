@@ -4,6 +4,7 @@ config.json
 *.pt
 __pycache__/
 models-fod/
+models/
 out*/
 benchmark_results*/
 .vs
