@@ -2,16 +2,18 @@ from ultralytics import YOLO
 import Utils
 import yaml
 import argparse
+from pathlib import Path
 
 def parse_args() -> argparse.Namespace:
     '''
     Parse the command line arguments. The argument(s) are as follows:
     - Path to the yaml config file which must have the following structure: 
         
-        model_variant:  TEXT (e.g. yolov8n)
+        model_path:  FILE 
         
         tune:
             iterations: INT
+            name:       TEXT
         train:
             data_path:  DIR
             epochs:     INT
@@ -64,12 +66,27 @@ def main():
     '''
     args = parse_args()
     config = load_config(args)
-    model = YOLO(f'../models-fod/yolov8n/{config["model_variant"]}.pt')
+
+    # Load the model and check
+    model_path = config['model_path']
+    if not Path(model_path).exists():
+        s = input("Cannot find model path. Download model path and continue? (Y/n)")
+        if s.lower() == 'n':
+            exit(1)
+    model = YOLO(model_path)
+
     tune = config['tune']
     train = config['train']
+
+    # check if automatically downlaoded weight is present in working directory
+    yolov8n_path = Path('./yolov8n.pt')
+    delete_yolov8n = not yolov8n_path.exists()
+
     model.tune(
         # Tuning params
         iterations= tune['iterations'],
+        name=       tune['name'],       # technically a kwarg of train but it is appropriate to be a 
+                                        # tuning param for naming here
 
         # Additional training params
         data=       train['data_path'], 
@@ -80,6 +97,10 @@ def main():
         val=        True,               # Evaluate the model on the validation set
         device=     Utils.get_device()  # Specify device for training based on availability
     )
+
+    # delete automatically downloaded weights 
+    if delete_yolov8n:
+        yolov8n_path.unlink()
 
 if __name__ == '__main__':
     main()

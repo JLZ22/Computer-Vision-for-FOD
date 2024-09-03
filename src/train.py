@@ -3,13 +3,14 @@ import yaml
 import Utils
 import argparse
 from clearml import Task
+from pathlib import Path
 
 def parse_args() -> argparse.Namespace:
     '''
     Parse the command line arguments. The argument(s) are as follows:
     - Path to the yaml config file which must have the following structure: 
         
-        model_variant:  TEXT (e.g. yolov8n)
+        model_path:  FILE 
         
         train:
             data_path:  DIR
@@ -72,6 +73,7 @@ def train(model, config: dict, hyp_exists: bool):
             imgsz=          train['imgsz'],
             cfg=            train['hyp'],
             patience=       train['patience'],
+            name=           train['name'],
             device=         device,
             verbose=        True,
             deterministic=  False
@@ -83,6 +85,7 @@ def train(model, config: dict, hyp_exists: bool):
             batch=          train['batch_size'],
             imgsz=          train['imgsz'],
             patience=       train['patience'],
+            name=           train['name'],
             device=         device,
             verbose=        True,
             deterministic=  False
@@ -110,6 +113,12 @@ def main():
     config, hyperparameters = get_config_and_hyperparameters(args)
     hyp_exists = hyperparameters is not None
 
+    # check if user wants to proceed without tuned hyperparameters
+    if not hyp_exists:
+        s = input("Cannot find hyperparameter file. Continue with default? (Y/n) ")
+        if s.lower() == 'n':
+            exit(1)
+
     # Initialize a new ClearML task
     task = None
     if 'clear_ml' in config:
@@ -118,21 +127,34 @@ def main():
                         task_type=      Task.TaskTypes.training)
 
     # Connect the hyperparameters to the task if they exist
-    if hyp_exists:
+    if hyp_exists and 'clear_ml' in config:
         task.connect(hyperparameters)
     
-    # Load the model
-    model = YOLO(f'../models-fod/yolov8n/{config['model_variant']}.pt')
+    # Load the model and check
+    model_path = config['model_path']
+    if not Path(model_path).exists():
+        s = input("Cannot find model path. Download model path and continue? (Y/n)")
+        if s.lower() == 'n':
+            exit(1)
+    model = YOLO(model_path)
 
     # Connect the model to the task
     if task:
         task.connect(model)
+
+    # check if automatically downlaoded weight is present in working directory
+    yolov8n_path = Path('./yolov8n.pt')
+    delete_yolov8n = not yolov8n_path.exists()
 
     # Train the model
     train(model, config, hyp_exists)
 
     if task:
         task.close()
+
+    # delete automatically downloaded weights 
+    if delete_yolov8n:
+        yolov8n_path.unlink()
 
 if __name__ == '__main__':
     main()
