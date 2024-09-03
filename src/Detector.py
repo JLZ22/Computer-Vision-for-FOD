@@ -18,7 +18,7 @@ class Detector:
         `model`: The YOLO model to use for object detection.
         '''
         if model is None:
-            self.model = YOLO('../models/yolov8n.pt')
+            self.model = YOLO('../models-fod/yolov8n/yolov8n.pt')
         self.model = model
         self.names = model.names
         self.objects_in_roi = dict()

@@ -64,7 +64,7 @@ def main():
     '''
     args = parse_args()
     config = load_config(args)
-    model = YOLO(f'../models/{config["model_variant"]}.pt')
+    model = YOLO(f'../models-fod/yolov8n/{config["model_variant"]}.pt')
     tune = config['tune']
     train = config['train']
     model.tune(

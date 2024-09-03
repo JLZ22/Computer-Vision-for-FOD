@@ -122,7 +122,7 @@ def main():
         task.connect(hyperparameters)
     
     # Load the model
-    model = YOLO(f'../models/{config['model_variant']}.pt')
+    model = YOLO(f'../models-fod/yolov8n/{config['model_variant']}.pt')
 
     # Connect the model to the task
     if task:
