@@ -85,10 +85,9 @@ def main():
     model.tune(
         # Tuning params
         iterations= tune['iterations'],
-        name=       tune['name'],       # technically a kwarg of train but it is appropriate to be a 
-                                        # tuning param for naming here
-
+        
         # Additional training params
+        name=       train['name'],     
         data=       train['data_path'], 
         epochs=     train['epochs'],
         batch=      train['batch_size'],
