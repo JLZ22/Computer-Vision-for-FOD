@@ -16,6 +16,7 @@ import shutil
 from tqdm import tqdm
 import random
 import torch
+import onnx
 
 def print_red(text: str, **kwargs):
     '''
@@ -1574,3 +1575,49 @@ def count_num_labels_per_class_yolo(read_dir: Path, json_path: Path) -> dict:
                 labels[label_map[int(label)]] += 1
 
     return labels
+
+def pt_to_onnx(read_path: str | Path, save_dir: str | Path):
+    '''
+    Convert a pytorch model to an onnx model.
+    - - -
+    `read_path`:   The path to the pytorch model.\n
+    `save_dir`:    The directory where the onnx model will be saved.\n
+    '''
+    if isinstance(read_path, str):
+        read_path = Path(read_path)
+
+    if isinstance(save_dir, str):
+        save_dir = Path(save_dir)
+
+    if not read_path.exists():
+        print(f'{str(read_path)} does not exist.')
+        return
+    if not read_path.is_file():
+        print(f'{str(read_path)} must be a file')
+        return
+    
+    if not save_dir.exists():
+        print(f'{str(save_dir)} does not exist.')
+        return
+    if not save_dir.is_dir():
+        print(f'{str(save_dir)} must be a directory')
+        return
+
+    # convert the pt file to onnx
+    model = torch.load(read_path)['model'].float()
+    model.eval()
+
+    # create a dummy input
+    dummy_input = torch.zeros(1, 3, 512, 512)
+
+    # export the model
+    torch.onnx.export(model, 
+                      dummy_input, 
+                      save_dir / f'{read_path.stem}.onnx', 
+                      verbose=True)
+    
+    # verify the onnx model
+    onnx_model = onnx.load(save_dir / f'{read_path.stem}.onnx')
+    onnx.checker.check_model(onnx_model)
+
+    print(f'Successfully converted {str(read_path)} to onnx format.')

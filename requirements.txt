@@ -10,3 +10,4 @@ matplotlib
 clearml
 pdoc
 pyside6
+onnx
