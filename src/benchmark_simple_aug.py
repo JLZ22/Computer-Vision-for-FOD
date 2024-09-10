@@ -20,8 +20,8 @@ def parse_args() -> argparse.Namespace:
     The parsed arguments.
     '''
     parser = argparse.ArgumentParser(description='Benchmark SimpleAugSeq')
-    parser.add_argument('--max-processes', type=int, default=os.cpu_count(), help='Max number of processes to use', metavar='INT')
-    parser.add_argument('--copies', type=int, default=16, help='Number of copies per image', metavar='INT')
+    parser.add_argument('max_processes', type=int, default=os.cpu_count(), help='Max number of processes to use', metavar='INT')
+    parser.add_argument('copies', type=int, default=16, help='Number of copies per image', metavar='INT')
     return parser.parse_args()
 
 def main():
@@ -32,7 +32,13 @@ def main():
     through the command line. Below is the usage of the command line arguments:
 
     ```
-    usage: benchmark_simple_aug.py [-h] [--max-processes INT] [--copies INT]
+    usage: benchmark_simple_aug.py [-h] INT INT
+
+    Benchmark SimpleAugSeq
+
+    positional arguments:
+    INT         Max number of processes to use
+    INT         Number of copies per image
     ```
     '''
     # Parse command line arguments
