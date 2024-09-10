@@ -89,12 +89,12 @@ def main():
         gc.collect()
         
     # Find the minimum time and plot the benchmark graph
-    minimum = times.index(min(times))
+    processes = [i for i in range(1, max_processes+1)]
+    min_time = min(times)
+    minimum = times.index(min_time)
     min_process = processes[minimum]
-    min_time = times[minimum]
 
     # Plot the benchmark graph
-    processes = [i for i in range(1, max_processes+1)]
     plt.plot(processes, 
              times, 
              marker='o',
