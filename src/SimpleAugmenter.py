@@ -20,7 +20,8 @@ class SimpleAugSeq:
     their corresponding xml files.
     '''
     
-    def __init__(self, read_path: Path, 
+    def __init__(self, 
+                 read_path: Path, 
                  save_path: Path, 
                  num_copies: int, 
                  seed = 1, 
