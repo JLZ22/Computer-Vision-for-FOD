@@ -737,7 +737,7 @@ def rotate_90_in_directory(read_dir, save_dir, repetitions=1, includeXML=True):
     aug = iaa.Rot90(repetitions)
     aug_in_directory(read_dir, save_dir, aug, includeXML)
 
-def resize_in_directory(read_dir: Path, save_dir: Path, width=512, height=512, includeXML=True):
+def resize_in_directory(read_dir: Path, save_dir: Path, width=640, height=640, includeXML=True):
     '''
     Resize the images in the directory to the given width and height and save them.
     This does not guarantee that the aspect ratio will remain the same.
@@ -755,7 +755,7 @@ def resize_in_directory(read_dir: Path, save_dir: Path, width=512, height=512, i
 
 def pad_and_resize_square_in_directory(read_dir: Path, 
                                        save_dir: Path, 
-                                       dim=512, 
+                                       dim=640, 
                                        includeXML=True):
     '''
     Pad the images in the directory to make them square and 
@@ -1610,7 +1610,7 @@ def pt_to_onnx(read_path: str | Path, save_dir: str | Path):
     model.eval()
 
     # create a dummy input
-    dummy_input = torch.rand(1, 3, 512, 512)
+    dummy_input = torch.rand(1, 3, 640, 640)
 
     # Define dynamic axes
     dynamic_axes = {

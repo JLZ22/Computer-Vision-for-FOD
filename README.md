@@ -135,7 +135,7 @@ Tuning improves the accuracy of your model but is very time consuming.
             name: train
             epochs: 10
             batch_size: 32
-            imgsz: 512
+            imgsz: 640
             patience: 10
 
         tune:
