@@ -1604,20 +1604,39 @@ def pt_to_onnx(read_path: str | Path, save_dir: str | Path):
         return
 
     # convert the pt file to onnx
-    model = torch.load(read_path)['model'].float()
+    checkpoint = torch.load(read_path)
+    model = checkpoint['model'] if 'model' in checkpoint else checkpoint
+    model = model.float()
     model.eval()
 
     # create a dummy input
-    dummy_input = torch.zeros(1, 3, 512, 512)
+    dummy_input = torch.rand(1, 3, 512, 512)
+
+    # Define dynamic axes
+    dynamic_axes = {
+        'input': {0: 'batch_size'},  # Variable batch size for input
+        'output': {0: 'batch_size'}  # Variable batch size for output
+    }
 
     # export the model
-    torch.onnx.export(model, 
-                      dummy_input, 
-                      save_dir / f'{read_path.stem}.onnx', 
-                      verbose=True)
+    try:
+        torch.onnx.export(model, 
+                        dummy_input, 
+                        save_dir / f'{read_path.stem}.onnx', 
+                        dynamic_axes=dynamic_axes,
+                        input_names=['input'],
+                        output_names=['output'])
+        print("Model exported successfully!")
+    except Exception as e:
+        print(f"Error during ONNX export: {e}")
+
     
     # verify the onnx model
-    onnx_model = onnx.load(save_dir / f'{read_path.stem}.onnx')
-    onnx.checker.check_model(onnx_model)
+    model = onnx.load(save_dir / f'{read_path.stem}.onnx')
 
-    print(f'Successfully converted {str(read_path)} to onnx format.')
+    try:
+        onnx.checker.check_model(model, full_check=True)
+        onnx.shape_inference.infer_shapes(model)
+        print("Model is valid and shape inference passed!")
+    except onnx.checker.ValidationError as e:
+        print("The model is invalid: {}".format(e))
