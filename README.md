@@ -146,7 +146,7 @@ Tuning improves the accuracy of your model but is very time consuming.
 
 2. run `./tune.py ../config.yaml` with Python
 
-The script will run for a few hours (maybe days) and there will be a `detect` directory created that contains the results. 
+The script will run for a few hours (maybe days) and there will be a `detect` directory created that contains the results. In one of the subdirectories of `detect`, you will find a yaml file called `best_hyperparameters.yaml`. Copy and paste the path to this file into the `hyp:` field above for training. 
 
 ### Train
 
