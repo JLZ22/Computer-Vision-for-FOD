@@ -126,12 +126,13 @@ Tuning improves the accuracy of your model but is very time consuming.
 1. create a `config.yaml` file
     - Ex: 
         ```
-        model_path: D:\zeng261_FOD\Computer-Vision-for-FOD\models-fod\yolov8n\yolov8n.pt
+        model_path: /path/to/model.pt/file # if this does not exist, the tune script 
+                                           # should download it for you
         project: FOD
 
         train:
-            data_path: D:\zeng261_FOD\dataset_augmented_no_mean_subtracted\dataset.yaml
-            hyp: ../runs/finished/tune_aug_15/best_hyperparameters.yaml
+            data_path: /path/to/dataset.yaml
+            hyp: /path/to/best_hyperparameters.yaml # you may ignore this for this step
             name: train
             epochs: 10
             batch_size: 32
