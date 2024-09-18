@@ -166,7 +166,7 @@ Images were subject to the following augmentations in random order for training.
 
 After augmentation, for each image in the dataset, the mean pixel value per channel is subtracted from it according to the 7th source in the literature review section.
 
-In a random sample of 128 data points, we found that 4 data points were faulty. Using a one sample t-test, we concluded with 99% confidence that 0.084% and 7.09% of the dataset of 10,048 images are faulty.
+In a random sample of 128 data points, we found that 4 data points were faulty. Using a one sample t-test, we concluded with 99% confidence that between 0.084% and 7.09% of the dataset of 10,048 images are faulty.
 
 ### Note for using augmentation modules:
 
