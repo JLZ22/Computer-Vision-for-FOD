@@ -128,15 +128,15 @@ Tuning improves the accuracy of your model but is very time consuming.
         ```
         model_path: /path/to/model.pt/file # if this does not exist, the tune script 
                                            # should download it for you
-        project: FOD
+        project: FOD # name of project
 
         train:
-            data_path: /path/to/dataset.yaml
+            data_path: /path/to/dataset.yaml # path to the dataset you will use for training
             hyp: /path/to/best_hyperparameters.yaml # you may ignore this for this step
-            name: train
+            name: train # name of the folder the results will be saved to
             epochs: 10
             batch_size: 32
-            imgsz: 640
+            imgsz: 640 # size of image 
             patience: 10
 
         tune:
@@ -150,7 +150,11 @@ The script will run for a few hours (maybe days) and there will be a `detect` di
 
 ### Train
 
-The train workflow is exactly the same as tune. Just run `./train.py ../config.yaml` instead. The main variables that affect performance are epochs and batch_size. Tuning should handle the other hyperparameters. 
+The train workflow is exactly the same as tune. Just run `./train.py ../config.yaml` instead. The main variables that affect performance are epochs and batch_size. Tuning should handle the other hyperparameters. To make sure that you use the hyperparameters that you found in the tuning step, set 
+```
+train:
+    hyp: /path/to/best_hyperparameters.yaml
+```
 
 ## Augmentation Notes
 
