@@ -107,8 +107,7 @@ def main():
         args.save_path = None
         args.camera_save_name = None
 
-    model = YOLO(args.model_path if args.model_path else '../models-fod/yolov8n/yolov8n.pt')
-    detector = Detector(model=model)
+    detector = Detector(model_string=args.model_path)
     detector.detect(input_type=args.input_type if args.input_type else 'camera', 
                     save_dir=args.save_path, 
                     media_paths=args.media_paths, 

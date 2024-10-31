@@ -11,16 +11,17 @@ class Detector:
     images, videos, or camera streams.
     '''
 
-    def __init__(self, model):
+    def __init__(self, model_string: str | None):
         '''
         Initialize the Detector with the YOLO model.
         - - -
         `model`: The YOLO model to use for object detection.
         '''
-        if model is None:
+        if model_string is None:
             self.model = YOLO('../models-fod/yolov8n/yolov8n.pt')
-        self.model = model
-        self.names = model.names
+        else:
+            self.model = YOLO(model_string)
+        self.names = self.model.names
         self.objects_in_roi = dict()
 
     def detect(self,  
@@ -62,6 +63,8 @@ class Detector:
                               iou=iou,
                               roi=roi)
         elif input_type == 'camera':
+            if camera_index is None or camera_index < 0:
+                raise ValueError(f"Invalid camera index: {camera_index}.")
             self.detect_camera(confidence=confidence,
                                camera=camera_index,
                                show=show,
