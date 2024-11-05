@@ -11,11 +11,12 @@ class Detector:
     images, videos, or camera streams.
     '''
 
-    def __init__(self, model_string: str | None):
+    def __init__(self, model_string: str | None, verbose: bool = False):
         '''
         Initialize the Detector with the YOLO model.
         - - -
         `model`: The YOLO model to use for object detection.
+        `verbose`: Boolean value to print the percentage overlap and union.
         '''
         if model_string is None:
             self.model = YOLO('../models-fod/yolov8n/yolov8n.pt')
@@ -23,6 +24,7 @@ class Detector:
             self.model = YOLO(model_string)
         self.names = self.model.names
         self.objects_in_roi = dict()
+        self.verbose = verbose
 
     def detect(self,  
                input_type:          str,
@@ -111,6 +113,7 @@ class Detector:
                                             persist=   True,
                                             conf=      confidence,
                                             iou=       0.5, # default value TODO: tune if necessary
+                                            verbose=   self.verbose
             )
                 # show bounding boxes and highlight objects that are not supposed to be in the space
                 frame = self.interpret_frame_result(results[0], frame, show, 'Image', media_path)
@@ -224,12 +227,17 @@ class Detector:
             results = self.model.track( frame, 
                                         persist=   True,
                                         conf=      confidence,
-                                        iou=       iou, # default value TODO: tune if necessary
+                                        iou=       iou, # tune if necessary
+                                        verbose=   self.verbose,
+                                        stream=    True,
             )
             
             # show bounding boxes and highlight objects that are not supposed to be in the space
-            frame = self.interpret_frame_result(results[0], show, 'Camera', win_name)
+            frame = self.interpret_frame_result(results[0])
             
+            if show:
+                self.display('Camera', frame, win_name)
+
             # save the results to a file
             if out is not None:
                 out.write(frame)
@@ -240,9 +248,6 @@ class Detector:
 
     def interpret_frame_result(self, 
                                results:         Results, 
-                               show:            bool, 
-                               input_type:      str, 
-                               win_name:        str, 
                                roi=             [50, 50, 1000, 1000],
                                roi_time=        3,
                                roi_exit_time=   3) -> cv2.typing.MatLike:
@@ -250,14 +255,8 @@ class Detector:
         Shows the results of the detection on the frame and highlights objects 
         that are within a certain space.
 
-        **TODO**: fix issue where item is immediately unhighlighted after being removed from the roi instead of after 1 second.
-        **TODO**: partition all results into highlight and non-highlighted objects.
         - - -
         `results`:      The results of the detection.\n
-        `frame`:        The frame to show the results on.\n
-        `show`:         Boolean value to show the frame or not.\n
-        `input_type`:   The type of input the frame is from.\n
-        `win_name`:     The name of the window to show the frame in.\n
         `roi`:          The region of interest to highlight objects in.\n
         `roi_time`:     The time in seconds an object must be in the roi to be highlighted.\n
         `roi_exit_time`:The time in seconds an object must be outside the roi to be removed from the roi.
@@ -288,19 +287,22 @@ class Detector:
                               edge_color= (255, 0, 255),
         )
 
-        # if the input type is an image, show the image with a loop
-        # video and camera streams are shown with a single frame because
-        # the loop to display is outside of this function
-        if input_type == 'Image' and show:
-            while True:
-                cv2.imshow(win_name, frame)
-                if cv2.waitKey(1) == ord('q'):
-                    break
-            cv2.destroyWindow(win_name)
-        elif show:
-            cv2.imshow(win_name, frame)
-
         return frame
+
+    def display(self, input_type: str, frame: cv2.typing.MatLike, win_name: str):
+        '''
+        Display the frame in a window.
+        - - -
+        `input_type`: The type of input the frame is from.\n
+        `frame`:      The frame to display.\n
+        `win_name`:   The name of the window to display the frame in.
+        '''
+        if input_type == 'Image':
+            cv2.imshow(win_name, frame)
+            cv2.waitKey(0)
+            cv2.destroyWindow(win_name)
+        else:
+            cv2.imshow(win_name, frame)
     
     def is_object_in_roi(self,
                       xyxy:         list,
@@ -332,7 +334,7 @@ class Detector:
         # calculate normalized overlap of the object that is in the roi
         normalized_overlap = intersection / box_area
 
-        if verbose:
+        if self.verbose:
             print(f'ROI area: {roi_area}')
             print(f'Box area: {box_area}')
             print(f'Intersection: {intersection}')
@@ -408,17 +410,17 @@ class Detector:
         for box_id in to_remove:
             self.objects_in_roi.pop(box_id)
 
-        if verbose:
+        if self.verbose:
             print(f'Objects in the roi: {self.objects_in_roi}')
             print(f'Objects to highlight: {to_highlight}')
             print(f'IDs: {ids}')
             for key in self.objects_in_roi:
                 obj = self.objects_in_roi[key]
-                print(f'Object {key} {obj.label}')
-                print('-'*5 + f'in the roi for {obj.get_time_elapsed_in_roi()} seconds.')
-                print('-'*5 + f'outside the roi for {obj.get_time_elapsed_outside_roi()} seconds.')
-                print('-'*5 + f'obj in roi?: {self.is_object_in_roi(obj.xyxy, roi, verbose=False)}')
-                print('-'*5 + f'exit timestamp: {obj.timestamp_of_exit_from_roi}')
+                print(f'Object {key} {obj.label}:')
+                print(' '*4 + f'in the roi for {obj.get_time_elapsed_in_roi()} seconds.')
+                print(' '*4 + f'outside the roi for {obj.get_time_elapsed_outside_roi()} seconds.')
+                print(' '*4 + f'obj in roi?: {self.is_object_in_roi(obj.xyxy, roi, verbose=False)}')
+                print(' '*4 + f'exit timestamp: {obj.timestamp_of_exit_from_roi}')
 
 
         return to_highlight

@@ -75,6 +75,8 @@ def parse_args() -> argparse.Namespace:
                         metavar='FILE')
     parser.add_argument('--model-path',         type=str,   default=None,   help='Path to the model file', 
                         metavar='FILE')
+    parser.add_argument('--verbose', action='store_true', help='Print verbose output')
+
     args = parser.parse_args()
     return args
 
@@ -107,7 +109,7 @@ def main():
         args.save_path = None
         args.camera_save_name = None
 
-    detector = Detector(model_string=args.model_path)
+    detector = Detector(model_string=args.model_path, verbose=args.verbose)
     detector.detect(input_type=args.input_type if args.input_type else 'camera', 
                     save_dir=args.save_path, 
                     media_paths=args.media_paths, 
