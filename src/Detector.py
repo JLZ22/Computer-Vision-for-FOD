@@ -116,7 +116,10 @@ class Detector:
                                             verbose=   self.verbose
             )
                 # show bounding boxes and highlight objects that are not supposed to be in the space
-                frame = self.interpret_frame_result(results[0], frame, show, 'Image', media_path)
+                frame = self.interpret_frame_result(results[0])
+
+                if show:
+                    self.display('Image', frame, media_path)
                 
                 # save the results to a file
                 if save_dir:
@@ -233,7 +236,7 @@ class Detector:
             )
             
             # show bounding boxes and highlight objects that are not supposed to be in the space
-            frame = self.interpret_frame_result(results[0])
+            frame = self.interpret_frame_result(next(results), frame)
             
             if show:
                 self.display('Camera', frame, win_name)
@@ -248,6 +251,7 @@ class Detector:
 
     def interpret_frame_result(self, 
                                results:         Results, 
+                               frame:           cv2.typing.MatLike | None = None,
                                roi=             [50, 50, 1000, 1000],
                                roi_time=        3,
                                roi_exit_time=   3) -> cv2.typing.MatLike:
@@ -257,6 +261,7 @@ class Detector:
 
         - - -
         `results`:      The results of the detection.\n
+        `frame`:        The frame to show the results on. If none provided, use the one from results.\n
         `roi`:          The region of interest to highlight objects in.\n
         `roi_time`:     The time in seconds an object must be in the roi to be highlighted.\n
         `roi_exit_time`:The time in seconds an object must be outside the roi to be removed from the roi.
@@ -268,8 +273,8 @@ class Detector:
         to_highlight = self.get_boxes_in_roi(results.boxes, roi, roi_time, roi_exit_time)
 
         # plot the results on the frame
-        # frame = results.plot(line_width=1, font_size=1.0)
-        frame = results.orig_img
+        if frame is None:
+            frame = results.orig_img
         if to_highlight:
             for box in to_highlight:
                 frame = self.draw_box(frame, 
